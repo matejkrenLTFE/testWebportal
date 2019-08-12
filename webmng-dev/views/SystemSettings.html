@@ -1,0 +1,168 @@
+<div style="width: 100%;">
+    <div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--6-col  mdl-cell--12-col-phone mdl-cell--6-short-view">
+        <div class="mdl-card__title mdl-color--blue-grey-200">
+            <h2 class="mdl-card__title-text mdl-color-text--white">$_title_general$</h2>
+        </div>
+        <div class="mdl-card__supporting-table">
+            <table class="mdl-data-table mdl-js-data-table" style="width: 100%">
+                <tbody>
+                <tr class="th-color-grey">
+                    <td class="mdl-data-table__cell--non-numeric"><strong>$labels.device$</strong></td>
+                    <td></td>
+                </tr>
+
+                <tr data-rbac="settings.hostname">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.hostname$</td>
+                    <td>
+                        <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-145">
+                            <input class="mdl-textfield__input text-align-right" name="iloc_host-name" type="text"
+                                   value="$paramsIloc.host-name$"
+                                   data-rbac-element="settings.hostname"/>
+                        </div>
+                    </td>
+                </tr>
+                <tr data-rbac="settings.actions">
+                    <td>
+                    </td>
+                    <td>
+                        <button
+                                data-rbac="settings.button-apply"
+                                id="btnSystemSettingsApply2" data-bind-event="click"
+                                data-bind-method="CtrlActionSystemSettings.setParams"
+                                class="mdl-button mdl-js-button mdl-button--raised">
+                            $labels.btnApply2$
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div style="width: 100%;">
+    <div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--6-col  mdl-cell--12-col-phone mdl-cell--6-short-view">
+        <div class="mdl-card__title mdl-color--blue-grey-200">
+            <h2 class="mdl-card__title-text mdl-color-text--white">$_title_time$</h2>
+        </div>
+        <div class="mdl-card__supporting-table">
+            <table class="mdl-data-table mdl-js-data-table" style="width: 100%">
+                <tbody>
+
+                <tr class="th-color-grey">
+                    <td class="mdl-data-table__cell--non-numeric"><strong>$labels.dateTime$</strong></td>
+                    <td></td>
+                </tr>
+
+                <tr>
+                    <td class="mdl-data-table__cell--non-numeric">$labels.currentTime$</td>
+                    <td>$params.dateTime$</td>
+                </tr>
+                <tr>
+                    <td class="mdl-data-table__cell--non-numeric">$labels.timezone$</td>
+                    <td>$elements.selectTimezone$</td>
+                </tr>
+
+                <tr data-rbac="settings.button-sync-time">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.syncSystemTime$</td>
+                    <td>
+                        <div id="btnSystemSyncTime" data-bind-event="click"
+                             data-bind-method="CtrlActionSystemSettings.__syncTime"
+                             class="mdl-button mdl-js-button mdl-button--raised"
+                             data-rbac-element="settings.button-sync-time">
+                            $labels.btnSyncTime$
+                        </div>
+                    </td>
+                </tr>
+
+                <tr class="th-color-grey">
+                    <td class="mdl-data-table__cell--non-numeric"><strong>$labels.ntp$</strong></td>
+                    <td>
+                        <div data-rbac="settings.ntp-sync-interval"
+                             class="mdl-cell mdl-typography--text-right mdl-color-text--white" style="float: right">
+                            $elements.enableSyncInterval$
+                        </div>
+                    </td>
+                </tr>
+
+                <tr class="ntp-sync-int" data-rbac="settings.ntp-server">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.server$</td>
+                    <td>
+                        <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-145">
+                            <input class="mdl-textfield__input text-align-right" name="dcmng_ntp-server" type="text"
+                                   value="$paramsDcmng.ntp-server$"
+                                   data-rbac-element="settings.ntp-server"/>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr class="ntp-sync-int" data-rbac="settings.ntp-sync-interval">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.syncInterval$</td>
+                    <td>
+                        $elements.syncInterval$
+                    </td>
+                </tr>
+
+                <tr data-rbac="settings.actions">
+                    <td>
+                    </td>
+                    <td>
+                        <button
+                                data-rbac="settings.button-apply"
+                                id="btnSystemSettingsApply" data-bind-event="click"
+                                data-bind-method="CtrlActionSystemSettings.setParams"
+                                class="mdl-button mdl-js-button mdl-button--raised">
+                            $labels.btnApply$
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div style="width: 100%;">
+    <div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--6-col  mdl-cell--12-col-phone mdl-cell--6-short-view">
+        <div class="mdl-card__title mdl-color--blue-grey-200">
+            <h2 class="mdl-card__title-text mdl-color-text--white">$labels.title_set$</h2>
+        </div>
+        <div class="mdl-card__supporting-table">
+            <table class="mdl-data-table mdl-js-data-table" style="width: 100%">
+                <tbody>
+                <tr data-rbac="settings.pushRetries">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.pushRetries$</td>
+                    <td>
+                        <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-145">
+                            <input class="mdl-textfield__input text-align-right" id="data-push-retries" name="data-push-retries" type="number"
+                                   value="$cntr.push-retries$"
+                                   data-rbac-element="settings.push-retries"/>
+                        </div>
+                    </td>
+                </tr>
+                <tr data-rbac="settings.pushTimeout">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.pushTimeout$</td>
+                    <td>
+                        <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-145">
+                            <input class="mdl-textfield__input text-align-right" id="data-push-retry-timeout" name="data-push-retry-timeout" type="number"
+                                   value="$cntr.push-retry-timeout$"
+                                   data-rbac-element="settings.push-timeout"/>
+                        </div>
+                    </td>
+                </tr>
+                <tr data-rbac="settings.actions">
+                    <td>
+                    </td>
+                    <td>
+                        <button
+                                data-rbac="groupsTable.button-apply" data-bind-event="click"
+                                data-bind-method="CtrlActionGroupTable.setParams"
+                                class="mdl-button mdl-js-button mdl-button--raised">
+                            $labels.btnApply3$
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

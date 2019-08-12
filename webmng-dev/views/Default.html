@@ -1,0 +1,278 @@
+ <script type="text/template" id="ViewDashboard">
+
+    <div data-rbac="info.general-box" class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--6-col  mdl-cell--12-col-phone">
+        <div class="mdl-card__title mdl-color--blue-grey-200">
+            <h2 class="mdl-card__title-text mdl-color-text--white mdl-color-text--white">$_generalTitle$</h2>
+        </div>
+        <table class="mdl-data-table mdl-js-data-table" style="width: 100%">			 
+            <tbody>
+            <tr data-rbac="info.device-type">
+                <td class="mdl-data-table__cell--non-numeric">$labels.deviceType$</td>				
+                <td>$generalInfo.Device_type$</td>
+            </tr>
+            <tr data-rbac="info.serial-number">
+                <td class="mdl-data-table__cell--non-numeric">$labels.serial$</td>				
+                <td>$generalInfo.Serial$</td>
+            </tr>         
+            <tr data-rbac="info.hostname">
+                <td class="mdl-data-table__cell--non-numeric">$labels.hostname$</td>				
+                <td>$wanInfo.Hostname$</td>
+            </tr>
+            <tr data-rbac="info.software-version">
+                <td class="mdl-data-table__cell--non-numeric">$labels.firmwareVersion$</td>
+                <td>$generalInfo.FW_library_version$</td>
+            </tr>
+            </tbody>
+        </table> 
+    </div>
+
+    <div data-rbac="info.system-info-box" class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--6-col  mdl-cell--12-col-phone">
+        <div class="mdl-card__title mdl-color--blue-grey-200">
+            <h2 class="mdl-card__title-text mdl-color-text--white mdl-color-text--white">$_systemInfoTitle$</h2>
+        </div>
+        <table class="mdl-data-table mdl-js-data-table" style="width: 100%">			 
+            <tbody>                
+                <tr data-rbac="info.battery-level">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.batteryLevel$</td>				
+                    <td>$generalInfo.Battery_level$</td>
+                </tr>
+                <tr data-rbac="info.supercap-level">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.supercapChargeLevel$</td>				
+                    <td>$counters.supercap-charge-level$ %</td>
+                </tr>
+                <tr data-rbac="info.internal-temp">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.internalTemperature$</td>
+                    <td>$counters.cpu-board-temperature$ &#8451;</td>
+                </tr>
+                <tr data-rbac="info.cpu-temp">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.cpuCoreTemperature$</td>
+                    <td>$counters.cpu-core-temperature$ &#8451;</td>
+                </tr>
+                <tr data-rbac="info.cpu-load">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.cpuLoad$</td>				
+                    <td>$counters.cpu-load$ %</td>
+                </tr>
+                <tr data-rbac="info.data-memory-usage">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.dataMemoryUsage$</td>				
+                    <td>$counters.data-memory-usage$ %</td>
+                </tr>
+            </tbody>
+        </table> 
+    </div>
+        
+    <div data-rbac="info.time-box" class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--6-col  mdl-cell--12-col-phone">
+        <div class="mdl-card__title mdl-card--expand mdl-color--blue-grey-200">
+            <h2 class="mdl-card__title-text mdl-color-text--white">$_timeTitle$</h2>
+        </div>
+        <table class="mdl-data-table mdl-js-data-table" style="width: 100%">			 
+            <tbody>				  
+                <tr data-rbac="info.uptime">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.uptime$</td>				
+                    <td>$counters.uptime$</td>
+                </tr>
+                <tr data-rbac="info.current-time">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.currentTime$</td>				
+                    <td>$generalInfo.DateTime$</td>
+                </tr>                
+                <tr data-rbac="info.timezone">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.timezone$</td>				
+                    <td>$generalInfo.Timezone$</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table> 			   			 
+    </div>
+
+    <div data-rbac="alarms-box" class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--6-col  mdl-cell--12-col-phone">
+        <div class="mdl-card__title mdl-card--expand mdl-color--blue-grey-200">
+            <h2 class="mdl-card__title-text mdl-color-text--white">$_alarmsTitle$</h2>
+        </div>
+        <div class="mdl-card__supporting-table">
+            <table class="mdl-data-table mdl-js-data-table" style="width: 100%">
+                <thead class="th-color-grey">
+                    <tr>
+                        <th class="mdl-data-table__cell--non-numeric">
+                            $labels.alarmName$
+                        </th>
+                        <th class="mdl-data-table__cell--non-numeric">
+                            $labels.lastOccurrence$
+                        </th>
+                        <th class="mdl-data-table__cell--non-numeric">
+                            $labels.count$
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="mdl-data-table__cell--non-numeric">
+                            $labels.EVT_SYS_MAIN_COVER_OPENED$
+                        </td>
+                        <td class="mdl-data-table__cell--non-numeric">
+                            $EVT_SYS_MAIN_COVER_OPENED.lastOcc$
+                        </td>
+                        <td class="mdl-data-table__cell--non-numeric">
+                            $EVT_SYS_MAIN_COVER_OPENED.count$
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="mdl-data-table__cell--non-numeric">
+                            $labels.EVT_SYS_TERMINAL_COVER_OPENED$
+                        </td>
+                        <td class="mdl-data-table__cell--non-numeric">
+                            $EVT_SYS_TERMINAL_COVER_OPENED.lastOcc$
+                        </td>
+                        <td class="mdl-data-table__cell--non-numeric">
+                            $EVT_SYS_TERMINAL_COVER_OPENED.count$
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="mdl-data-table__cell--non-numeric">
+                            $labels.EVT_SYS_BATTERY_DISCHARGED$
+                        </td>
+                        <td class="mdl-data-table__cell--non-numeric">
+                            $EVT_SYS_BATTERY_DISCHARGED.lastOcc$
+                        </td>
+                        <td class="mdl-data-table__cell--non-numeric">
+                            $EVT_SYS_BATTERY_DISCHARGED.count$
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="card-separator mdl-cell--1-col"></div>
+</script>
+
+
+<script id="MainMenu" type="text/template">
+    <nav class="navigation mdl-navigation mdl-color-text--grey-600">
+        <i id="expandMenu" class="material-icons exp-col-icon">expand_more</i>
+        <i id="collapseMenu" class="material-icons exp-col-icon" style="display: none">expand_less</i>
+        <ul class="list-navigation">
+		  <li class="level1" data-rbac="mainmenu.dashboard"><a class="mdl-navigation__link active" href="#Default" id="dashboard"><div class="icon dashboard"></div>$mainmenu.dashboard$</a></li>
+		  <li class="level1" data-rbac="mainmenu.nodes">
+              <a class="mdl-navigation__link" href="#Nodes" id="nodes">
+                <div class="icon nodes"></div>$mainmenu.nodes$
+              </a>
+              <ul class="list-navigation--sublevel">
+                  <li data-rbac="mainmenu.nodes"><a class="mdl-navigation__link" href="#Nodes" id="nodes_list">$mainmenu.nodes_list$</a></li>
+                  <li data-rbac="mainmenu.plc-neighbor"><a class="mdl-navigation__link" href="#PLCNeighbor" id="plc-neighbor">$mainmenu.plcNeighbor$</a></li>
+                  <li data-rbac="mainmenu.plc-routing"><a class="mdl-navigation__link" href="#PLCRouting" id="plc-routing">$mainmenu.plcRouting$</a></li>
+                  <li data-rbac="mainmenu.white-list"><a class="mdl-navigation__link" href="#WhiteList" id="white-list">$mainmenu.whiteList$</a></li>
+              </ul>
+          </li>
+            <li class="level1" data-rbac="mainmenu.events"><a class="mdl-navigation__link" href="#Events" id="events"><div class="icon alarms"></div>$mainmenu.events$</a>
+			<ul class="list-navigation--sublevel">
+				<li data-rbac="mainmenu.events"><a class="mdl-navigation__link" href="#Events" id="events2">$mainmenu.events2$</a></li>
+				<li data-rbac="mainmenu.events-settings"><a class="mdl-navigation__link" href="#EventsSettings" id="events-settings">$mainmenu.settings$</a></li>
+			</ul>
+		  </li>
+		  <li class="level1" data-rbac="mainmenu.wan"><a class="mdl-navigation__link" href="#WANModem" id="wan"><div class="icon wan"></div>$mainmenu.wan$</a>
+			<ul class="list-navigation--sublevel">
+                <li data-rbac="mainmenu.wan-modem"><a class="mdl-navigation__link" href="#WANModem" id="wan-modem">$mainmenu.modem$</a></li>				
+				<li data-rbac="mainmenu.wan-ethernet"><a class="mdl-navigation__link" href="#WANEthernet" id="wan-internet">$mainmenu.ethernet$</a></li>								
+			</ul>
+		  </li>
+		  <li class="level1" data-rbac="mainmenu.nan"><a class="mdl-navigation__link" href="#NANPlc" id="nan"><div class="icon nan"></div>$mainmenu.nan$</a>
+			<ul class="list-navigation--sublevel">
+				<li data-rbac="mainmenu.plc"><a class="mdl-navigation__link" href="#NANPlc" id="nan-plc">$mainmenu.plc$</a></li>				
+				<li data-rbac="mainmenu.rs485"><a class="mdl-navigation__link" href="#NANRs" id="nan-rs">$mainmenu.rs485$</a></li>
+			</ul>
+		  </li>
+		  <li class="level1" data-rbac="mainmenu.lan"><a class="mdl-navigation__link" href="#LANEthernet" id="lan"><div class="icon lan"></div>$mainmenu.lan$</a>
+			<ul class="list-navigation--sublevel">
+				<li data-rbac="mainmenu.local-ethernet"><a class="mdl-navigation__link" href="#LANEthernet" id="lan-ethernet">$mainmenu.localEthernet$</a></li>							
+			</ul>
+		  </li>
+            <li class="level1" data-rbac="mainmenu.task-manager"><a class="mdl-navigation__link" href="#TaskManager" id="task-manager"><div class="icon resource"></div>$mainmenu.taskManager$</a>
+                <ul class="list-navigation--sublevel">
+                    <li data-rbac="mainmenu.task-table"><a class="mdl-navigation__link" href="#TaskManager" id="task-table">$mainmenu.taskTable$</a></li>
+                    <li data-rbac="mainmenu.groups-table"><a class="mdl-navigation__link" href="#GroupTable" id="groups-table">$mainmenu.groupTable$</a></li>
+                </ul>
+            </li>
+            <li class="level1" data-rbac="mainmenu.monitoring-diagnostics"><a class="mdl-navigation__link" href="#MonitoringManager" id="monitoring"><div class="icon stat"></div>$mainmenu.monitoring$</a>
+                <ul class="list-navigation--sublevel">
+                    <li data-rbac="mainmenu.monitoring-manager"><a class="mdl-navigation__link" href="#MonitoringManager" id="monitoring-manager">$mainmenu.monitoringManager$</a></li>
+                    <li data-rbac="mainmenu.plc-diagnostics"><a class="mdl-navigation__link" href="#PLCdiagnostics" id="plc-diagnostics">$mainmenu.plcDiagnostics$</a></li>
+                    <li data-rbac="mainmenu.network-topology"><a class="mdl-navigation__link" href="#Network" id="network-topology">$mainmenu.networkTopology$</a></li>
+                </ul>
+            </li>
+            <li class="level1" data-rbac="mainmenu.system"><a class="mdl-navigation__link" href="#SystemSettings" id="system"><div class="icon system"></div>$mainmenu.system$</a>
+			<ul class="list-navigation--sublevel">
+                <li data-rbac="mainmenu.system-settings"><a class="mdl-navigation__link" href="#SystemSettings" id="system-settings">$mainmenu.systemSettings$</a></li>
+                <li data-rbac="mainmenu.system-settings-export"><a class="mdl-navigation__link" href="#SystemSettingsExport" id="system-export">$mainmenu.settingsExportImport$</a></li>
+                <li data-rbac="mainmenu.system-users"><a class="mdl-navigation__link" href="#SystemUsers" id="system-management">$mainmenu.userManagement$</a></li>
+                <!--<li data-rbac="mainmenu.system-users"><a class="mdl-navigation__link" href="#SystemUsersRole" id="system-management">$mainmenu.userManagement$</a></li>-->
+                <!--<li data-rbac="mainmenu.user-role"><a class="mdl-navigation__link" href="#SystemUsersRole" id="user-role">$mainmenu.userRole$</a></li>-->
+                <li data-rbac="mainmenu.system-upgrade"><a class="mdl-navigation__link" href="#SystemUpgrade" id="system-update">$mainmenu.firmwareUpgrade$</a></li>
+                <!--<li data-rbac="mainmenu.system-cert-manager"><a class="mdl-navigation__link" href="#SystemCertManager" id="system-cert-manager">$mainmenu.certManager$</a></li>-->
+                <!--<li data-rbac="mainmenu.system-firewall-manager"><a class="mdl-navigation__link" href="#SystemFirewallManager" id="system-firewall-manager">$mainmenu.firewallManager$</a></li>-->
+                <li data-rbac="mainmenu.system-reboot"><a class="mdl-navigation__link" href="#SystemReboot" id="system-reboot">$mainmenu.systemReboot$</a></li>
+                <li data-rbac="mainmenu.system-information"><a class="mdl-navigation__link" href="#SystemInformation" id="system-information">$mainmenu.information$</a></li>
+			</ul>
+		  </li>
+		  <li data-rbac="mainmenu.logout" class="level1"><a data-bind-event="click" data-bind-method="userLogoutPrompt" class="mdl-navigation__link" href="#"><div class="icon logout"></div>$mainmenu.logout$</a></li>
+		</ul>
+        </nav>    
+</script>
+
+<script id="LanguageBar" type="text/template">
+    <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon language" id="langbtn">
+        <div class="headericon $langActive$"></div>
+    </button>
+    <ul class="mdl-menu mdl-js-menu mdl-js-ripple-effect mdl-menu--bottom-right" for="langbtn">
+        $langMenu$
+    </ul>
+</script>
+
+<script id="AlarmsEventsBar" type="text/template">    
+    <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon mdl-button--icon_overflow_visible" id="notificationbtn">
+    <div class="notification headericon"><span class="$eventsAlarmClass$ mdl-color-text--white notificationCounter">$eventsTotal$</span></div>
+        </button>
+        <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect notificatioMenuList mdl-menu__item--full-bleed-divider $eventsUlClass$"
+            for="notificationbtn">
+            $eventsList$
+        </ul>		    
+</script>
+
+<script id="LoginForm" type="text/template">
+    <form action="#">
+        <div class="mdl-grid" style="margin:auto auto;">
+                <div class="mdl-card mdl-shadow--2dp">							
+                    <div class="mdl-card__title mdl-card--expand mdl-color--blue-grey-200">
+                            <h2 class="mdl-card__title-text mdl-layout-title">$title$</h2>
+                    </div>
+                    <div class="mdl-card__supporting-text">
+                            <div class="mdl-grid text-center">
+                            
+                                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--10-col">
+                                        <input name="username" class="mdl-textfield__input" type="text" id="username">
+                                        <label class="mdl-textfield__label" for="username">Username...</label>
+                                </div>
+                                
+                                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--10-col">
+                                        <input name="password" class="mdl-textfield__input" type="password" id="password">
+                                        <label class="mdl-textfield__label" for="password">Password...</label>
+                                </div>
+                            </div>
+                    </div>
+                    
+                    <div class="mdl-card__actions mdl-card--border">
+                            <a
+                                data-bind-method="userLogin"
+                                data-bind-event="click"
+                                type="submit"
+                                id="btnLogin"
+                                class="mdl-button mdl-js-button mdl-js-ripple-effect  mdl-color-text--accent mdl-cell mdl-cell--12-col">
+                                    Login
+                            </a>
+                            <input type="submit" style="visibility: hidden" />
+                    </div>
+                </div>
+        </div>
+    </form>
+</script>

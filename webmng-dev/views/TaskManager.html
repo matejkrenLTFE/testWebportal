@@ -1,0 +1,78 @@
+
+<div class="mdl-tooltip" data-mdl-for="add_icon">
+    $labels.addResourceTxt$
+</div>
+<div class="mdl-tooltip" data-mdl-for="filter_icon">$labels.filter$</div>
+<div class="mdl-tooltip" data-mdl-for="refresh_icon">$labels.btnRefresh$</div>
+<div class="mdl-tooltip" data-mdl-for="export_icon">$labels.btnExport$</div>
+<div class="mdl-tooltip" data-mdl-for="import_icon">$labels.btnImport$</div>
+
+$tooltipsHtml$
+
+<div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--12-col  mdl-cell--12-col-phone">
+    <div class="mdl-card__title mdl-color--blue-grey-200 enable-interface">
+        <div id="title-row" style="width:100%;" class="content-grid mdl-grid main-row">
+            <div class="mdl-cell">
+                <h2 class="mdl-card__title-text mdl-color-text--white">$title$</h2>
+            </div>
+            <div class="mdl-cell mdl-cell-icons
+                            mdl-typography--text-right mdl-color-text--white" style="margin: 3px;">
+
+                <span id="filter_icon" class="icon-filter title_icon" style="margin-left: 0"
+                      data-bind-event="click"
+                      data-bind-method="CtrlActionTaskManager.filter"></span>
+
+                <div id="table-search" class="mdl-textfield mdl-js-textfield is-upgraded is-focused table-search">
+                    <div class="mdl-textfield-holder">
+                        <input class="mdl-textfield__input search" type="text">
+                    </div>
+                </div>
+
+                <i id="refresh_icon" class="material-icons title_icon"
+                   data-rbac="taskManager.refresh"
+                   data-bind-event="click"
+                   data-bind-action="CtrlActionTaskManager.exec">refresh</i>
+
+                <i id="export_icon" class="material-icons title_icon"
+                   data-rbac="taskManager.export"
+                   data-bind-event="click"
+                   data-bind-method="CtrlActionTaskManager.export">vertical_align_bottom</i>
+
+                <i id="add_icon" class="material-icons title_icon"
+                   data-rbac="taskManager.add"
+                   data-bind-event="click"
+                   data-bind-method="CtrlActionTaskManager.addJobFirstStep">playlist_add</i>
+
+                <span id="import_icon" class="icon-import title_icon"
+                      data-bind-event="click"
+                      data-bind-method="CtrlActionTaskManager.importClick"></span>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="mdl-card__supporting-table">
+        <table id="resourceList" class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="width: 100%">
+            <thead class="th-color-grey text-align-right">
+                <tr>
+                    <th class="checkbox-col"><input style="cursor: pointer;" class="selectAllNodes" name="selectAllNodes" type="checkbox"/></th>
+                    <th data-sort="int">$labels.id$ <i class="icon-sort"></i></th>
+                    <th data-sort="string">$labels.type$ <i class="icon-sort"></i></th>
+                    <th data-sort="string">$labels.DEVICE_REFERENCE$ <i class="icon-sort"></i></th>
+                    <th data-sort="string">$labels.service$ <i class="icon-sort"></i></th>
+                    <th data-sort="string">$labels.object$ <i class="icon-sort"></i></th>
+                    <th data-sort="string">$labels.START_TIME$ <i class="icon-sort"></i></th>
+                    <th data-sort="string">$labels.expires$ <i class="icon-sort"></i></th>
+                    <th data-sort="string">$labels.REPEATING_INTERVAL$ <i class="icon-sort"></i></th>
+                    <th data-sort="int">$labels.priority$ <i class="icon-sort"></i></th>
+                    <th data-sort="string">$labels.RESOURCE_STATUS$ <i class="icon-sort"></i></th>
+                    <th data-sort="string">$labels.ACCEPT_DATA_NOTIFICATION$</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody class="list">
+                $htmlResources$
+            </tbody>
+        </table>
+    </div>
+</div>

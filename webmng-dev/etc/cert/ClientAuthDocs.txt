@@ -1,0 +1,5 @@
+### APACHE NSS client authentication ###
+
+# Import root CA into NSS cert db
+certutil -A -n "rootCA" -t "CT,," -d [path] -a -i /path/to/cacertificate
+

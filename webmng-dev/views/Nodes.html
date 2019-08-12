@@ -1,0 +1,111 @@
+
+    <div class="mdl-tooltip" data-mdl-for="refresh_icon">$labels.btnRefresh$</div>
+    <div class="mdl-tooltip" data-mdl-for="export_icon">$labels.btnExport$</div>
+    <div class="mdl-tooltip" data-mdl-for="filter_icon">$labels.filter$</div>
+    $htmlTooltips$
+    <div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--12-col  mdl-cell--12-col-phone" id="nodesTable">
+        <div class="mdl-card__title mdl-color--blue-grey-200">
+            <h2 class="mdl-card__title-text mdl-color-text--white">$labels.attachedDevicesSummary$</h2>
+        </div>
+        <div style="position: relative;float: left; width: 100%;">
+            <div style="position: relative; float: left;width: 50%">
+
+            </div>
+            <div style="position: relative;float: left;width: 50%">
+
+            </div>
+        </div>
+        <div class="mdl-grid" style="width: 100%;padding: 0;">
+            <div class="mdl-cell mdl-cell--6-col" style="overflow: auto">
+                <table class="mdl-data-table mdl-js-data-table" style="width: 100%;overflow: auto">
+                    <tbody>
+                    <tr>
+                        <td class="mdl-data-table__cell--non-numeric"><b>$labels.totalAttachedDevices$</b></td>
+                        <td><b>$totalNodesDC$</b></td>
+                    </tr>
+                    <tr>
+                        <td class="mdl-data-table__cell--non-numeric">$labels.joinedDevices$</td>
+                        <td>$joinedNodes$</td>
+                    </tr>
+                    <tr>
+                        <td class="mdl-data-table__cell--non-numeric">$labels.commissionedNodes$</td>
+                        <td>$commissionedNodes$</td>
+                    </tr>
+                    <tr>
+                        <td class="mdl-data-table__cell--non-numeric">$labels.activeDevices$</td>
+                        <td>$activeNodes$</td>
+                    </tr>
+                    <tr>
+                        <td class="mdl-data-table__cell--non-numeric">$labels.notActiveNodes$</td>
+                        <td>$notActiveNodes$</td>
+                    </tr>
+                    <tr>
+                        <td class="mdl-data-table__cell--non-numeric">$labels.lostNodes$</td>
+                        <td>$lostNodes$</td>
+                    </tr>
+                    <tr>
+                        <td class="mdl-data-table__cell--non-numeric"><b>$labels.statisticsTime$</b></td>
+                        <td><b>$statisticsTime$</b></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="mdl-cell mdl-cell--6-col" style="max-height: 330px;">
+                <canvas id="chart_attached"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--12-col  mdl-cell--12-col-phone">
+        <div class="mdl-card__title mdl-color--blue-grey-200 enable-interface">
+            <div id="title-row" style="width:100%;" class="content-grid mdl-grid main-row">
+                <div class="mdl-cell">
+                    <h2 class="mdl-card__title-text mdl-color-text--white">$labels.title$ ($totalNodes$ $totalDevicesText$)</h2>
+                </div>
+                <div data-rbac="nodes.actions" class="mdl-cell mdl-cell-icons mdl-typography--text-right mdl-color-text--white"
+                     style="margin: 3px;">
+
+                    <span id="filter_icon" class="icon-filter title_icon"
+                          data-bind-event="click"
+                          data-bind-method="CtrlActionNodes.filter"></span>
+
+                    <div id="table-search" class="mdl-textfield mdl-js-textfield is-upgraded is-focused table-search">
+                        <div class="mdl-textfield-holder">
+                            <input class="mdl-textfield__input search" type="text">
+                        </div>
+                    </div>
+
+                    <i id="refresh_icon" class="material-icons title_icon"
+                       data-rbac="nodes.refresh-list"
+                       data-bind-event="click"
+                       data-bind-action="CtrlActionNodes.exec">refresh</i>
+
+                    <i id="export_icon" class="material-icons title_icon"
+                       data-rbac="nodes.export-list"
+                       data-bind-event="click"
+                       data-bind-method="CtrlActionNodes.__exportNodeList">vertical_align_bottom</i>
+                </div>
+            </div>
+        </div>
+        <div class="mdl-card__supporting-table">
+            <table id="nodesList" class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="width: 100%">
+
+                <thead class="th-color-grey text-align-right">
+                <tr class="double-line">
+                    <th class="checkbox-col"><input style="cursor: pointer;" class="selectAllNodes" name="selectAllNodes" type="checkbox"/></th>
+                    <th data-sort="string" class="mdl-data-table__cell--non-numeric">$labels.shortAddress$ <i class="icon-sort"></i></th>
+                    <th data-sort="string" class="mdl-data-table__cell--non-numeric">$labels.macAddressSplit$ <i class="icon-sort"></i></th>
+                    <th data-sort="string" class="mdl-data-table__cell--non-numeric text-align-left">$labels.deviceTitleSplit$ <i class="icon-sort"></i></th>
+                    <th data-sort="string" class="mdl-data-table__cell--non-numeric text-align-left">$labels.dcStatus$ <i class="icon-sort"></i></th>
+                    <th data-sort="string" style="cursor: pointer">$labels.plcStatusSplit$<i class="icon-sort"></i></th>
+                    <th class="mdl-data-table__cell--non-numeric" data-sort="int">$labels.succRateSplit$ <i class="icon-sort"></i></th>
+                    <th data-sort="string">$labels.commissioningTime$ <i class="icon-sort"></i></th>
+                    <th data-sort="string">$labels.lastCommunicationTimeSplit$ <i class="icon-sort"></i></th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody class="list">
+                    $htmlNodes$
+                </tbody>
+            </table>
+        </div>
+    </div>

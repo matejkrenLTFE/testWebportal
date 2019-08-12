@@ -1,0 +1,74 @@
+
+<div class="mdl-tooltip" data-mdl-for="export_icon">
+    $labels.btnExportParams$
+</div>
+<div class="mdl-tooltip" data-mdl-for="plc_modem_restart_icon">
+    $labels.plcModemRestartTooltip$
+</div>
+
+
+<div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--6-col  mdl-cell--12-col-phone mdl-cell--6-short-view">
+    <div class="mdl-card__title mdl-color--blue-grey-200 enable-interface">
+        <div style="width:100%;" class="content-grid mdl-grid main-row">
+            <div class="mdl-cell">
+                <h2 class="mdl-card__title-text mdl-color-text--white">$title$</h2>
+            </div>
+            <div data-rbac="nodes.actions" class="mdl-cell  mdl-cell-icons
+                            mdl-typography--text-right mdl-color-text--white" style="margin: 3px;">
+
+                <i id="export_icon" class="material-icons title_icon"
+                   data-rbac="plc.button-export"
+                   data-bind-event="click"
+                   data-bind-method="CtrlActionNANPlc.exportParams">vertical_align_bottom</i>
+
+                <i id="plc_modem_restart_icon" class="material-icons title_icon"
+                   data-rbac="plc.plc-restart"
+                   data-bind-event="click"
+                   data-bind-method="CtrlActionNANPlc.plcModemRestart">crop_rotate</i>
+
+
+            </div>
+        </div>
+    </div>
+    <form id="NANPlcForm">
+        <table class="mdl-data-table mdl-js-data-table" style="width: 100%">			 
+            <tbody>
+            
+            <tr data-rbac="plc.mac-address">
+                <td class="mdl-data-table__cell--non-numeric">$labels.macAddress$</td>				
+                <td>$params.mac-address$</td>
+            </tr>
+            <tr data-rbac="plc.pan-id">
+                <td class="mdl-data-table__cell--non-numeric">$labels.panId$</td>				
+                <td>
+                    <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-145">
+                        <input class="mdl-textfield__input text-align-right" data-rbac-element="plc.pan-id" name="pan-id" value="$params.pan-id$" />
+                    </div>
+                </td>
+            </tr>
+
+            <tr data-rbac="plc.band">
+                <td class="mdl-data-table__cell--non-numeric">$labels.band$</td>				
+                <td>
+                    $elements.band$
+                    </td>
+            </tr>
+            </tbody>
+            <tfoot data-rbac="plc.actions">
+                <tr>
+                    <td></td>
+                    <td>
+                        <!--<div id="btnNANPlcExportParams" data-bind-event="click" data-bind-method="CtrlActionNANPlc.exportParams" class="mdl-button mdl-js-button mdl-button&#45;&#45;raised" data-rbac="plc.button-export">
+                            $labels.btnExportParams$
+                        </div>&nbsp;-->
+                        <button id="btnNANPlcApply" 
+                            data-rbac="plc.button-apply"
+                            data-bind-event="click" data-bind-method="CtrlActionNANPlc.setParams" class="mdl-button mdl-js-button mdl-button--raised">
+                            $labels.apply$
+                        </button>
+                    </td>
+                </tr>
+            </tfoot>        
+        </table> 
+    </form>
+</div>

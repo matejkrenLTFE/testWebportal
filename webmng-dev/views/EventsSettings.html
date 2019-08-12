@@ -1,0 +1,66 @@
+<div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--12-col  mdl-cell--12-col-phone" id="eventListWrap">
+    <div class="mdl-card__title mdl-color--blue-grey-200 enable-interface">
+        <div class="content-grid mdl-grid" style="width:100%;">
+            <div class="mdl-cell mdl-cell--4-col mdl-cell--6-col-phone">
+                <h2 class="mdl-card__title-text mdl-color-text--white">$title$</h2>
+            </div>
+        </div>
+    </div>
+    <div class="mdl-card__supporting-table">
+        <!--<div class="text-box">
+            <p style="margin-bottom: 0">$labels.instructions$</p>
+        </div>-->
+        <form id="EventsSettingsForm">
+            <table class="mdl-data-table mdl-js-data-table" id="eventList" style="width: 100%">
+                <thead>
+                    <tr id="hes-input-row">
+                        <th style="text-align: left!important;font-weight: 400;font-size: 14px;color: rgba(0, 0, 0, 0.87);">$labels.hesURL$:</th>
+                        <th colspan="2" style="text-align: left!important;">
+                            <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label"
+                                 style="width: 410px;">
+                                <input class="mdl-textfield__input" data-rbac-element="eventsSettings.settings-apply" id="hes-url" name="hes-url"
+                                       pattern="^[a-zA-Z\d\-:/_.]+$" type="text" value="$params.hesUrl$"/>
+                            </div>
+                        </th>
+                        <th>
+                            <button
+                                    class="mdl-button mdl-js-button mdl-button--raised"
+                                    data-bind-event="click"
+                                    data-bind-method="CtrlActionEventsSettings.setParams"
+                                    data-rbac="eventsSettings.settings-apply">
+                                $labels.applyHes$
+                            </button>
+                        </th>
+                    </tr>
+                </thead>
+                <thead class="th-color-grey text-align-right">
+                    <tr >
+                        <th style="text-align: left!important;cursor: default;" width="25%">$labels.eventName$</th>
+                        <th style="text-align: left!important;cursor: default;" width="10%">$labels.eventID$</th>
+                        <th style="text-align: left!important;cursor: default;">$labels.eventDesc$</th>
+                        <th style="cursor: default;">$labels.enabled$</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    $params.tbody$
+                </tbody>
+                <tfoot data-rbac="eventsSettings.settings-apply">
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <button
+                                class="mdl-button mdl-js-button mdl-button--raised"
+                                data-bind-event="click"
+                                data-bind-method="CtrlActionEventsSettings.setParams"
+                                data-rbac="eventsSettings.settings-apply">
+                            $labels.apply$
+                        </button>
+                    </td>
+                </tr>
+                </tfoot>
+            </table>
+        </form>
+    </div>
+</div>

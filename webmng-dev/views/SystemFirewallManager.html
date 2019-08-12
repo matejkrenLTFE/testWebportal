@@ -1,0 +1,110 @@
+<div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--12-col  mdl-cell--12-col-phone">
+    <form id="FWForm">
+        <div class="mdl-card__title mdl-color--blue-grey-200 enable-interface">        
+            <div style="width:100%;" class="content-grid mdl-grid">
+                <div class="mdl-cell">
+                    <h2 class="mdl-card__title-text mdl-color-text--white">$_title$</h2>
+                </div>
+                <div class="mdl-cell">
+                    
+                </div>
+                <div data-rbac="lan.enable" class="mdl-cell mdl-typography--text-right mdl-color-text--white">
+                    $elements.enable$
+                </div>
+            </div>
+        </div>
+        <table class="mdl-data-table mdl-js-data-table" style="width: 100%">
+            <thead>
+                <tr class="th-color-grey">
+                    <td colspan="7" class="mdl-data-table__cell--non-numeric"><strong>$labels.firewallRules$</strong></td>
+                    <td>
+                        <button data-rbac="firewall.add" class="mdl-button mdl-button--fab mdl-button--primary button-middle"
+                                data-bind-event="click" data-bind-method="CtrlActionSystemFirewallManager.showHideAddDialog">
+                            <i class="material-icons">add</i>
+                        </button>
+                    </td>
+                </tr>
+                <tr class="add-rule-dialog th-color-grey" style="display: none">
+                    <th colspan="2" style="text-align: center">$labels.addFirewallRule$</th>
+                    <th colspan="6"></th>
+                </tr>
+                <tr class="add-rule-dialog th-color-grey" style="display: none">
+                    <th>$labels.rulePort1$:  </th>
+                    <th><input class="mdl-textfield__input" type="number" id="rulePortNumber" name="rulePortNumber" /></th>
+                    <th colspan="6"></th>
+                </tr>
+                <tr class="add-rule-dialog th-color-grey" style="display: none">
+                    <th>$labels.ruleProtocol1$:  </th>
+                    <th>
+                        <select class="mdl-select__input" id="ruleProtocol" name="ruleProtocol">
+                            $formSelectProtocolTypeOptions$
+                        </select>
+                    </th>
+                    <th colspan="6"></th>
+                </tr>
+                <tr class="add-rule-dialog th-color-grey" style="display: none">
+                    <th>$labels.ruleDirection1$:  </th>
+                    <th>
+                        <select class="mdl-select__input" id="ruleDirection" name="ruleDirection">
+                        $formSelectDirectionTypeOptions$
+                        </select>
+                    </th>
+                    <th colspan="6"></th>
+                </tr>
+                <tr class="add-rule-dialog th-color-grey" style="display: none">
+                    <th>$labels.ruleInterface1$:  </th>
+                    <th>
+                        <select class="mdl-select__input" id="ruleInterface" name="ruleInterface">
+                        $formSelectInterfaceTypeOptions$
+                        </select>
+                    </th>
+                    <th colspan="6"></th>
+                </tr>
+                <tr class="add-rule-dialog th-color-grey" style="display: none">
+                    <th>$labels.ruleDescription1$:  </th>
+                    <th>
+                        <input class="mdl-textfield__input" type="text" id="ruleDescription" name="ruleDescription" />
+                    </th>
+                    <th colspan="6"></th>
+                </tr>
+                <tr class="add-rule-dialog th-color-grey" style="display: none">
+                    <th colspan="2" style="text-align: right">
+                        <button id="btnAddFirewallRule"
+                                data-rbac="firewall.add" data-bind-event="click"
+                                data-bind-method="CtrlActionSystemFirewallManager.addFirewallRule"
+                                class="mdl-button mdl-js-button mdl-button--raised">
+                            $labels.btnAddFWRule$
+                        </button>
+                    </th>
+                    <th colspan="7"></th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th>$labels.ruleID$</th>
+                    <th>$labels.rulePort$</th>
+                    <th>$labels.ruleProtocol$</th>
+                    <th>$labels.ruleDirection$</th>
+                    <th>$labels.ruleInterface$</th>
+                    <th>$labels.ruleDescription$</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="fwRulesBody">
+                $tableHtml$
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="8">
+                        <button id="btnApplyPermanently"
+                                data-rbac="firewall.apply"
+                                data-bind-event="click" data-bind-method="CtrlActionSystemFirewallManager.exportParams"
+                                class="mdl-button mdl-js-button mdl-button--raised">
+                            $labels.btnApplyPermanently$
+                        </button>
+                    </th>
+                </tr>
+            </tfoot>
+        </table> 
+
+    </form>
+</div>

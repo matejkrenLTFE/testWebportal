@@ -1,0 +1,94 @@
+
+<div class="mdl-tooltip" data-mdl-for="export_icon">
+    $labels.btnExport$
+</div>
+<div class="mdl-tooltip" data-mdl-for="filter_icon">$labels.filter$</div>
+
+<div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--12-col  mdl-cell--12-col-phone" id="eventListWrap">
+    <div class="mdl-card__title mdl-color--blue-grey-200 enable-interface">
+        <div id="title-row" style="width:100%;" class="content-grid mdl-grid main-row">
+            <div class="mdl-cell">
+                <h2 class="mdl-card__title-text mdl-color-text--white">$_title$</h2>
+            </div>
+            <div data-rbac="events.export" class="mdl-cell mdl-cell-icons
+                            mdl-typography--text-right mdl-color-text--white" style="margin: 3px;">
+
+                <span id="filter_icon" class="icon-filter title_icon" style="margin-left: 0"
+                      data-bind-event="click"
+                      data-bind-method="CtrlActionWhiteList.filter"></span>
+
+                <div id="table-search" class="mdl-textfield mdl-js-textfield is-upgraded is-focused table-search">
+                    <div class="mdl-textfield-holder">
+                        <input class="mdl-textfield__input search" type="text">
+                    </div>
+                </div>
+
+                <i id="export_icon" class="material-icons title_icon"
+                   data-rbac="events.export"
+                   data-bind-event="click"
+                   data-bind-method="CtrlActionEvents.__exportEventsList">vertical_align_bottom</i>
+            </div>
+        </div>
+    </div>
+    <div class="mdl-card__supporting-table">
+        <div class="scrollabletable">
+
+        <table id="eventList" class="mdl-data-table mdl-js-data-table" style="width: 100%">
+            <thead class="th-color-grey text-align-right">
+                <tr>
+                    <th colspan="6" style="background: #fff">
+                        <div class="mdl-grid" style="padding: 0">
+                            <div class="mdl-cell" style="width: 150px; text-align: left">
+                                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-textfield-less-padding textfield-short">
+                                    <input class="mdl-textfield__input" type="text" id="dateFrom">
+                                    <label class="mdl-textfield__label" for="dateFrom">$dateFrom$</label>
+                                </div>
+                            </div>
+                            <div class="mdl-cell" style="width: 150px; text-align: left">
+                                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-textfield-less-padding textfield-short">
+                                    <input class="mdl-textfield__input" type="text" id="dateTo">
+                                    <label class="mdl-textfield__label" for="dateTo">$dateTo$</label>
+                                </div>
+                            </div>
+                            <div class="mdl-cell mdl-textfield-less-padding-chrome" style="width: 190px; text-align: left">
+                                <div style="width:320px;" class="mdl-select mdl-js-select mdl-select--floating-label mdl-textfield-less-padding textfield-short-180">
+                                    <select class="mdl-select__input" id="eventType" name="eventType">
+                                        $formSelectTypeOptions$
+                                    </select>
+                                    <label class="mdl-select__label" for="eventType">$formSelectType$</label>
+                                </div>
+                            </div>
+                            <div  class="mdl-cell mdl-cell--2-col" style="text-align: left; padding-top: 13px;">
+                                <button
+                                        id="btnEventFilterApply"
+                                        data-bind-event="click"
+                                        data-bind-action="CtrlActionEvents.exec" style="width:80px;" class="mdl-button mdl-js-button mdl-button--raised">
+                                    $formApply$
+                                </button>
+                            </div>
+                        </div>
+                    </th>
+                </tr>
+                <tr id="eventListTotalResults" class="hidden" style="text-align: left!important;height: 20px">
+                        <th colspan="6" style="text-align: left;background: #fff; height: 20px;">
+                            <div style="text-align: left">$totalResults$</div>
+                        </th>
+                </tr>
+                <tr>
+                    <th align="left" width="15%" data-sort="string" style="text-align: left!important;">$thID$ <i class="icon-sort"></i></th>
+                    <th align="left"  width="10%" data-sort="string" style="text-align: left!important;">$thIDCol$ <i class="icon-sort"></i></th>
+                    <th data-sort="string"  width="10%"  align="left"  style="text-align: left!important;padding-left: 18px;">$thSeverity$ <i class="icon-sort"></i></th>
+                    <th data-sort="string" align="left"  style="text-align: left!important;">$thTimestamp$ <i class="icon-sort"></i></th>
+                    <th data-sort="string" align="left"  style="text-align: left!important;">$thDeviceTitle$ <i class="icon-sort"></i></th>
+                    <th data-sort="string" align="left"  style="text-align: left!important;">$thMacAddress$ <i class="icon-sort"></i></th>
+                    <th data-sort="string" align="left"  style="text-align: left!important;">$thEventInfo$ <i class="icon-sort"></i></th>
+                </tr>
+            </thead>
+            <tbody class="list">
+                $events.htmlList$
+            </tbody>
+        </table>
+        </div>
+
+    </div>
+</div>

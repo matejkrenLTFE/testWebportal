@@ -1,0 +1,85 @@
+
+<div class="mdl-tooltip" data-mdl-for="export_icon">
+    $labels.btnExportParams$
+</div>
+
+<div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--6-col  mdl-cell--12-col-phone mdl-cell--6-short-view">
+    <form id="LANEthernetForm">
+        <div class="mdl-card__title mdl-color--blue-grey-200 enable-interface">
+            <div style="width:100%;" class="content-grid mdl-grid main-row">
+                <div class="mdl-cell">
+                    <h2 class="mdl-card__title-text mdl-color-text--white">$_title$</h2>
+                </div>
+                <div class="mdl-cell mdl-cell-icons
+                            mdl-typography--text-right mdl-color-text--white" style="margin: 3px;">
+
+                    <span data-rbac="lan.enable" class="title_icon_span_enable">
+                         $elements.enable$
+                    </span>
+
+                    <span class="title_icon_span" style="margin-right: 10px;">
+                        <i id="export_icon" class="material-icons title_icon"
+                           data-rbac="lan.button-export"
+                           data-bind-event="click"
+                           data-bind-method="CtrlActionLANEthernet.exportParams">vertical_align_bottom</i>
+
+                    </span>
+                </div>
+            </div>
+        </div>
+        <table class="mdl-data-table mdl-js-data-table" style="width: 100%">			 
+            <tbody>                                      
+                
+                <tr data-rbac="lan.dhcp">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.ipConfigClientDhcp$</td>				
+                    <td><span>$elements.ipConfigClientDhcp$</span></td>
+                </tr>                   
+                <tr data-rbac="lan.ip-config-ip">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.ipConfigIp$</td>				
+                    <td>
+                        <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-145">
+                            <input class="mdl-textfield__input text-align-right" type="text" name="ip-config-ip" value="$params.ip-config-ip$" data-rbac-element="lan.ip-config-ip"
+                                   pattern="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"  />
+                        </div>
+                    </td>
+                </tr>   
+                <tr data-rbac="lan.netmask">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.ipConfigNetMask$</td>				
+                    <td>
+                        <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-145">
+                            <input class="mdl-textfield__input text-align-right" type="text" name="ip-config-net-mask" value="$params.ip-config-net-mask$" data-rbac-element="lan.ip-config-net-mask"
+                                   pattern="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"  />
+                        </div>
+                    </td>
+                </tr>   
+                <tr data-rbac="lan.gateway">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.ipConfigGateway$</td>				
+                    <td>
+                        <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-145">
+                            <input class="mdl-textfield__input text-align-right" type="text" name="ip-config-gateway" value="$params.ip-config-gateway$" data-rbac-element="lan.ip-config-gateway"
+                                   pattern="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$" />
+                        </div>
+                    </td>
+                </tr>   
+
+            </tbody>
+            <tfoot>
+                <tr id="FormActions" data-rbac="lan.actions">
+                    <td>
+                    </td>
+                    <td>
+                        <!--<div id="btnLANEthernetExportParams" data-bind-event="click" data-bind-method="CtrlActionLANEthernet.exportParams" class="mdl-button mdl-js-button mdl-button&#45;&#45;raised" data-rbac="lan.button-export">
+                            $labels.btnExportParams$
+                        </div>&nbsp;-->
+                        <button id="btnLANEthernetApply"
+                            data-rbac="lan.button-apply"
+                            data-bind-event="click" data-bind-method="CtrlActionLANEthernet.setParams" class="mdl-button mdl-js-button mdl-button--raised">
+                            $labels.apply$
+                        </button>
+                    </td>
+                </tr>
+            </tfoot>
+        </table> 
+
+    </form>
+</div>

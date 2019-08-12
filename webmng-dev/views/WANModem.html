@@ -1,0 +1,183 @@
+
+<div class="mdl-tooltip" data-mdl-for="export_icon">
+    $labels.exportParams$
+</div>
+<div class="mdl-tooltip" data-mdl-for="network-icon">
+    $params.GSM_Status_icon1Tooltip$
+</div>
+<div class="mdl-tooltip" data-mdl-for="roaming-icon">
+    $params.GSM_Status_icon2Tooltip$
+</div>
+<div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--8-col  mdl-cell--12-col-phone mdl-cell--6-short-view3">
+    <form id="WANModemForm">
+        <div class="mdl-card__title mdl-color--blue-grey-200 enable-interface">
+            <div style="width:100%;" class="content-grid mdl-grid main-row">
+                <div class="mdl-cell">
+                    <h2 class="mdl-card__title-text mdl-color-text--white">$title$</h2>
+                </div>
+                <div class="mdl-cell mdl-cell-icons
+                            mdl-typography--text-right mdl-color-text--white" style="margin: 3px;">
+
+                    <span data-rbac="wan1.enable" class="title_icon_span_enable">
+                        $elements.enable$
+                    </span>
+
+                    <span class="title_icon_span" style="margin-right: 10px;">
+                        <i id="export_icon" class="material-icons title_icon"
+                           data-rbac="wan1.button-export"
+                           data-bind-event="click"
+                           data-bind-method="CtrlActionWANModem.exportParams">vertical_align_bottom</i>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <table class="mdl-data-table mdl-js-data-table" style="width: 100%">
+            <tbody>
+            <tr class="th-color-grey">
+                <td class="mdl-data-table__cell--non-numeric"><strong>$labels.groupTitleWAN$</strong></td>
+                <td></td>
+            </tr>
+
+            <tr data-rbac="wan1.gsm-status">
+                <td class="mdl-data-table__cell--non-numeric">$labels.gsmStatus$</td>
+                <td style="padding-bottom: 4px;padding-top: 4px;">
+                    <span class='mdl-chip $params.GSM_Status_icon1Style$'><span class='mdl-chip__text node-state'>$params.GSM_Status_txt$</span></span>
+                </td>
+            </tr>
+            <tr data-rbac="wan1.gsm-signal-level">
+                <td class="mdl-data-table__cell--non-numeric">$labels.gsmSignalLevel$</td>
+                <td style="padding-top: 1px; padding-bottom: 1px;">
+                    <div id="SignalLevelIndicator"></div>
+                    <div class="mdl-tooltip mdl-tooltip--medium SignalLevelTooltip" for="SignalLevelIndicator"></div>
+                </td>
+            </tr>
+            <tr data-rbac="wan1.network">
+                <td class="mdl-data-table__cell--non-numeric">$labels.network$</td>
+                <td>$params.Network$</td>
+            </tr>
+            <tr data-rbac="wan1.ip">
+                <td class="mdl-data-table__cell--non-numeric">$labels.wanIP$</td>
+                <td>$params.WAN_IP$</td>
+            </tr>
+
+            <tr class="th-color-grey">
+                <td class="mdl-data-table__cell--non-numeric"><strong>$labels.groupTitleModem$</strong></td>
+                <td></td>
+            </tr>
+            <tr data-rbac="wan1.modem-type">
+                <td class="mdl-data-table__cell--non-numeric">$labels.modemType$</td>
+                <td>$params.Type$</td>
+            </tr>
+            <tr data-rbac="wan1.apn">
+                <td class="mdl-data-table__cell--non-numeric">$labels.apn$</td>
+                <td>
+                    <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-400">
+                        <input class="mdl-textfield__input text-align-right" type="text" name="apn" value="$params.apn$"
+                               data-rbac-element="wan1.apn"/>
+                    </div>
+                </td>
+            </tr>
+            <tr data-rbac="wan1.user-name">
+                <td class="mdl-data-table__cell--non-numeric">$labels.userName$</td>
+                <td>
+                    <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-400">
+                        <input class="mdl-textfield__input  text-align-right" type="text" name="user-name" value="$params.user-name$"
+                               data-rbac-element="wan1.user-name"/>
+                    </div>
+                </td>
+            </tr>
+            <tr data-rbac="wan1.password">
+                <td class="mdl-data-table__cell--non-numeric">$labels.password$</td>
+                <td>
+                    <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-400">
+                        <input class="mdl-textfield__input text-align-right" type="password" name="password" value="$params.password$"
+                               data-rbac-element="wan1.password" disabled>
+                    </div>
+                </td>
+            </tr>
+            <tr data-rbac="wan1.imei">
+                <td class="mdl-data-table__cell--non-numeric">$labels.IMEI$</td>
+                <td>$params.IMEI$</td>
+            </tr>
+
+            <tr class="th-color-grey">
+                <td class="mdl-data-table__cell--non-numeric"><strong>$labels.groupTitleSIM$</strong></td>
+                <td></td>
+            </tr>
+
+            <tr data-rbac="wan1.card-id">
+                <td class="mdl-data-table__cell--non-numeric">$labels.cardID$</td>
+                <td>$params.CardID$</td>
+            </tr>
+
+            <tr class="th-color-grey" data-rbac="wan1.heartbeat">
+                <td class="mdl-data-table__cell--non-numeric"><strong>$labels.heartbeat$</strong></td>
+                <td></td>
+            </tr>
+
+            <tr data-rbac="wan1.heartbeatIP">
+                <td class="mdl-data-table__cell--non-numeric">$labels.wanHeartbeatIP$</td>
+                <td>
+                    <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-400">
+                        <input class="mdl-textfield__input text-align-right" type="text" name="ip-config-heart-beat-ip" value="$params.ip-config-heart-beat-ip$"
+                               pattern="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
+                               data-rbac="wan1.heartbeatIP"/>
+                    </div>
+                </td>
+            </tr>
+
+            <tr data-rbac="wan1.heartbeatBackUpIP">
+                <td class="mdl-data-table__cell--non-numeric">$labels.wanBackupHeartbeatIP$</td>
+                <td>
+                    <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-400">
+                        <input class="mdl-textfield__input text-align-right" type="text" name="ip-config-heart-beat-ip-backup" value="$params.ip-config-heart-beat-ip-backup$"
+                               pattern="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
+                               data-rbac="wan1.heartbeatBackUpIP"/>
+                    </div>
+                </td>
+            </tr>
+
+            <tr data-rbac="wan1.heartbeatPeriod">
+                <td class="mdl-data-table__cell--non-numeric">$labels.heartbeatPeriod$</td>
+                <td>
+                    <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-400">
+                        <input class="mdl-textfield__input text-align-right just-number" type="text" name="ip-config-heart-beat-period"
+                               value="$params.ip-config-heart-beat-period$" data-rbac="wan1.heartbeatPeriod"/>
+                    </div>
+                </td>
+            </tr>
+
+            <tr data-rbac="wan1.heartbeatTimeout">
+                <td class="mdl-data-table__cell--non-numeric">$labels.heartbeatTimeout$</td>
+                <td>
+                    <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-400">
+                        <input class="mdl-textfield__input text-align-right just-number" type="text" name="ip-config-heart-beat-timeout"
+                               value="$params.ip-config-heart-beat-timeout$" data-rbac="wan1.heartbeatTimeout"/>
+                    </div>
+                </td>
+            </tr>
+
+            <tr data-rbac="wan1.heartbeatMaxRetry">
+                <td class="mdl-data-table__cell--non-numeric">$labels.heartbeatMaxRetry$</td>
+                <td>
+                    <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-400">
+                        <input class="mdl-textfield__input text-align-right just-number" type="text" name="ip-config-heart-beat-max-retry"
+                               value="$params.ip-config-heart-beat-max-retry$" data-rbac="wan1.heartbeatMaxRetry"/>
+                    </div>
+                </td>
+            </tr>
+
+            <tr id="FormActions" data-rbac="wan1.actions">
+                <td></td>
+                <td>
+                    <input type="submit" id="btnWANModemApply" data-bind-event="click"
+                           data-bind-method="CtrlActionWANModem.setParams"
+                           class="mdl-button mdl-js-button mdl-button--raised" data-rbac="wan1.button-apply"
+                           value="$labels.apply$"/>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </form>
+</div>

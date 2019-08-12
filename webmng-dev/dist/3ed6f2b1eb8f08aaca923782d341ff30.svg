@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 16.0.3, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="32px" height="32px" viewBox="0 0 32 32" enable-background="new 0 0 32 32" xml:space="preserve">
+<g>
+	<path fill="#273476" d="M-1.389-1.5v33.84h56.327V-1.5H-1.389z"/>
+</g>
+<g transform="scale(840)">
+	<g>
+		<defs>
+			<rect id="SVGID_1_" x="-28.146" y="-16.91" width="56.356" height="33.857"/>
+		</defs>
+		<clipPath id="SVGID_2_">
+			<use xlink:href="#SVGID_1_"  overflow="visible"/>
+		</clipPath>
+		<g clip-path="url(#SVGID_2_)">
+			<path fill="#010101" d="M-0.002-0.002l0.067,0.04 M0.065-0.002l-0.067,0.04"/>
+			<polygon fill="#FFFFFF" points="0.064,0.042 0.032,0.022 0,0.042 -0.003,0.036 0.026,0.018 -0.003,0.001 0,-0.005 0.032,0.015 
+				0.064,-0.005 0.067,0.001 0.038,0.018 0.067,0.036 			"/>
+		</g>
+	</g>
+	<g>
+		<defs>
+			<path id="SVGID_3_" d="M-0.002-0.002v0.02h0.078v0.02H0.065L-0.002-0.002z M0.065-0.002H0.032v0.047h-0.034V0.039L0.065-0.002z"
+				/>
+		</defs>
+		<clipPath id="SVGID_4_">
+			<use xlink:href="#SVGID_3_"  overflow="visible"/>
+		</clipPath>
+		<g clip-path="url(#SVGID_4_)">
+			<defs>
+				<rect id="SVGID_5_" x="-28.146" y="-16.91" width="56.356" height="33.856"/>
+			</defs>
+			<clipPath id="SVGID_6_">
+				<use xlink:href="#SVGID_5_"  overflow="visible"/>
+			</clipPath>
+			<g clip-path="url(#SVGID_6_)">
+				<path fill="#010101" d="M-0.002-0.002l0.067,0.04 M0.065-0.002l-0.067,0.04"/>
+				<polygon fill="#D0202D" points="0.065,0.04 0.032,0.021 -0.001,0.04 -0.002,0.037 0.028,0.018 -0.002,0 -0.001,-0.004 
+					0.032,0.016 0.065,-0.004 0.066,0 0.036,0.018 0.066,0.037 				"/>
+			</g>
+		</g>
+	</g>
+	<g>
+		<path fill="#010101" d="M0.032-0.002v0.04 M-0.002,0.018h0.067"/>
+		<polygon fill="#FFFFFF" points="0.037,0.039 0.026,0.039 0.026,0.025 -0.002,0.025 -0.002,0.012 0.026,0.012 0.026,-0.002 
+			0.037,-0.002 0.037,0.012 0.065,0.012 0.065,0.025 0.037,0.025 		"/>
+	</g>
+	<g>
+		<path fill="#010101" d="M0.032-0.002v0.04 M-0.002,0.018h0.067"/>
+		<polygon fill="#D0202D" points="0.035,0.039 0.029,0.039 0.029,0.022 -0.002,0.022 -0.002,0.014 0.029,0.014 0.029,-0.002 
+			0.035,-0.002 0.035,0.014 0.065,0.014 0.065,0.022 0.035,0.022 		"/>
+	</g>
+</g>
+</svg>

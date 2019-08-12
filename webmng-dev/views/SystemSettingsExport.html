@@ -1,0 +1,147 @@
+
+<div class="mdl-tooltip" data-mdl-for="export_icon">
+    $labels.btnExportParams$
+</div>
+
+<div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--6-col  mdl-cell--12-col-phone mdl-cell--6-short-view">
+    <div class="mdl-card__title mdl-color--blue-grey-200 enable-interface">
+        <div style="width:100%;" class="content-grid mdl-grid main-row">
+            <div class="mdl-cell">
+                <h2 class="mdl-card__title-text mdl-color-text--white">$title$</h2>
+            </div>
+            <div class="mdl-cell mdl-cell-icons
+                            mdl-typography--text-right mdl-color-text--white" style="margin: 3px;">
+
+                <i id="export_icon" class="material-icons title_icon"
+                   data-rbac="settings_import_export.export"
+                   data-bind-event="click"
+                   data-bind-method="CtrlActionSystemSettingsExport.exportParams">vertical_align_bottom</i>
+            </div>
+        </div>
+    </div>
+    <form id="SystemSettingsExport">
+        <table class="mdl-data-table mdl-js-data-table" style="width: 100%">
+            <tbody>
+                <tr data-rbac="settings_import_export.export" class="th-color-grey">
+                    <td class="mdl-data-table__cell--non-numeric"><strong>$labels.exportSettings$</strong></td>
+                    <td>
+                        <input data-rbac-element="settings_import_export.export" type="checkbox" name="exportAllParams" id="selectAllCheckbox" />
+                    </td>
+                </tr>
+                <tr data-rbac="settings_import_export.export_local_ethernet">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.catIloc$</td>
+                    <td>
+                        <input data-rbac-element="settings_import_export.export_local_ethernet"
+                               type="checkbox" name="export_iloc" class="AppHTMLCheckbox" />
+                    </td>
+                </tr>
+                <tr data-rbac="settings_import_export.export_modem">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.catWan1$</td>
+                    <td>
+                        <input data-rbac-element="settings_import_export.export_modem"
+                               type="checkbox" name="export_wan1" class="AppHTMLCheckbox" />
+                    </td>
+                </tr>
+                <tr  data-rbac="settings_import_export.export_ethernet">
+                    <td  class="mdl-data-table__cell--non-numeric">$labels.catWan2$</td>
+                    <td>
+                        <input  data-rbac-element="settings_import_export.export_ethernet"
+                               type="checkbox" name="export_wan2" class="AppHTMLCheckbox" />
+                    </td>
+                </tr>
+                <tr data-rbac="settings_import_export.export_plc">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.catIPlc$</td>
+                    <td>
+                        <input  data-rbac-element="settings_import_export.export_plc"
+                               type="checkbox" name="export_plc" class="AppHTMLCheckbox" />
+                    </td>
+                </tr>
+                <tr data-rbac="settings_import_export.export_rs485">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.catRs485$</td>
+                    <td>
+                        <input  data-rbac-element="settings_import_export.export_rs485"
+                               type="checkbox" name="export_rs485" class="AppHTMLCheckbox" />
+                    </td>
+                </tr>
+                <tr data-rbac="settings_import_export.export_system">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.catCntr$</td>
+                    <td>
+                        <input  data-rbac-element="settings_import_export.export_system"
+                               type="checkbox" name="export_cntr" class="AppHTMLCheckbox" />
+                    </td>
+                </tr>
+                <tr data-rbac="settings_import_export.export_application">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.app$</td>
+                    <td>
+                        <input  data-rbac-element="settings_import_export.export_application"
+                               type="checkbox" name="export_app" class="AppHTMLCheckbox" />
+                    </td>
+                </tr>
+                <tr data-rbac="settings_import_export.export_gwpd">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.gwpd$</td>
+                    <td>
+                        <input  data-rbac-element="settings_import_export.export_gwpd"
+                               type="checkbox" name="export_gwpd" class="AppHTMLCheckbox" />
+                    </td>
+                </tr>
+                <tr data-rbac="settings_import_export.export_macd">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.macd$</td>
+                    <td>
+                        <input  data-rbac-element="settings_import_export.export_macd"
+                               type="checkbox" name="export_macd" class="AppHTMLCheckbox" />
+                    </td>
+                </tr>
+                <tr data-rbac="settings_import_export.export_csmd">
+                    <td class="mdl-data-table__cell--non-numeric">$labels.csmd$</td>
+                    <td>
+                        <input  data-rbac-element="settings_import_export.export_csmd"
+                               type="checkbox" name="export_csmd" class="AppHTMLCheckbox" />
+                    </td>
+                </tr>
+                <tr class="th-color-grey" data-rbac="settings_import_export.import">
+                    <td class="mdl-data-table__cell--non-numeric"><strong>$labels.importSettings$</strong></td>
+                    <td></td>
+                </tr>
+
+                <tr data-rbac="settings_import_export.import">
+                    <td colspan="2" class="mdl-data-table__cell--non-numeric">$labels.uploadFile$
+                        <span style="position: relative; float: right;">
+                            <div class="select-file">
+                                <input data-rbac-element="settings_import_export.import" id="file" type="file" name="upload" />
+                            </div>
+
+                            <div style="display: none;padding-bottom: 10px; text-align: right;" class="file-selected">
+                                <span data-rbac="settings_import_export.factory_defaults">
+                                    <span>$labels.exportFactoryDefaults$</span>
+                                    <span>
+                                        <input data-rbac-element="settings_import_export.import" id="create-factory-file" value="1"
+                                               type="checkbox" name="create-factory-file" />
+                                    </span>
+                                </span>
+
+                            </div>
+
+                            <div style="display: none;float: right;padding-bottom: 5px;" class="file-selected">
+                                <button id="btnSystemSettingsImportCancel" data-bind-event="click"
+                                        data-bind-method="CtrlActionSystemSettingsExport.importCancel"
+                                        class="mdl-button mdl-js-button mdl-button--raised">
+                                    $labels.cancel$
+                                </button>&nbsp;
+
+                                <button id="btnSystemSettingsImportFile" data-bind-event="click"
+                                        data-bind-method="CtrlActionSystemSettingsExport.importFile"
+                                        class="mdl-button mdl-js-button mdl-button--raised" data-rbac-element="settings_import_export.import">
+                                    $labels.importFile$
+                                </button>
+                            </div>
+                            <div style="display: none;float: right; margin-right: 15px;margin-top: 8px; max-width: 410px; overflow: auto;"
+                                 class="file-selected" id="file-name"></div>
+
+                        </span>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </form>
+</div>

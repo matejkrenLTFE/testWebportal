@@ -1,0 +1,1134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="750b6fe4-b54f-4b75-888c-3d0ccaab691d" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/src/AppRBAC.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/AppRBAC.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/views/SystemSettingsExport.html" beforeDir="false" afterPath="$PROJECT_DIR$/views/SystemSettingsExport.html" afterDir="false" />
+    </list>
+    <list id="81925c52-bc54-4fcf-90cb-effea3b9bbb1" name="Revert &quot;alarms added to dashboard, IE login fix&quot;" comment="Revert &quot;alarms added to dashboard, IE login fix&quot;&#10;&#10;This reverts commit 66bcda86" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <option name="HIDDEN_KINDS">
+      <set />
+    </option>
+    <expand />
+    <select />
+  </component>
+  <component name="DefaultGradleProjectSettings">
+    <option name="isMigrated" value="true" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/CtrlActionGroupTable.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="191">
+              <caret line="314" column="59" lean-forward="true" selection-start-line="314" selection-start-column="59" selection-end-line="314" selection-end-column="59" />
+              <folding>
+                <element signature="n#style#0;n#td#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#td#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#td#1;n#tr#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#td#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#td#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#table#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#div#0;n#td#1;n#tr#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#div#0;n#div#0;n#td#1;n#tr#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#table#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#table#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#th#0;n#tr#0;n#thead#0;n#table#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#table#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#td#1;n#tr#0;n#tbody#0;n#table#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#div#0;n#td#1;n#tr#0;n#tbody#0;n#table#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#div#1;n#td#1;n#tr#0;n#tbody#0;n#table#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#i#0;n#div#1;n#td#1;n#tr#0;n#tbody#0;n#table#0;n#!!top" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/CtrlActionWhiteList.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="490">
+              <caret line="422" column="86" selection-start-line="422" selection-start-column="63" selection-end-line="422" selection-end-column="86" />
+              <folding>
+                <element signature="n#style#0;n#p#0;n#td#0;n#tr#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#div#0;n#td#1;n#tr#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#div#1;n#td#1;n#tr#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#table#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#table#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#div#1;n#td#1;n#tr#0;n#table#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#div#2;n#td#1;n#tr#0;n#table#0;n#!!top" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/AppMain.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1486">
+              <caret line="376" column="30" selection-start-line="376" selection-start-column="30" selection-end-line="376" selection-end-column="30" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/AppWebserviceClient.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="228">
+              <caret line="124" column="35" selection-start-line="124" selection-start-column="15" selection-end-line="124" selection-end-column="35" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/CtrlActionEventsSettings.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="453">
+              <caret line="65" column="68" selection-start-line="65" selection-start-column="68" selection-end-line="65" selection-end-column="68" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/CtrlActionNetworkTopology.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="465">
+              <caret line="392" column="87" selection-start-line="392" selection-start-column="83" selection-end-line="392" selection-end-column="87" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/AppController.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="577">
+              <caret line="118" column="71" selection-start-line="118" selection-start-column="61" selection-end-line="118" selection-end-column="71" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/package.json">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="345">
+              <caret line="39" column="22" selection-start-line="39" selection-start-column="22" selection-end-line="39" selection-end-column="22" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/package-lock.json">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="311">
+              <caret line="4240" column="12" selection-start-line="4240" selection-start-column="5" selection-end-line="4240" selection-end-column="12" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/views/MonitoringManager.html">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>statisticsTime</find>
+      <find>network-graph</find>
+      <find>node</find>
+      <find>Json2Xml</find>
+      <find>csmd</find>
+      <find>vk</find>
+      <find>ip-config-ipv6</find>
+      <find>add</find>
+      <find>addjobdevi</find>
+      <find>nodest</find>
+      <find>EVT_SD_DATABASE_REINIT</find>
+      <find>EVT_SNMP_V3_CREDENTIAL_SET</find>
+      <find>PLCDiscove</find>
+      <find>.pldDiscoveryRunning</find>
+      <find>discovery-is-running</find>
+      <find>toolti</find>
+      <find>tooltip</find>
+      <find>showHoverTooltip</find>
+      <find>just</find>
+      <find>Business</find>
+      <find>PLCDi</find>
+      <find>__useDHCP</find>
+      <find>FFFDFFFF07FFFFFFFFFFFFFF</find>
+      <find>mdl-data-table</find>
+      <find>select-file</find>
+      <find>Function has a complexity of 9.</find>
+      <find>editGroup</find>
+      <find>_executeAsyncRequest</find>
+      <find>lodash</find>
+      <find>js-yaml</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>CtrlActionMonitoringManager</replace>
+      <replace>MONITORING_MANAGER</replace>
+      <replace>SELECT_PROFILE_TYPE</replace>
+      <replace>node</replace>
+      <replace>toString()</replace>
+      <replace>xmlMainEl</replace>
+      <replace>CtrlActionGroupsTable</replace>
+      <replace>0C7F12</replace>
+      <replace>00000</replace>
+      <replace>009E00</replace>
+      <replace>180, 180, 180</replace>
+      <replace>150, 150, 150</replace>
+      <replace>CtrlActionPLCRouting</replace>
+      <replace>CtrlActionPLCNeighbor</replace>
+      <replace>CtrlActionTaskManager</replace>
+      <replace>RSRP</replace>
+      <replace>).getResponse(false)</replace>
+      <replace>.getResponse(false)</replace>
+      <replace>CtrlActionNetworkTopology</replace>
+      <replace>let</replace>
+      <replace>000000</replace>
+      <replace>666</replace>
+      <replace>CtrlActionGroupTable</replace>
+      <replace>NetworkTopologyCytoscape</replace>
+      <replace>NetworkTopologyCytoscape.</replace>
+      <replace>CtrlActionNetworkTopologyCytoscape</replace>
+      <replace>CtrlActionNetworkTopologyCytoscape.</replace>
+      <replace>CtrlActionNetwork</replace>
+      <replace>Max retries</replace>
+      <replace>Retry period (sec)</replace>
+    </replaceStrings>
+    <dirStrings>
+      <dir>$PROJECT_DIR$/node_modules</dir>
+      <dir>$PROJECT_DIR$/src/assets</dir>
+      <dir>$PROJECT_DIR$</dir>
+      <dir>$PROJECT_DIR$/views</dir>
+      <dir>$PROJECT_DIR$/src</dir>
+    </dirStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/views/PLCdiagnostics.html" />
+        <option value="$PROJECT_DIR$/src/CtrlActionPLCdiagnostics.js" />
+        <option value="$PROJECT_DIR$/src/CtrlActionSystemUsers.js" />
+        <option value="$PROJECT_DIR$/src/CtrlActionEvents.js" />
+        <option value="$PROJECT_DIR$/views/TaskManager.html" />
+        <option value="$PROJECT_DIR$/src/img/icon-export.svg" />
+        <option value="$PROJECT_DIR$/src/img/logo.svg" />
+        <option value="$PROJECT_DIR$/views/SystemSettings.html" />
+        <option value="$PROJECT_DIR$/src/CtrlActionSystemSettings.js" />
+        <option value="$PROJECT_DIR$/views/SystemInformation.html" />
+        <option value="$PROJECT_DIR$/views/SystemUpgrade.html" />
+        <option value="$PROJECT_DIR$/views/GroupTable.html" />
+        <option value="$PROJECT_DIR$/src/CtrlActionEventsSettings.js" />
+        <option value="$PROJECT_DIR$/views/NetworkTopology.html" />
+        <option value="$PROJECT_DIR$/src/img/icon-import.svg" />
+        <option value="$PROJECT_DIR$/src/img/icon-discover.svg" />
+        <option value="$PROJECT_DIR$/views/NetworkTopologyCytoscape.html" />
+        <option value="$PROJECT_DIR$/package.json" />
+        <option value="$PROJECT_DIR$/src/CtrlActionNetworkTopologyCytoscape.js" />
+        <option value="$PROJECT_DIR$/src/CtrlActionNetworkTopology.js" />
+        <option value="$PROJECT_DIR$/src/includes/CytoscapeOptions.js" />
+        <option value="$PROJECT_DIR$/src/img/loading.svg" />
+        <option value="$PROJECT_DIR$/src/img/icon-loading-discovery.svg" />
+        <option value="$PROJECT_DIR$/index.html.src" />
+        <option value="$PROJECT_DIR$/index.html" />
+        <option value="$PROJECT_DIR$/views/Default.html" />
+        <option value="$PROJECT_DIR$/index-login.html" />
+        <option value="$PROJECT_DIR$/views/EventsSettings.html" />
+        <option value="$PROJECT_DIR$/src/CtrlActionDefault.js" />
+        <option value="$PROJECT_DIR$/src/includes/CytoscapeStyle.js" />
+        <option value="$PROJECT_DIR$/src/AppMain.js" />
+        <option value="$PROJECT_DIR$/src/includes/appMessages.js" />
+        <option value="$PROJECT_DIR$/src/AppView.js" />
+        <option value="$PROJECT_DIR$/src/AppWebserviceClient.js" />
+        <option value="$PROJECT_DIR$/src/CtrlActionMonitoringManager.js" />
+        <option value="$PROJECT_DIR$/src/CtrlActionSystemUpgrade.js" />
+        <option value="$PROJECT_DIR$/src/CtrlActionNANPlc.js" />
+        <option value="$PROJECT_DIR$/src/CtrlActionNodes.js" />
+        <option value="$PROJECT_DIR$/views/Nodes.html" />
+        <option value="$PROJECT_DIR$/src/CtrlActionSystemSettingsExport.js" />
+        <option value="$PROJECT_DIR$/src/CtrlActionGroupTable.js" />
+        <option value="$PROJECT_DIR$/src/includes/events.js" />
+        <option value="$PROJECT_DIR$/etc/webmng.conf" />
+        <option value="$PROJECT_DIR$/src/locale/en_US.js" />
+        <option value="$PROJECT_DIR$/src/CtrlActionNetwork.js" />
+        <option value="$PROJECT_DIR$/src/CtrlActionTaskManager.js" />
+        <option value="$PROJECT_DIR$/src/CtrlActionWANEthernet.js" />
+        <option value="$PROJECT_DIR$/views/Network.html" />
+        <option value="$PROJECT_DIR$/src/assets/main.css" />
+        <option value="$PROJECT_DIR$/views/SystemSettingsExport.html" />
+        <option value="$PROJECT_DIR$/src/AppRBAC.js" />
+      </list>
+    </option>
+  </component>
+  <component name="MavenProjectNavigator">
+    <treeState>
+      <expand />
+      <select />
+    </treeState>
+  </component>
+  <component name="ProjectFrameBounds">
+    <option name="y" value="23" />
+    <option name="width" value="1440" />
+    <option name="height" value="852" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectView">
+    <navigator proportions="" version="1">
+      <autoscrollFromSource ProjectPane="true" />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="webmng-dev" type="b2602c69:ProjectViewProjectNode" />
+              <item name="webmng-dev" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="webmng-dev" type="b2602c69:ProjectViewProjectNode" />
+              <item name="webmng-dev" type="462c0819:PsiDirectoryNode" />
+              <item name="etc" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="webmng-dev" type="b2602c69:ProjectViewProjectNode" />
+              <item name="webmng-dev" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="webmng-dev" type="b2602c69:ProjectViewProjectNode" />
+              <item name="webmng-dev" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="assets" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="webmng-dev" type="b2602c69:ProjectViewProjectNode" />
+              <item name="webmng-dev" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="includes" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="webmng-dev" type="b2602c69:ProjectViewProjectNode" />
+              <item name="webmng-dev" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="locale" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="webmng-dev" type="b2602c69:ProjectViewProjectNode" />
+              <item name="webmng-dev" type="462c0819:PsiDirectoryNode" />
+              <item name="views" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1554983273350" />
+    <property name="jsx.switch.disabled" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/img" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="project.structure.last.edited" value="Project" />
+    <property name="project.structure.proportion" value="0.0" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="restartRequiresConfirmation" value="false" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+    <property name="settings.editor.selected.configurable" value="Errors" />
+    <property name="ts.external.directory.path" value="$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/img" />
+      <recent name="$PROJECT_DIR$/src/includes" />
+      <recent name="$PROJECT_DIR$/views" />
+      <recent name="$PROJECT_DIR$/src" />
+      <recent name="$PROJECT_DIR$/src/vendor" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="Applet">
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="Application" factoryName="Application">
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="BashConfigurationType" factoryName="Bash">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="INTERPRETER_PATH" value="" />
+      <option name="PROJECT_INTERPRETER" value="false" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../../../rsyncBash.sh" />
+      <option name="PARAMETERS" value="" />
+      <module name="" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="rsyncBashForIntelliJ" type="BashConfigurationType" factoryName="Bash" nameIsGenerated="true">
+      <module name="webmng-dev" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="INTERPRETER_PATH" value="/bin/bash" />
+      <option name="PROJECT_INTERPRETER" value="false" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../../../rsyncBashForIntelliJ.sh" />
+      <option name="PARAMETERS" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="JUnit" factoryName="JUnit">
+      <option name="TEST_OBJECT" value="class" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="TestNG">
+      <option name="TEST_OBJECT" value="CLASS" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <properties />
+      <listeners />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="750b6fe4-b54f-4b75-888c-3d0ccaab691d" name="Default" comment="" />
+      <created>1525977513247</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1525977513247</updated>
+      <workItem from="1525977516871" duration="13965000" />
+      <workItem from="1526040992621" duration="15000" />
+      <workItem from="1526041049936" duration="1237000" />
+      <workItem from="1526042874882" duration="882000" />
+      <workItem from="1526455237993" duration="2779000" />
+      <workItem from="1526534292743" duration="4120000" />
+      <workItem from="1526547158436" duration="780000" />
+      <workItem from="1526554519925" duration="20000" />
+      <workItem from="1526651034255" duration="9000" />
+      <workItem from="1526677643970" duration="1005000" />
+      <workItem from="1527586989877" duration="788000" />
+      <workItem from="1528185893436" duration="27936000" />
+      <workItem from="1528347941276" duration="23817000" />
+      <workItem from="1528443469342" duration="537000" />
+      <workItem from="1528701699317" duration="13515000" />
+      <workItem from="1528782296614" duration="9992000" />
+      <workItem from="1528803190109" duration="785000" />
+      <workItem from="1528804401237" duration="758000" />
+      <workItem from="1528974858406" duration="5808000" />
+      <workItem from="1529299630932" duration="10484000" />
+      <workItem from="1529351896333" duration="22000" />
+      <workItem from="1529385746024" duration="20334000" />
+      <workItem from="1529481261941" duration="21536000" />
+      <workItem from="1529520502527" duration="671000" />
+      <workItem from="1529561501371" duration="2377000" />
+      <workItem from="1529566336408" duration="503000" />
+      <workItem from="1529568211741" duration="92000" />
+      <workItem from="1529568364273" duration="10324000" />
+      <workItem from="1529991008415" duration="12738000" />
+      <workItem from="1530088013403" duration="1808000" />
+      <workItem from="1530172602949" duration="378000" />
+      <workItem from="1530179508222" duration="7465000" />
+      <workItem from="1530359411842" duration="73000" />
+      <workItem from="1531306185379" duration="234000" />
+      <workItem from="1531725674786" duration="12241000" />
+      <workItem from="1531772614750" duration="149000" />
+      <workItem from="1531772979096" duration="32000" />
+      <workItem from="1531773082503" duration="5623000" />
+      <workItem from="1531989481726" duration="1476000" />
+      <workItem from="1532261213942" duration="721000" />
+      <workItem from="1532946788619" duration="104000" />
+      <workItem from="1532946952396" duration="128000" />
+      <workItem from="1533112494472" duration="1475000" />
+      <workItem from="1533284178063" duration="6125000" />
+      <workItem from="1533533621357" duration="16731000" />
+      <workItem from="1534230793775" duration="2382000" />
+      <workItem from="1534929739638" duration="3409000" />
+      <workItem from="1535433033265" duration="17043000" />
+      <workItem from="1535473771729" duration="2658000" />
+      <workItem from="1535619899642" duration="629000" />
+      <workItem from="1535717294510" duration="27370000" />
+      <workItem from="1536135218710" duration="40171000" />
+      <workItem from="1537163419558" duration="9317000" />
+      <workItem from="1537528375293" duration="3386000" />
+      <workItem from="1537780350184" duration="10073000" />
+      <workItem from="1537816316874" duration="3138000" />
+      <workItem from="1538027650462" duration="2949000" />
+      <workItem from="1538456584453" duration="1132000" />
+      <workItem from="1539062903525" duration="30941000" />
+      <workItem from="1540418617149" duration="11078000" />
+      <workItem from="1540714559806" duration="14512000" />
+      <workItem from="1540880085382" duration="62000" />
+      <workItem from="1540880212416" duration="2488000" />
+      <workItem from="1540884408967" duration="18936000" />
+      <workItem from="1541412455271" duration="7205000" />
+      <workItem from="1541591321746" duration="2110000" />
+      <workItem from="1541596340742" duration="48000" />
+      <workItem from="1542360027521" duration="49000" />
+      <workItem from="1542360117928" duration="7981000" />
+      <workItem from="1542694914546" duration="3606000" />
+      <workItem from="1542717114640" duration="2656000" />
+      <workItem from="1543245052688" duration="26000" />
+      <workItem from="1543245259604" duration="14998000" />
+      <workItem from="1543563501943" duration="34770000" />
+      <workItem from="1543656770893" duration="387000" />
+      <workItem from="1543819529254" duration="373000" />
+      <workItem from="1543822040812" duration="214000" />
+      <workItem from="1543828687987" duration="600000" />
+      <workItem from="1543903448193" duration="4963000" />
+      <workItem from="1544018363674" duration="6864000" />
+      <workItem from="1544087261806" duration="16655000" />
+      <workItem from="1544185729090" duration="5631000" />
+      <workItem from="1544422395167" duration="27795000" />
+      <workItem from="1544594552749" duration="24313000" />
+      <workItem from="1544717367505" duration="45033000" />
+      <workItem from="1545253531642" duration="325000" />
+      <workItem from="1545292616002" duration="16076000" />
+      <workItem from="1545853311697" duration="44345000" />
+      <workItem from="1546975446929" duration="22833000" />
+      <workItem from="1548047350314" duration="16000" />
+      <workItem from="1548047406348" duration="4829000" />
+      <workItem from="1548224732909" duration="6042000" />
+      <workItem from="1548368563872" duration="927000" />
+      <workItem from="1548411666221" duration="11273000" />
+      <workItem from="1548656985608" duration="8000" />
+      <workItem from="1548757697680" duration="2437000" />
+      <workItem from="1548848001274" duration="18769000" />
+      <workItem from="1549017722992" duration="3627000" />
+      <workItem from="1549293703340" duration="37928000" />
+      <workItem from="1549437616584" duration="78000" />
+      <workItem from="1549437698263" duration="2504000" />
+      <workItem from="1549525174016" duration="15870000" />
+      <workItem from="1549916479466" duration="28289000" />
+      <workItem from="1550146131931" duration="5854000" />
+      <workItem from="1552555061296" duration="1605000" />
+      <workItem from="1552894607275" duration="1932000" />
+      <workItem from="1553062421924" duration="31159000" />
+      <workItem from="1553850288379" duration="4065000" />
+      <workItem from="1554370980571" duration="400000" />
+      <workItem from="1554799852889" duration="28705000" />
+      <workItem from="1555321029969" duration="34000" />
+      <workItem from="1555321123602" duration="5491000" />
+      <workItem from="1555330711400" duration="17497000" />
+      <workItem from="1555563726278" duration="6955000" />
+      <workItem from="1556271307725" duration="3465000" />
+      <workItem from="1556519722786" duration="15945000" />
+      <workItem from="1557126656971" duration="11649000" />
+      <workItem from="1557227495813" duration="751000" />
+      <workItem from="1557292447432" duration="8903000" />
+      <workItem from="1557376818858" duration="40767000" />
+      <workItem from="1557727048507" duration="44483000" />
+      <workItem from="1557950463402" duration="665000" />
+      <workItem from="1558035662439" duration="1687000" />
+      <workItem from="1558181542188" duration="33233000" />
+      <workItem from="1558466185547" duration="16595000" />
+      <workItem from="1559128250958" duration="8108000" />
+      <workItem from="1559224209617" duration="86000" />
+      <workItem from="1559224311560" duration="4601000" />
+      <workItem from="1559548147094" duration="1766000" />
+      <workItem from="1559562911184" duration="340000" />
+      <workItem from="1560246513147" duration="2168000" />
+      <workItem from="1560922580883" duration="7991000" />
+      <workItem from="1562567937750" duration="17000" />
+      <workItem from="1562756993325" duration="1071000" />
+      <workItem from="1564579893273" duration="10000" />
+      <workItem from="1565608112763" duration="1502000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="1176219000" />
+  </component>
+  <component name="TodoView" selected-index="1">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="0" y="23" width="1440" height="852" extended-state="0" />
+    <layout>
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2081545" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Image Layers" order="2" />
+      <window_info id="Designer" order="3" />
+      <window_info id="UI Designer" order="4" />
+      <window_info id="Capture Tool" order="5" />
+      <window_info id="Favorites" order="6" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.13026316" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4985694" weight="0.23289473" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" sideWeight="0.49946752" weight="0.32903227" />
+      <window_info anchor="bottom" id="Version Control" order="7" sideWeight="0.73748666" weight="0.29210526" />
+      <window_info anchor="bottom" id="Database Changes" order="8" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Terminal" order="9" sideWeight="0.72389126" weight="0.3118421" />
+      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.50214595" side_tool="true" weight="0.28947368" />
+      <window_info anchor="bottom" id="Messages" order="11" weight="0.32894737" />
+      <window_info anchor="bottom" id="Docker" order="12" show_stripe_button="false" />
+      <window_info anchor="bottom" id="TypeScript" order="13" />
+      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.24964234" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Palette" order="3" />
+      <window_info anchor="right" id="Capture Analysis" order="4" />
+      <window_info anchor="right" id="Theme Preview" order="5" />
+      <window_info anchor="right" id="Database" order="6" />
+      <window_info anchor="right" id="Palette&#9;" order="7" />
+      <window_info anchor="right" id="Maven Projects" order="8" />
+      <window_info anchor="right" id="Maven" order="9" weight="0.3297568" />
+    </layout>
+    <layout-to-restore>
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.19456366" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Image Layers" order="2" />
+      <window_info id="Designer" order="3" />
+      <window_info id="UI Designer" order="4" />
+      <window_info id="Capture Tool" order="5" />
+      <window_info id="Favorites" order="6" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.13026316" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49928468" visible="true" weight="0.28947368" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" sideWeight="0.49946752" weight="0.32903227" />
+      <window_info anchor="bottom" id="Version Control" order="7" sideWeight="0.73748666" weight="0.29210526" />
+      <window_info anchor="bottom" id="Database Changes" order="8" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Terminal" order="9" sideWeight="0.72389126" weight="0.3118421" />
+      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5007153" side_tool="true" weight="0.22763158" />
+      <window_info anchor="bottom" id="Messages" order="11" weight="0.32894737" />
+      <window_info anchor="bottom" id="Docker" order="12" show_stripe_button="false" />
+      <window_info anchor="bottom" id="TypeScript" order="13" />
+      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.24964234" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Palette" order="3" />
+      <window_info anchor="right" id="Capture Analysis" order="4" />
+      <window_info anchor="right" id="Theme Preview" order="5" />
+      <window_info anchor="right" id="Database" order="6" />
+      <window_info anchor="right" id="Palette&#9;" order="7" />
+      <window_info anchor="right" id="Maven Projects" order="8" />
+      <window_info anchor="right" id="Maven" order="9" />
+    </layout-to-restore>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.conf" />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_WIDTH">
+      <map>
+        <entry key="3" value="142" />
+      </map>
+    </option>
+    <option name="COLUMN_ORDER">
+      <list>
+        <option value="0" />
+        <option value="2" />
+        <option value="3" />
+        <option value="1" />
+      </list>
+    </option>
+  </component>
+  <component name="antWorkspaceConfiguration">
+    <option name="IS_AUTOSCROLL_TO_SOURCE" value="false" />
+    <option name="FILTER_TARGETS" value="false" />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="705">
+          <caret line="47" column="43" selection-start-line="47" selection-start-column="43" selection-end-line="47" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external/lib.dom.d.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="18219" column="17" selection-start-line="18219" selection-start-column="17" selection-end-line="18219" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/CtrlActionWANModem.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="587">
+          <caret line="232" column="66" lean-forward="true" selection-start-line="232" selection-start-column="66" selection-end-line="232" selection-end-column="66" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/vendor/mdl-select.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="399">
+          <caret line="140" column="14" selection-start-line="140" selection-end-line="140" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/vendor/pretify.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="563">
+          <caret line="308" column="38" selection-start-line="308" selection-start-column="28" selection-end-line="308" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/vendor/jquery-extensions.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/AppHTML.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="379">
+          <caret line="93" column="9" lean-forward="true" selection-start-line="93" selection-start-column="9" selection-end-line="93" selection-end-column="9" />
+          <folding>
+            <element signature="n#style#0;n#label#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" selection-start-line="4" selection-end-line="4" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/views/EventsSettings.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="9" column="12" selection-start-line="9" selection-start-column="8" selection-end-line="11" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/views/Events.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-712">
+          <caret line="4" selection-start-line="4" selection-end-line="4" selection-end-column="73" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/views/Default.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="332">
+          <caret line="95" column="24" selection-start-line="95" selection-start-column="24" selection-end-line="95" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/CtrlActionDefault.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1995">
+          <caret line="133" selection-start-line="133" selection-end-line="133" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/includes/CytoscapeOptions.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="485">
+          <caret line="47" column="57" selection-start-line="47" selection-start-column="57" selection-end-line="47" selection-end-column="57" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/vendor/jquery-stupid-table.min.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="13" selection-start-column="13" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/IControllerAction.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1170">
+          <caret line="78" column="35" selection-start-line="78" selection-start-column="35" selection-end-line="78" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/includes/CytoscapeStyle.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="990">
+          <caret line="66" column="25" selection-start-line="66" selection-start-column="25" selection-end-line="66" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/AppView.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6765">
+          <caret line="451" selection-start-line="451" selection-end-line="451" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/includes/appMessages.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="16" column="53" selection-start-line="16" selection-start-column="33" selection-end-line="16" selection-end-column="53" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/CtrlActionMonitoringManager.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="274">
+          <caret line="271" column="15" selection-start-line="271" selection-start-column="15" selection-end-line="271" selection-end-column="15" />
+          <folding>
+            <element signature="n#style#0;n#td#0;n#tr#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#td#1;n#tr#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/views/SystemUsersRole.html">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/views/WANEthernet.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-877" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/AppUser.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="15" column="4" selection-start-line="15" selection-start-column="4" selection-end-line="15" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/webpack.config.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/CtrlActionNANPlc.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="463">
+          <caret line="103" column="72" selection-start-line="103" selection-start-column="72" selection-end-line="103" selection-end-column="72" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/CtrlActionSystemUpgrade.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="463">
+          <caret line="73" column="30" selection-start-line="73" selection-start-column="30" selection-end-line="73" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/views/Nodes.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="690">
+          <caret line="46" column="70" selection-start-line="46" selection-start-column="70" selection-end-line="46" selection-end-column="100" />
+          <folding>
+            <element signature="n#style#0;n#div#2;n#div#3;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#input#0;n#th#0;n#tr#0;n#thead#0;n#table#0;n#div#1;n#div#4;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#th#5;n#tr#0;n#thead#0;n#table#0;n#div#1;n#div#4;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/CtrlActionNodes.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="172">
+          <caret line="73" column="58" selection-start-line="73" selection-start-column="58" selection-end-line="74" selection-end-column="66" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/etc/webmng.conf">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="308">
+          <caret line="159" selection-start-line="159" selection-end-line="159" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/locale/sl_SI.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/views/TaskManager.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="101">
+          <caret line="54" column="97" lean-forward="true" selection-start-line="54" selection-start-column="97" selection-end-line="54" selection-end-column="97" />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#div#0;n#div#5;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#table#0;n#div#1;n#div#5;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/assets/main.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="441">
+          <caret line="1223" column="22" selection-start-line="1223" selection-start-column="22" selection-end-line="1223" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/views/SystemUpgrade.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="13" column="35" lean-forward="true" selection-start-line="13" selection-start-column="35" selection-end-line="13" selection-end-column="35" />
+          <folding>
+            <element signature="n#style#0;n#td#1;n#tr#0;n#tbody#0;n#table#0;n#form#0;n#div#1;n#div#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/CtrlActionNetwork.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2145">
+          <caret line="143" column="35" selection-start-line="143" selection-start-column="35" selection-end-line="143" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/CtrlActionWANEthernet.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2040">
+          <caret line="136" column="8" selection-start-line="136" selection-start-column="8" selection-end-line="136" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/CtrlActionTaskManager.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="33195">
+          <caret line="2213" column="38" selection-start-line="2213" selection-start-column="38" selection-end-line="2213" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/CtrlActionSystemSettingsExport.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2565">
+          <caret line="171" column="133" selection-start-line="171" selection-start-column="133" selection-end-line="171" selection-end-column="133" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/AppRBAC.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1140">
+          <caret line="76" column="133" selection-start-line="76" selection-start-column="133" selection-end-line="76" selection-end-column="133" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/views/Network.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="870">
+          <caret line="58" column="33" selection-start-line="58" selection-start-column="33" selection-end-line="58" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/locale/en_US.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5580">
+          <caret line="372" column="125" selection-start-line="372" selection-start-column="125" selection-end-line="372" selection-end-column="125" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/includes/events.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1515">
+          <caret line="101" column="72" selection-start-line="101" selection-start-column="72" selection-end-line="101" selection-end-column="85" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/views/SystemSettingsExport.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="244">
+          <caret line="113" column="88" selection-start-line="113" selection-start-column="72" selection-end-line="113" selection-end-column="88" />
+          <folding>
+            <element signature="n#style#0;n#div#1;n#span#0;n#td#0;n#tr#12;n#tbody#0;n#table#0;n#form#0;n#div#1;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/CtrlActionGroupTable.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="191">
+          <caret line="314" column="59" lean-forward="true" selection-start-line="314" selection-start-column="59" selection-end-line="314" selection-end-column="59" />
+          <folding>
+            <element signature="n#style#0;n#td#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#td#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#td#1;n#tr#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#td#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#td#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#table#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#td#1;n#tr#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#0;n#td#1;n#tr#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#table#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#table#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#th#0;n#tr#0;n#thead#0;n#table#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#table#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#td#1;n#tr#0;n#tbody#0;n#table#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#td#1;n#tr#0;n#tbody#0;n#table#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#1;n#td#1;n#tr#0;n#tbody#0;n#table#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#i#0;n#div#1;n#td#1;n#tr#0;n#tbody#0;n#table#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/CtrlActionWhiteList.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="490">
+          <caret line="422" column="86" selection-start-line="422" selection-start-column="63" selection-end-line="422" selection-end-column="86" />
+          <folding>
+            <element signature="n#style#0;n#p#0;n#td#0;n#tr#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#td#1;n#tr#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#1;n#td#1;n#tr#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#table#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#table#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#1;n#td#1;n#tr#0;n#table#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#2;n#td#1;n#tr#0;n#table#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/AppMain.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1486">
+          <caret line="376" column="30" selection-start-line="376" selection-start-column="30" selection-end-line="376" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/AppWebserviceClient.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="228">
+          <caret line="124" column="35" selection-start-line="124" selection-start-column="15" selection-end-line="124" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/CtrlActionEventsSettings.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="453">
+          <caret line="65" column="68" selection-start-line="65" selection-start-column="68" selection-end-line="65" selection-end-column="68" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/CtrlActionNetworkTopology.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="465">
+          <caret line="392" column="87" selection-start-line="392" selection-start-column="83" selection-end-line="392" selection-end-column="87" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/AppController.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="577">
+          <caret line="118" column="71" selection-start-line="118" selection-start-column="61" selection-end-line="118" selection-end-column="71" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/package.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="345">
+          <caret line="39" column="22" selection-start-line="39" selection-start-column="22" selection-end-line="39" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/package-lock.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="311">
+          <caret line="4240" column="12" selection-start-line="4240" selection-start-column="5" selection-end-line="4240" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/views/MonitoringManager.html">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="GlobalLibrariesConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="JdkListConfigurable.UI">
+        <settings>
+          <last-edited>1.8</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ProjectJDKs.UI">
+        <settings>
+          <last-edited>1.8</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ProjectLibrariesConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+</project>
