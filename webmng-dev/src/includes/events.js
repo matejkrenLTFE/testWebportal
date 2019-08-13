@@ -67,7 +67,7 @@ const eventList = {
         {"id":"707", "enumeration":"EVT_CNTR_UPGRADE_CANCELLED", "description":"Upgrade cancelled", "severity":"Info"},
         {"id":"800", "enumeration":"EVT_MAC_METER_COMMISSIONED", "description":"Meter commissioned", "severity":"Info"},
         {"id":"801", "enumeration":"EVT_MAC_METER_NO_KEYS", "description":"Meter no keys", "severity":"Info"},
-        {"id":"802", "enumeration":"EVT_MAC_METER_WRONG_KEYS", "description":"Meter has wrong keys", "severity":"Info"},
+        {"id":"802", "enumeration":"EVT_MAC_METER_WRONG_KEYS", "description":"Meter wrong keys", "severity":"Info"},
         {"id":"803", "enumeration":"EVT_MAC_METER_LOST", "description":"Meter lost", "severity":"Info"},
         {"id":"804", "enumeration":"EVT_MAC_METER_REMOVED", "description":"Meter removed from list", "severity":"Info"},
         {"id":"805", "enumeration":"EVT_MAC_METER_UPGRADE_STARTED", "description":"Upgrade operation started", "severity":"Info"},
