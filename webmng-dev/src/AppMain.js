@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  * Main application component
  * @author LTFE
