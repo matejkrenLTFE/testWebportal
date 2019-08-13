@@ -50,8 +50,9 @@ module.exports.AppController = function () {
      * Attach component event. Events are executed in FIFO order.
      */
     this.attachEvent = function (eventName, callback) {
-        if (!defined(this._events[eventName]))
+        if (!defined(this._events[eventName])) {
             this._events[eventName] = [];
+        }
         this._events[eventName][this._events[eventName].length] = callback;
     };
 
@@ -60,14 +61,12 @@ module.exports.AppController = function () {
      */
     this.executeEvent = function (eventName) {
         // Execute event callbacks
-        if (defined(this._events[eventName])) {
-            for (let i in this._events[eventName]) {
+            for(let i in this._events[eventName]) {
                 if (this._events[eventName].hasOwnProperty(i)) {
                     if (typeof this._events[eventName][i] === "function")
                         this._events[eventName][i]();
                 }
             }
-        }
     };
 
     /**
