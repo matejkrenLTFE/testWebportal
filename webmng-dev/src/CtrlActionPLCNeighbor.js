@@ -70,7 +70,7 @@ CtrlActionPLCNeighbor._buildNeighborListHTML = function(_this, neighbor) {
         }else{
             txGain = txGain * 3;
         }
-        let shortAdd = parseInt(node["short-address"]).toString(16).toUpperCase();
+        let shortAdd = parseInt(node["short-address"], 10).toString(16).toUpperCase();
         if (shortAdd.length % 2) {
             shortAdd = '0' + shortAdd;
         }

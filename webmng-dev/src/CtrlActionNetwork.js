@@ -210,11 +210,11 @@ CtrlActionNetwork._buildNodeListHTML = function (nodes) {
 
 CtrlActionNetwork._buildNodesAndLinks = function (routing) {
     $.each(routing, function (index, route) {
-        let destAdd = parseInt(route["destination-address"]).toString(16).toUpperCase();
+        let destAdd = parseInt(route["destination-address"], 10).toString(16).toUpperCase();
         if (destAdd.length % 2) {
             destAdd = '0' + destAdd;
         }
-        let nextHopAdd = parseInt(route["next-hop-address"]).toString(16).toUpperCase();
+        let nextHopAdd = parseInt(route["next-hop-address"], 10).toString(16).toUpperCase();
         if (nextHopAdd.length % 2) {
             nextHopAdd = '0' + nextHopAdd;
         }
@@ -255,17 +255,17 @@ CtrlActionNetwork._buildNodesAndLinks = function (routing) {
                 CtrlActionNetwork.nodes[nextHopAddInd].data.busyness++;
         }
         // add pathRouting
-        if (parseInt(route["hop-count"]) === 1) {
+        if (parseInt(route["hop-count"], 10) === 1) {
             CtrlActionNetwork.nodes[destAddInd].data.pathRouting = [0, destAddInd];
         } else {
             CtrlActionNetwork.nodes[destAddInd].data.pathRouting = [0, nextHopAddInd, destAddInd];
         }
 
-        if (parseInt(route["hop-count"]) === 1) { //link from DC to destAdd
+        if (parseInt(route["hop-count"], 10) === 1) { //link from DC to destAdd
             CtrlActionNetwork.addEdge(0, destAddInd, 1, 2);
-        } else if (parseInt(route["hop-count"]) >= 2 || parseInt(route["hop-count"]) === 0) {
+        } else if (parseInt(route["hop-count"], 10) >= 2 || parseInt(route["hop-count"]) === 0) {
             CtrlActionNetwork.addEdge(0, nextHopAddInd, 1, 4);
-            if (parseInt(route["hop-count"]) === 2) { // in this case add regular link from nextHopAdd to destAdd
+            if (parseInt(route["hop-count"], 10) === 2) { // in this case add regular link from nextHopAdd to destAdd
                 CtrlActionNetwork.addEdge(nextHopAddInd, destAddInd, 1, 3);
             } else {
                 CtrlActionNetwork.addEdge(nextHopAddInd, destAddInd, 2, 3);
@@ -560,7 +560,7 @@ CtrlActionNetwork._checkForExistingData = function (nodes) {
                     let startInd = 0;
                     let nodeData = node["path-discover-data"]["node-data"];
                     $.each(nodeData, function (index, n) {
-                        let toAddress = parseInt(n.address).toString(16).toUpperCase();
+                        let toAddress = parseInt(n.address, 10).toString(16).toUpperCase();
                         if (toAddress.length % 2) {
                             toAddress = '0' + toAddress;
                         }
@@ -637,7 +637,7 @@ CtrlActionNetwork.discoverPLC = function () {
                 confirm: {
                     text: AppMain.t("OK", "global"),
                     action: function () {
-                        let val = parseInt($("#timeout").val());
+                        let val = parseInt($("#timeout").val(), 10);
                         CtrlActionNetwork.timeoutForPLCDiscovey = setTimeout(function () {
                             CtrlActionNetwork.pldDiscoveryRunning = false;
                             clearTimeout(CtrlActionNetwork.timeoutForPLCDiscovey);
@@ -666,7 +666,7 @@ CtrlActionNetwork.discoverPLC = function () {
             $("#timeout").on("input", function () {
                 const nonNumReg = /[^0-9]/g;
                 $(this).val($(this).val().replace(nonNumReg, ''));
-                let val = parseInt($(this).val());
+                let val = parseInt($(this).val(), 10);
                 if(val > 1440){
                     $(this).val(1440);
                 }
@@ -726,7 +726,7 @@ CtrlActionNetwork.nodeUpdatePath = function (node, routingDiscover) {
     let startInd = 0;
     let nodeData = routingDiscover.PlcDiscoverInfoGetResponse["path-discover-data"]["node-data"];
     $.each(nodeData, function (index, node) {
-        let toAddress = parseInt(node.address).toString(16).toUpperCase();
+        let toAddress = parseInt(node.address, 10).toString(16).toUpperCase();
         if (toAddress.length % 2) {
             toAddress = '0' + toAddress;
         }
@@ -815,9 +815,9 @@ CtrlActionNetwork.arrangeNodes = function (nodes, nodesCosemStat) {
             node["node-commissioned"] = nodesObj[node["mac-address"]]["commissioned"] ? nodesObj[node["mac-address"]]["commissioned"].toString() : "";
             node["node-last-comm"] = nodesObj[node["mac-address"]]["last-successful-communication"] ? nodesObj[node["mac-address"]]["last-successful-communication"].toString() : "";
             node["dc-state"] = defined(nodesObj[node["mac-address"]]["meter-state"]) ? nodesObj[node["mac-address"]]["meter-state"].toString() : "";
-            const succ = parseInt(nodesObj[node["mac-address"]]["successful-communications"]);
-            const unsucc = parseInt(nodesObj[node["mac-address"]]["unsuccessful-communications"]);
-            node["success-rate"] = (!isNaN(succ) && !isNaN(unsucc) && succ + unsucc !== 0) ? parseInt((succ / (succ + unsucc)) * 100) : 100;
+            const succ = parseInt(nodesObj[node["mac-address"]]["successful-communications"], 10);
+            const unsucc = parseInt(nodesObj[node["mac-address"]]["unsuccessful-communications"], 10);
+            node["success-rate"] = (!isNaN(succ) && !isNaN(unsucc) && succ + unsucc !== 0) ? parseInt((succ / (succ + unsucc)) * 100 + "", 10) : 100;
             node["successful-communications"] = nodesObj[node["mac-address"]]["successful-communications"];
             if (nodesObj[node["mac-address"]]["last-successful-communication"] && nodesObj[node["mac-address"]]["last-successful-communication"].toString() !== "0")
                 node["last-successful-communication"] = moment(nodesObj[node["mac-address"]]["last-successful-communication"].toString()).format(AppMain.localization("DATETIME_FORMAT"));

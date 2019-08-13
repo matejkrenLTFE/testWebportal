@@ -65,11 +65,11 @@ CtrlActionPLCRouting._buildNeighborListHTML = function(_this, routing) {
 
     let i = 1;
     $.each(routing, function(index, node){
-        let destAdd = parseInt(node["destination-address"]).toString(16).toUpperCase();
+        let destAdd = parseInt(node["destination-address"], 10).toString(16).toUpperCase();
         if (destAdd.length % 2) {
             destAdd = '0' + destAdd;
         }
-        let nextHopAdd = parseInt(node["next-hop-address"]).toString(16).toUpperCase();
+        let nextHopAdd = parseInt(node["next-hop-address"], 10).toString(16).toUpperCase();
         if (nextHopAdd.length % 2) {
             nextHopAdd = '0' + nextHopAdd;
         }

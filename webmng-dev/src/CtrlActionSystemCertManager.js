@@ -99,7 +99,7 @@ CtrlActionSystemCertManager.__generateCert = function(e) {
     var email = $("input[name='cert-email']").val();
     var validity = $("input[name='cert-validity']").val();
     try{
-        validity = parseInt(validity);
+        validity = parseInt(validity, 10);
     }catch (e){
         validity = 0;
     }finally {

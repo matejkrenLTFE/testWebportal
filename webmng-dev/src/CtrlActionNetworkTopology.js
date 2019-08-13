@@ -60,11 +60,11 @@ CtrlActionNetworkTopology._buildNetwork = function (_this, routing) {
     }
 
     $.each(routing, function (index, route) {
-        let destAdd = parseInt(route["destination-address"]).toString(16).toUpperCase();
+        let destAdd = parseInt(route["destination-address"], 10).toString(16).toUpperCase();
         if (destAdd.length % 2) {
             destAdd = '0' + destAdd;
         }
-        let nextHopAdd = parseInt(route["next-hop-address"]).toString(16).toUpperCase();
+        let nextHopAdd = parseInt(route["next-hop-address"], 10).toString(16).toUpperCase();
         if (nextHopAdd.length % 2) {
             nextHopAdd = '0' + nextHopAdd;
         }
@@ -93,14 +93,14 @@ CtrlActionNetworkTopology._buildNetwork = function (_this, routing) {
                 name: nextHopAdd
             })
         }
-        if(parseInt(route["hop-count"]) === 1){ //link from DC to destAdd
+        if(parseInt(route["hop-count"], 10) === 1){ //link from DC to destAdd
             CtrlActionNetworkTopology.addEdge(0, destAddInd,1, undefined);
-        }else if(parseInt(route["hop-count"]) >= 2){
+        }else if(parseInt(route["hop-count"], 10) >= 2){
             CtrlActionNetworkTopology.addEdge(0, nextHopAddInd,3, undefined);
-            if(parseInt(route["hop-count"]) === 2){ // in this case add regular link from nextHopAdd to destAdd
+            if(parseInt(route["hop-count"]) === 2, 10){ // in this case add regular link from nextHopAdd to destAdd
                 CtrlActionNetworkTopology.addEdge(nextHopAddInd, destAddInd,1, undefined);
             }else{
-                CtrlActionNetworkTopology.addEdge(nextHopAddInd, destAddInd,2, parseInt(route["hop-count"]));
+                CtrlActionNetworkTopology.addEdge(nextHopAddInd, destAddInd,2, parseInt(route["hop-count"], 10));
             }
         }else{ //special case hop-count = 0
             // TODO
@@ -258,7 +258,7 @@ CtrlActionNetworkTopology._buildNetwork = function (_this, routing) {
                             let startInd = 0;
                             let nodeData = routingDiscover.PlcDiscoverInfoGetResponse["path-discover-data"]["node-data"];
                             $.each(nodeData, function (index, node) {
-                                let toAddress = parseInt(node.address).toString(16).toUpperCase();
+                                let toAddress = parseInt(node.address, 10).toString(16).toUpperCase();
                                 if (toAddress.length % 2) {
                                     toAddress = '0' + toAddress;
                                 }
@@ -372,7 +372,7 @@ CtrlActionNetworkTopology._checkForExistingData = function () {
             let startInd = 0;
             let nodeData = pDd["node-data"];
             $.each(nodeData, function (index, node) {
-                let toAddress = parseInt(node.address).toString(16).toUpperCase();
+                let toAddress = parseInt(node.address, 10).toString(16).toUpperCase();
                 if (toAddress.length % 2) {
                     toAddress = '0' + toAddress;
                 }

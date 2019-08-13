@@ -1183,7 +1183,7 @@ CtrlActionTaskManager.addJobSecond = function (jobType, node) {
                         jobObj.AsyncReplyFlag = $('input[name="async-data-push"]:checked').length > 0;
                     } else {
                         const priority = $("input[name='priority']").val();
-                        jobObj.Priority = priority !== "" ? (isNaN(parseInt(priority)) ? 255 : parseInt(priority)) : 255;
+                        jobObj.Priority = priority !== "" ? (isNaN(parseInt(priority, 10)) ? 255 : parseInt(priority, 10)) : 255;
                         if (jobObj.Priority > 255 || jobObj.Priority < 0) {
                             jobObj.Priority = 255;
                             CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
@@ -1204,7 +1204,7 @@ CtrlActionTaskManager.addJobSecond = function (jobType, node) {
 
                             jobObj.RepeatingInterval = $("#repeating").val();
 
-                            const dMinutes = parseInt($("#d-minutes").val());
+                            const dMinutes = parseInt($("#d-minutes", 10).val());
                             jobObj.Duration = moment.duration({
                                 seconds: 0,
                                 minutes: isNaN(dMinutes) || dMinutes < 0 ? 0 : dMinutes,
@@ -1576,7 +1576,7 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
                 }
                 for (let index in allTextLines) {
                     if (allTextLines.hasOwnProperty(index)) {
-                        if (parseInt(index) < startInd)
+                        if (parseInt(index, 10) < startInd)
                             continue;
                         const line = allTextLines[index];
                         if (line !== "")
@@ -2065,7 +2065,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
         const jOd = $("#job-object");
         jOd.on("change", function () {
             if (jOd.val() !== "0") {
-                const newValPos = parseInt(jOd.val()) - 1;
+                const newValPos = parseInt(jOd.val(), 10) - 1;
                 CtrlActionTaskManager.selectCosemHelper(objectList.get[newValPos]);
             }
         });
@@ -2126,7 +2126,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
                 CtrlActionTaskManager.checkDesc();
                 jOd.on("change", function () {
                     if (jOd.val() !== "0") {
-                        const newValPos = parseInt(jOd.val()) - 1;
+                        const newValPos = parseInt(jOd.val(), 10) - 1;
                         CtrlActionTaskManager.selectCosemHelper(objectList.get[newValPos]);
                     }
                 });
@@ -2270,11 +2270,11 @@ CtrlActionTaskManager.updateAttrs = function (jobObj) {
  * function is called on classID, attrID or InstanceId change
  */
 CtrlActionTaskManager.checkDesc = function () {
-    const classId = parseInt($("#add-class").val());
+    const classId = parseInt($("#add-class").val(), 10);
     const instanceId = $("input[name='inst1']").val() + "." + $("input[name='inst2']").val() + "." +
         $("input[name='inst3']").val() + "." + $("input[name='inst4']").val() + "." +
         $("input[name='inst5']").val() + "." + $("input[name='inst6']").val();
-    const attrId = parseInt($("#add-attr").val());
+    const attrId = parseInt($("#add-attr").val(), 10);
     const service = $("#job-service").val();
     let list = [];
     switch (service) {
@@ -2313,13 +2313,13 @@ CtrlActionTaskManager.addAttrPress = function () {
     let descTXT = "---";
     switch (service) {
         case "get":
-            descTXT = (defined(descVal) && descVal !== "0" && descVal !== "") ? objectList.get[parseInt(descVal) - 1].description : "---";
+            descTXT = (defined(descVal) && descVal !== "0" && descVal !== "") ? objectList.get[parseInt(descVal, 10) - 1].description : "---";
             break;
         case "time-sync":
-            descTXT = (defined(descVal) && descVal !== "0" && descVal !== "") ? objectList.timeSync[parseInt(descVal) - 1].description : "---";
+            descTXT = (defined(descVal) && descVal !== "0" && descVal !== "") ? objectList.timeSync[parseInt(descVal, 10) - 1].description : "---";
             break;
     }
-    const classID = parseInt($("#add-class").val());
+    const classID = parseInt($("#add-class").val(), 10);
     if (isNaN(classID) || classID < 0 || classID > 65536) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
             AppMain.t("CLASS_ID_ERROR_TXT", "TASK_MANAGER"));
@@ -2328,7 +2328,7 @@ CtrlActionTaskManager.addAttrPress = function () {
 
     let instaID = "";
     let instaIDshort = "";
-    const instaID1 = parseInt($("input[name='inst1']").val());
+    const instaID1 = parseInt($("input[name='inst1']").val(), 10);
     if (isNaN(instaID1) || instaID1 < 0 || instaID1 > 255) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
             AppMain.t("ATTRIBUTE_ID_ERROR_TXT", "TASK_MANAGER"));
@@ -2340,7 +2340,7 @@ CtrlActionTaskManager.addAttrPress = function () {
         else
             instaID += "0" + instaID1.toString(16);
     }
-    const instaID2 = parseInt($("input[name='inst2']").val());
+    const instaID2 = parseInt($("input[name='inst2']").val(), 10);
     if (isNaN(instaID2) || instaID2 < 0 || instaID2 > 255) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
             AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
@@ -2352,7 +2352,7 @@ CtrlActionTaskManager.addAttrPress = function () {
         else
             instaID += "0" + instaID2.toString(16);
     }
-    const instaID3 = parseInt($("input[name='inst3']").val());
+    const instaID3 = parseInt($("input[name='inst3']").val(), 10);
     if (isNaN(instaID3) || instaID3 < 0 || instaID3 > 255) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
             AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
@@ -2364,7 +2364,7 @@ CtrlActionTaskManager.addAttrPress = function () {
         else
             instaID += "0" + instaID3.toString(16);
     }
-    const instaID4 = parseInt($("input[name='inst4']").val());
+    const instaID4 = parseInt($("input[name='inst4']").val(), 10);
     if (isNaN(instaID4) || instaID4 < 0 || instaID4 > 255) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
             AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
@@ -2376,7 +2376,7 @@ CtrlActionTaskManager.addAttrPress = function () {
         else
             instaID += "0" + instaID4.toString(16);
     }
-    const instaID5 = parseInt($("input[name='inst5']").val());
+    const instaID5 = parseInt($("input[name='inst5']").val(), 10);
     if (isNaN(instaID5) || instaID5 < 0 || instaID5 > 255) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
             AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
@@ -2388,7 +2388,7 @@ CtrlActionTaskManager.addAttrPress = function () {
         else
             instaID += "0" + instaID5.toString(16);
     }
-    const instaID6 = parseInt($("input[name='inst6']").val());
+    const instaID6 = parseInt($("input[name='inst6']").val(), 10);
     if (isNaN(instaID6) || instaID6 < 0 || instaID6 > 255) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
             AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
@@ -2402,7 +2402,7 @@ CtrlActionTaskManager.addAttrPress = function () {
     }
     instaID = instaID.toUpperCase();
 
-    const attrID = parseInt($("#add-attr").val());
+    const attrID = parseInt($("#add-attr").val(), 10);
     if (isNaN(attrID) || attrID < 0 || attrID > 127) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
             AppMain.t("ATTRIBUTE_ID_ERROR_TXT", "TASK_MANAGER"));
@@ -2438,9 +2438,9 @@ CtrlActionTaskManager.addAttrPress = function () {
         relAccessTo = "FFFEFFFFFFFFFFFFFFFFFFFF";
     }
 
-    const maxDiffInt = parseInt($("#max-time-diff").val());
+    const maxDiffInt = parseInt($("#max-time-diff").val(), 10);
     let maxDiff = "";
-    const minDiffInt = parseInt($("#min-time-diff").val());
+    const minDiffInt = parseInt($("#min-time-diff").val(), 10);
     let minDiff = "";
     if (!isNaN(maxDiffInt) || !isNaN(minDiffInt)) { //is time sync
         if (isNaN(maxDiffInt)) {

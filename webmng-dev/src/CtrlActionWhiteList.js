@@ -424,7 +424,7 @@ CtrlActionWhiteList.addWhiteList = function() {
                 }
                 for(let index in allTextLines){
                     if(allTextLines.hasOwnProperty(index)){
-                        if(parseInt(index) < startInd)
+                        if(parseInt(index, 10) < startInd)
                             continue;
                         const line = allTextLines[index];
                         if(line !== "")
