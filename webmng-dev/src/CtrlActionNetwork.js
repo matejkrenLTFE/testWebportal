@@ -263,7 +263,7 @@ CtrlActionNetwork._buildNodesAndLinks = function (routing) {
 
         if (parseInt(route["hop-count"], 10) === 1) { //link from DC to destAdd
             CtrlActionNetwork.addEdge(0, destAddInd, 1, 2);
-        } else if (parseInt(route["hop-count"], 10) >= 2 || parseInt(route["hop-count"]) === 0) {
+        } else if (parseInt(route["hop-count"], 10) >= 2 || parseInt(route["hop-count"], 10) === 0) {
             CtrlActionNetwork.addEdge(0, nextHopAddInd, 1, 4);
             if (parseInt(route["hop-count"], 10) === 2) { // in this case add regular link from nextHopAdd to destAdd
                 CtrlActionNetwork.addEdge(nextHopAddInd, destAddInd, 1, 3);
@@ -755,7 +755,7 @@ CtrlActionNetwork.plcNodeDiscover = function (nodeIndex) {
         $("#discover_icon").removeClass("discovery-is-running");
         const tt = $("#discover_tooltip");
         tt.html(AppMain.t("DISCOVER_PLC", "NETWORK_TOPOLOGY"));
-        return;
+        return false;
     }
 
     CtrlActionNetwork.updatePLCtooltip(nodeIndex);

@@ -97,7 +97,7 @@ CtrlActionNetworkTopology._buildNetwork = function (_this, routing) {
             CtrlActionNetworkTopology.addEdge(0, destAddInd,1, undefined);
         }else if(parseInt(route["hop-count"], 10) >= 2){
             CtrlActionNetworkTopology.addEdge(0, nextHopAddInd,3, undefined);
-            if(parseInt(route["hop-count"]) === 2, 10){ // in this case add regular link from nextHopAdd to destAdd
+            if(parseInt(route["hop-count"], 10) === 2){ // in this case add regular link from nextHopAdd to destAdd
                 CtrlActionNetworkTopology.addEdge(nextHopAddInd, destAddInd,1, undefined);
             }else{
                 CtrlActionNetworkTopology.addEdge(nextHopAddInd, destAddInd,2, parseInt(route["hop-count"], 10));

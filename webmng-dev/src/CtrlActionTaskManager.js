@@ -1204,7 +1204,7 @@ CtrlActionTaskManager.addJobSecond = function (jobType, node) {
 
                             jobObj.RepeatingInterval = $("#repeating").val();
 
-                            const dMinutes = parseInt($("#d-minutes", 10).val());
+                            const dMinutes = parseInt($("#d-minutes").val(), 10);
                             jobObj.Duration = moment.duration({
                                 seconds: 0,
                                 minutes: isNaN(dMinutes) || dMinutes < 0 ? 0 : dMinutes,
