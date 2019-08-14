@@ -86,8 +86,8 @@ CtrlActionNetwork.exec = function () {
         animationDuration: 3000,
         randomize: true,
         gravity: -1.5,
-        pull: 0.0001,
-        mass: function (node) {
+        pull: 0.001,
+        mass: function () {
             return 10;
         },
         springCoeff: function (e) {

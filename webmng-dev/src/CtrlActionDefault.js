@@ -1,10 +1,10 @@
 /**
  * @class CtrlActionDefault Controller action using IControllerAction interface.
  */
-var moment = require("moment");
-var modulecontrolleraction = require("./IControllerAction");
-var comsignal = require("./ComWANModemSignal");
-var CtrlActionDefault = Object.create(new modulecontrolleraction.IControllerAction);
+const moment = require("moment");
+const modulecontrolleraction = require("./IControllerAction");
+const comsignal = require("./ComWANModemSignal");
+let CtrlActionDefault = Object.create(new modulecontrolleraction.IControllerAction);
 //var fs = require("fs");
 
 CtrlActionDefault.exec = function() {    
@@ -23,7 +23,7 @@ CtrlActionDefault.exec = function() {
     }, true);
 
     // Get infos
-    const info = AppMain.ws().exec("GetInfos").getResponse();
+    const info = AppMain.ws().exec("GetInfos", undefined).getResponse(false);
 
     // Prepare params
     $.each(info.GetInfosResponse.info, function(i, obj){	
@@ -45,24 +45,24 @@ CtrlActionDefault.exec = function() {
         generalInfo.system.FW_library_version = generalInfo.system.FW_library_version.split(" ")[0];
 
     // Prepate counters
-    const cnt = AppMain.ws().exec("GetCounters").getResponse();
+    const cnt = AppMain.ws().exec("GetCounters", undefined).getResponse(false);
     let counters = {};
     if (defined(cnt.GetCountersResponse.counter)) {
-        for (index in cnt.GetCountersResponse.counter["cnt-sys"]) {
-            var cntValue = cnt.GetCountersResponse.counter["cnt-sys"][index];
+        cnt.GetCountersResponse.counter["cnt-sys"].forEach(function (index) {
+            let cntValue = cnt.GetCountersResponse.counter["cnt-sys"][index];
 
             // Convert m celsius
-            if (index == "cpu-core-temperature" || index=="cpu-board-temperature")
+            if (index === "cpu-core-temperature" || index === "cpu-board-temperature")
                 cntValue = (cntValue/1000).toString().substring(0,4);
 
             // Convert uptime to date
-            if (index == "uptime") {
+            if (index === "uptime") {
                 //var uptimeTimestamp = (Date.now()/1000) - cntValue;
-                //cntValue = moment.unix( uptimeTimestamp ).format( "HH:mm:ss.SSS" );                
+                //cntValue = moment.unix( uptimeTimestamp ).format( "HH:mm:ss.SSS" );
                 cntValue = uptimeFormat(cntValue);
-            }            
+            }
             counters[index]=cntValue
-        }
+        });
     }
 
     this.view.render("Default#ViewDashboard", {
@@ -118,7 +118,7 @@ CtrlActionDefault.getAlarmOccurrenceInfo = function(alarmName){
 
     const cnt = AppMain.ws().exec("GetEventCounter", {
         eventName: alarmName
-    }).getResponse();
+    }).getResponse(false);
 
     if(defined(cnt.GetEventCounterResponse.EventCount)){
         alarmInfo.count = cnt.GetEventCounterResponse.EventCount.count;
@@ -158,7 +158,7 @@ CtrlActionDefault._showSignalIndicator = function(signal) {
  * @return {String}
  */
 CtrlActionDefault.batteryChargeLevelStr = function(level) {
-    var levelStr = {
+    const levelStr = {
         "BATTERY_NOT_INSTALLED": AppMain.t("NO_BATTERY", "DASHBOARD"),
         "BATTERY_EMPTY": AppMain.t("DISCHARGED", "DASHBOARD"),
         "BATTERY_LOW": AppMain.t("LOW", "DASHBOARD"),

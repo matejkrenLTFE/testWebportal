@@ -1,8 +1,8 @@
 /**
  * @class CtrlActionLogin Controller action using IControllerAction interface.
  */
-var modulecontrolleraction = require("./IControllerAction");
-var CtrlActionLogin = Object.create(new modulecontrolleraction.IControllerAction);
+const modulecontrolleraction = require("./IControllerAction");
+let CtrlActionLogin = Object.create(new modulecontrolleraction.IControllerAction);
 
 CtrlActionLogin.exec = function() {    
     this.view.setTitle("Login");
@@ -20,7 +20,8 @@ CtrlActionLogin.exec = function() {
 
     // Set login form action
     $("#LoginForm").prop("action", AppMain.getUrl("app") + "/index.html" );
-}
+};
+
 CtrlActionLogin.onBeforeExecute = function() {
     // Redirect logged-in user back to Dashboard
     if (AppMain.user.loggedIn()){
@@ -30,18 +31,16 @@ CtrlActionLogin.onBeforeExecute = function() {
         
     switch (AppMain.getConfigParams("authType")) {            
         case AppMain.AUTH_TYPE_CERT:
-            AppMain.dialog("CHECKING_CERTIFICATE");
+            AppMain.dialog("CHECKING_CERTIFICATE", undefined);
             // Fetch user data from certificate
-            var userData = AppMain.ws().exec("GetUserData", {                
+            let userData = AppMain.ws().exec("GetUserData", {
                 "operation": "CERTIFICATE"
-            }).getResponse();
+            }).getResponse(false);
 
             if (defined(userData.GetUserDataResponse) && defined(userData.GetUserDataResponse.user) && defined(userData.GetUserDataResponse.role)) {
-                var user = userData.GetUserDataResponse.user;
+                let user = userData.GetUserDataResponse.user;
                 user.role = "";
                 user["access-level"] = userData.GetUserDataResponse.role["access-level"];
-                dmp("USER_DATA");
-                dmp( userData );
                 CtrlActionLogin.controller.userLogin(user);
             }
             else
@@ -53,9 +52,11 @@ CtrlActionLogin.onBeforeExecute = function() {
     }        
 
 
-}
+};
+
 CtrlActionLogin.init = function() {
     this.controller.attachEvent("onBeforeExecute", this.onBeforeExecute);
     this.controller.attachEvent("onAfterExecute", this.onAfterExecute);    
-}
+};
+
 module.exports.CtrlActionLogin = CtrlActionLogin;

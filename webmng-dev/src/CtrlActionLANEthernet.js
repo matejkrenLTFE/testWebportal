@@ -1,16 +1,17 @@
 /**
  * @class CtrlActionLANEthernet Controller action using IControllerAction interface.
  */
-var build = require("../build.info");
-var modulecontrolleraction = require("./IControllerAction");
-var CtrlActionLANEthernet = Object.create(new modulecontrolleraction.IControllerAction);
-var moment = require("moment");
+const build = require("../build.info");
+const modulecontrolleraction = require("./IControllerAction");
+let CtrlActionLANEthernet = Object.create(new modulecontrolleraction.IControllerAction);
+const moment = require("moment");
+const download = require("./vendor/download.js");
 
 CtrlActionLANEthernet.formId = "LANEthernetForm";
-CtrlActionLANEthernet.exec = function(e) {
+CtrlActionLANEthernet.exec = function() {
     this.view.setTitle("LAN_LOCAL_ETHERNET");
 
-    var params = AppMain.ws().exec("GetParameters", {"iloc":""}).getResponse();
+    let params = AppMain.ws().exec("GetParameters", {"iloc":""}).getResponse(false);
     params = defined(params.GetParametersResponse.iloc) ? params.GetParametersResponse.iloc : {};
 
     
@@ -55,7 +56,7 @@ CtrlActionLANEthernet.exec = function(e) {
     });
     //AppMain.dialog("Section <b>" + this.controller.action + "</b> is not yet supported!", "error");
     // Show interface as: enabled/disabled
-    var enabled = params.enable === "true";
+    let enabled = params.enable === "true";
     CtrlActionLANEthernet.enableInterface(enabled);
     AppMain.html.updateElements([".mdl-textfield"]);
 };
@@ -63,10 +64,10 @@ CtrlActionLANEthernet.exec = function(e) {
 /**
  * Form element callback: enable/disable interface.
  */
-CtrlActionLANEthernet.__useInterface = function(e) {
+CtrlActionLANEthernet.__useInterface = function() {
     // Show interface: enabled/disabled
-    var switchButton = document.querySelector('.mdl-js-switch').MaterialSwitch;
-    var enabled = $("[name='enable']").val() === "true";
+    let switchButton = document.querySelector('.mdl-js-switch').MaterialSwitch;
+    let enabled = $("[name='enable']").val() === "true";
 
     if(!enabled === false){
         $.confirm({
@@ -103,7 +104,7 @@ CtrlActionLANEthernet.__useInterface = function(e) {
 /**
  * Form element callback: enable/disable dhcp.
  */
-CtrlActionLANEthernet.__useDHCP = function(e) {
+CtrlActionLANEthernet.__useDHCP = function() {
     // Show interface: enabled/disabled
     const switchButton = document.querySelector('.ipConfigClientDhcp').MaterialSwitch;
     const dhcp = $("[name='dhcp-server']");
@@ -154,20 +155,20 @@ CtrlActionLANEthernet.enableInterface = function(enabled) {
     }
 };
 
-CtrlActionLANEthernet.setParams = function(e) {
-    var ipStr = $("[name='ip-config-ip']").val();
-    var maskStr = $("[name='ip-config-net-mask']").val();
-    var gwStr = $("[name='ip-config-gateway']").val();
-    var re = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
+CtrlActionLANEthernet.setParams = function() {
+    let ipStr = $("[name='ip-config-ip']").val();
+    let maskStr = $("[name='ip-config-net-mask']").val();
+    let gwStr = $("[name='ip-config-gateway']").val();
+    let re = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
     if(ipStr.match(re) && maskStr.match(re) && gwStr.match(re)){
-        dmp("setParams");
-        var form = $("#" + CtrlActionLANEthernet.formId);
-        var data = form.serialize();
+        // dmp("setParams");
+        let form = $("#" + CtrlActionLANEthernet.formId);
+        let data = form.serialize();
         data = form.deserialize(data);
-        dmp("FormData");
-        dmp(data);
+        // dmp("FormData");
+        // dmp(data);
 
-        var response = AppMain.ws().exec("SetParameters", {"iloc": data }).getResponse();
+        let response = AppMain.ws().exec("SetParameters", {"iloc": data }).getResponse(false);
         if(defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK")
             AppMain.dialog( "SUCC_UPDATED", "success" );
         else
@@ -183,16 +184,18 @@ CtrlActionLANEthernet.setParams = function(e) {
     AppMain.html.updateElements([".mdl-button"]);
 };
 
-CtrlActionLANEthernet.exportParams = function(e) {
-    var response = AppMain.ws().exec("GetParameters", {"iloc": "" }).getResponse();    
+CtrlActionLANEthernet.exportParams = function() {
+    let response = AppMain.ws().exec("GetParameters", {"iloc": "" }).getResponse(false);
     if (defined(response.GetParametersResponse.iloc)) {
-        var xml="<iloc>\n";
-        for (elm in response.GetParametersResponse.iloc)
+        let xml="<iloc>\n";
+        response.GetParametersResponse.iloc.forEach(function (elm) {
             xml += "<" + elm + ">" + response.GetParametersResponse.iloc[elm] + "</" + elm + ">\n";
+        });
+
         xml += "</iloc>";
 
-        var download = require("./vendor/download.js");
-        var dateStr = moment(new Date()).format( AppMain.localization("EXPORT_DATETIME_FORMAT") );
+
+        const dateStr = moment(new Date()).format( AppMain.localization("EXPORT_DATETIME_FORMAT") );
         download("data:application/xml;charset=utf-8;base64," + btoa(xml), build.device + "_Parameters_LocalEthernet_"+ dateStr + ".xml", "application/xml");
     }
 };

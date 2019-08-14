@@ -1,10 +1,10 @@
 /**
  * @class CtrlActionSystemReboot Controller action using IControllerAction interface.
  */
-var modulecontrolleraction = require("./IControllerAction");
-var CtrlActionSystemReboot = Object.create(new modulecontrolleraction.IControllerAction);
+const modulecontrolleraction = require("./IControllerAction");
+let CtrlActionSystemReboot = Object.create(new modulecontrolleraction.IControllerAction);
 
-CtrlActionSystemReboot.exec = function(e) {
+CtrlActionSystemReboot.exec = function() {
     this.view.setTitle("SYS_REBOOT");
     
     this.view.render(this.controller.action, {
@@ -20,7 +20,7 @@ CtrlActionSystemReboot.exec = function(e) {
 };
 
 
-CtrlActionSystemReboot.systemReboot = function(e) {
+CtrlActionSystemReboot.systemReboot = function() {
     if(!AppMain.user.getRBACpermissionElement("settings", "reboot")){
         return;
     }
@@ -52,14 +52,14 @@ CtrlActionSystemReboot.systemReboot = function(e) {
 };
 
 CtrlActionSystemReboot.reboot = function() {
-    var data = AppMain.html.getFormData("#SystemSettingsForm");
+    let data = AppMain.html.getFormData("#SystemSettingsForm");
     if (defined(data.rebootType)) {
         AppMain.dialog("SYS_REBOOT_WARNING", "warning");
         AppMain.ws().exec("ExecuteAction", {"Reboot": data.rebootType});
 
         // Waiting for WS to boot-up
 
-        var interval = setInterval(function(){
+        let interval = setInterval(function(){
             $.get(AppMain.getUrl("base") + "/soap/").success(function(resp){
                 dmp("Success");
                 dmp(resp);

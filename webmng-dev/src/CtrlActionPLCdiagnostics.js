@@ -1,11 +1,11 @@
 /**
  * @class CtrlActionPLCdiagnostics Controller action using IControllerAction interface.
  */
-var modulecontrolleraction = require("./IControllerAction");
-var CtrlActionPLCdiagnostics = Object.create(new modulecontrolleraction.IControllerAction);
+const modulecontrolleraction = require("./IControllerAction");
+let CtrlActionPLCdiagnostics = Object.create(new modulecontrolleraction.IControllerAction);
 
 CtrlActionPLCdiagnostics.formId = "PLCdiagnosticsForm";
-CtrlActionPLCdiagnostics.exec = function(e) {
+CtrlActionPLCdiagnostics.exec = function() {
     this.view.setTitle("PLC_DIAGNOSTICS");
 
     this.view.render(this.controller.action, {
@@ -24,7 +24,7 @@ CtrlActionPLCdiagnostics.exec = function(e) {
     });
 };
 
-CtrlActionPLCdiagnostics.setParams = function(e) {
+CtrlActionPLCdiagnostics.setParams = function() {
     const form = $( "#" + CtrlActionPLCdiagnostics.formId );
     let data = form.serialize();
     data = form.deserialize(data);
@@ -32,7 +32,7 @@ CtrlActionPLCdiagnostics.setParams = function(e) {
         data["time-stamp"] = "0"
     }
 
-    const response = AppMain.ws().exec("PlcSnifferSet", data).getResponse();
+    const response = AppMain.ws().exec("PlcSnifferSet", data).getResponse(false);
     if(defined(response.PlcSnifferSetResponse) && response.PlcSnifferSetResponse.toString() === "OK")
         AppMain.dialog( "SUCC_UPDATED", "success" );
     else

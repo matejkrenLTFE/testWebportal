@@ -16,7 +16,7 @@ module.exports.IComponent = function()
     /**
      * Temporary component data storage.
      */
-    var _data = {};
+    let _data = {};
     
     /**
      * Set or read component data as "key => value".
@@ -34,14 +34,15 @@ module.exports.IComponent = function()
             return defined(_data[name]) ? _data[name] : null; 
         else            
             return _data;
-    }
+    };
 
     /**
      * Init default temporary data.
      * @param {Object} data Object to populate default temp data storage.
      */
     this.initData = function(data) {
-        for (key in data)
+        data.forEach(function (key) {
             _data[key]=data[key];
+        });
     }
-}
+};

@@ -1,17 +1,18 @@
 /**
  * @class CtrlActionNANPlc Controller action using IControllerAction interface.
  */
-var modulecontrolleraction = require("./IControllerAction");
-var CtrlActionNANPlc = Object.create(new modulecontrolleraction.IControllerAction);
-var moment = require("moment");
-var build = require("../build.info");
+const modulecontrolleraction = require("./IControllerAction");
+let CtrlActionNANPlc = Object.create(new modulecontrolleraction.IControllerAction);
+const moment = require("moment");
+const build = require("../build.info");
+const download = require("./vendor/download.js");
 
 CtrlActionNANPlc.formId = "NANPlcForm";
 CtrlActionNANPlc.exec = function() {
 
     this.view.setTitle("NAN_PLC");
 
-    let params = AppMain.ws().exec("GetParameters", {"plc":""}).getResponse();
+    let params = AppMain.ws().exec("GetParameters", {"plc":""}).getResponse(false);
     params = defined(params.GetParametersResponse.plc) ? params.GetParametersResponse.plc : {};
 
     this.view.render(this.controller.action, {
@@ -41,15 +42,13 @@ CtrlActionNANPlc.exec = function() {
 };
 
 
-CtrlActionNANPlc.setParams = function(e) {
-    dmp("setParams");
-    var form = $("#"+ CtrlActionNANPlc.formId);
-    var data = form.serialize();
+CtrlActionNANPlc.setParams = function() {
+    // dmp("setParams");
+    let form = $("#"+ CtrlActionNANPlc.formId);
+    let data = form.serialize();
     data = form.deserialize(data);
-    dmp("FormData");
-    dmp(data);
-    
-    var response = AppMain.ws().exec("SetParameters", {"plc": data }).getResponse();
+
+    const response = AppMain.ws().exec("SetParameters", {"plc": data }).getResponse(false);
     if(defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK")
         AppMain.dialog( "SUCC_UPDATED", "success" );
     else
@@ -57,50 +56,38 @@ CtrlActionNANPlc.setParams = function(e) {
     AppMain.html.updateElements([".mdl-button"]);
 };
 
-CtrlActionNANPlc.exportParams = function(e) {
-    var response = AppMain.ws().exec("GetParameters", {"plc": "" }).getResponse();
-    dmp("EXPORT PARAMS");
-    dmp(response);
+CtrlActionNANPlc.exportParams = function() {
+    let response = AppMain.ws().exec("GetParameters", {"plc": "" }).getResponse(false);
 
     if (defined(response.GetParametersResponse.plc)) {
-        var xml="<plc>\n";
-        for (elm in response.GetParametersResponse.plc) {
-
-            dmp( response.GetParametersResponse.plc[elm] );
-            //dmp( response.GetParametersResponse.plc[elm][Object.keys(response.GetParametersResponse.plc[elm])[0]] );
-            //dmp(response.GetParametersResponse.plc[elm] instanceof Array);
-            
-            //if (typeof response.GetParametersResponse.plc[elm] === "object" && response.GetParametersResponse.plc[elm] instanceof Array) {
+        let xml="<plc>\n";
+        response.GetParametersResponse.plc.forEach(function (elm) {
             if (typeof response.GetParametersResponse.plc[elm] === "object") {
-                var key = Object.keys(response.GetParametersResponse.plc[elm])[0];
+                let key = Object.keys(response.GetParametersResponse.plc[elm])[0];
                 if (response.GetParametersResponse.plc[elm][key] instanceof Array) {
-                    for(value in response.GetParametersResponse.plc[elm]) {
+                    response.GetParametersResponse.plc[elm].forEach(function (value) {
                         xml += "<" + elm + ">";
-                        for (param in response.GetParametersResponse.plc[elm][value]) {
+                        response.GetParametersResponse.plc[elm][value].forEach(function (param) {
                             xml += "<" + value + ">";
                             xml += response.GetParametersResponse.plc[elm][value][param];
                             xml += "</" + value + ">\n";
-                        }
+                        });
                         xml += "</" + elm + ">\n";
-                    }   
+                    });
                 }
                 else {
                     xml += "<" + elm + ">";
-                    var key = Object.keys(response.GetParametersResponse.plc[elm])[0];
+                    key = Object.keys(response.GetParametersResponse.plc[elm])[0];
                     xml += "<" + key + ">" + response.GetParametersResponse.plc[elm][key] + "</" + key + ">\n";
                     xml += "</" + elm + ">\n";
                 }
-                dmp("OBJECT-LOOP");
-                dmp(response.GetParametersResponse.plc[elm]);
-                dmp(xml);
             }
             else
                 xml += "<" + elm + ">" + response.GetParametersResponse.plc[elm] + "</" + elm + ">\n";
+        });
 
-        }
-        //return;
         xml += "</plc>";
-        //return;
+
         const userRoleName = AppMain.user.getUserData("user-role-name");
         if(userRoleName !== "Factory"){
             //comment some lines
@@ -108,13 +95,13 @@ CtrlActionNANPlc.exportParams = function(e) {
             xml = xml.replace("<mac-address>","<!--mac-address>");
             xml = xml.replace("</mac-address>","<mac-address-->");
         }
-        var download = require("./vendor/download.js");
-        var dateStr = moment(new Date()).format( AppMain.localization("EXPORT_DATETIME_FORMAT") );
+
+        const dateStr = moment(new Date()).format( AppMain.localization("EXPORT_DATETIME_FORMAT") );
         download("data:application/xml;charset=utf-8;base64," + btoa(xml), build.device + "_Parameters_PLC_" + dateStr + ".xml", "application/xml");
     }
 };
 
-CtrlActionNANPlc.plcModemRestart = function(e) {
+CtrlActionNANPlc.plcModemRestart = function() {
 
     let html = AppMain.t("PLEASE_SELECT", "NAN_PLC") + "<br/><br/>";
     html += AppMain.html.formElementSelect("modem-reset-type", { "NETWORK-PRESERVATION": AppMain.t("NETWORK_PRESERVATION", "NAN_PLC"),
@@ -145,7 +132,7 @@ CtrlActionNANPlc.plcModemRestart = function(e) {
 };
 
 CtrlActionNANPlc.runPLCModemReset = function(resetType){
-    /*const resp = */AppMain.ws().exec("ExecuteAction", {"PlcModemReset": resetType}).getResponse();
+    /*const resp = */AppMain.ws().exec("ExecuteAction", {"PlcModemReset": resetType}).getResponse(false);
     return true;
 };
 

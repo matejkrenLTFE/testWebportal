@@ -3,13 +3,13 @@
  */
 const modulecontrolleraction = require("./IControllerAction");
 let CtrlActionEventsSettings = Object.create(new modulecontrolleraction.IControllerAction);
-const includesevents = require("./includes/events.js");
+const includeEvents = require("./includes/events.js");
 
-CtrlActionEventsSettings.exec = function (e) {
+CtrlActionEventsSettings.exec = function () {
     this.view.setTitle("ALARM_EVENTS");
 
-    const allEventList = defined(includesevents.events) ? includesevents.events : [];
-    let selectedEventList = AppMain.ws().exec("GetParameters", {"cntr": ""}).getResponse();
+    const allEventList = defined(includeEvents.events) ? includeEvents.events : [];
+    let selectedEventList = AppMain.ws().exec("GetParameters", {"cntr": ""}).getResponse(false);
 
     const hesUrl = defined(selectedEventList.GetParametersResponse.cntr) ?
         selectedEventList.GetParametersResponse.cntr["alrm-alarm-destination-url"] : "";
@@ -51,14 +51,14 @@ CtrlActionEventsSettings.exec = function (e) {
 
 CtrlActionEventsSettings._htmlTableBody = function (eventList, selectedEventList) {
     let html = "";
-    for (let i in eventList) {
+    eventList.forEach(function (i) {
         let checked = false;
 
         // Find checked events
-        for (let j in selectedEventList) {
+        selectedEventList.forEach(function (j) {
             if (eventList[i].enumeration === selectedEventList[j])
                 checked = true;
-        }
+        });
 
         html += "<tr>";
         html += "<td style='width:25%;text-align: left!important;'>" + AppMain.t(eventList[i].enumeration, "EVENTS") + "</td>";
@@ -67,19 +67,19 @@ CtrlActionEventsSettings._htmlTableBody = function (eventList, selectedEventList
         html += "<td>" + AppMain.html.formElementSwitch(eventList[i].enumeration, eventList[i].enumeration,
             {checked: checked, labelClass: "alarm-settings-switch", inputAttr: {"data-rbac-element": "eventsSettings.settings-apply"}}) + "</td>";
         html += "</tr>";
-    }
+    });
     return html;
 };
 
-CtrlActionEventsSettings.setParams = function (e) {
+CtrlActionEventsSettings.setParams = function () {
     const data = AppMain.html.getFormData("#EventsSettingsForm");
 
     let dataArr = [];
     let hesUrl = $("#hes-url").val();
-    for (let i in data) {
+    data.forEach(function (i) {
         if (i !== "hes-url" && data[i] !== "false")
             dataArr.push(i);
-    }
+    });
 
     const pJson = {
         "cntr" : {
@@ -90,7 +90,7 @@ CtrlActionEventsSettings.setParams = function (e) {
     if(dataArr.length > 0){
         pJson.cntr["forward-to-hes-list"]["event"] = dataArr;
     }
-    const response = AppMain.ws().exec("SetParameters", pJson).getResponse();
+    const response = AppMain.ws().exec("SetParameters", pJson).getResponse(false);
 
     if (defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK") {
         AppMain.dialog("SUCC_UPDATED", "success");
