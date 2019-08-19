@@ -2,9 +2,6 @@
  * Component for creating dynamic HTML elements.
  * @author LTFE
  */
-/*jshint esversion: 6 */
-/* jshint node: true */
-/* global defined, AppMain, componentHandler */
 "use strict";
 
 module.exports.AppHTML = function () {

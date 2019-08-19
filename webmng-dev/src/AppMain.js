@@ -3,15 +3,8 @@
  * @author LTFE
  */
 
-/* global defined, AppMain, componentHandler, dmp */
-
-/*jshint esversion: 6 */
-/* jshint node: true */
-
-
-
-
 global.dmp = function (input) {
+    "use strict";
     console.log(input);
 };
 /**
@@ -20,6 +13,7 @@ global.dmp = function (input) {
  * @return {Boolean}
  */
 global.defined = function (variable) {
+    "use strict";
     return (typeof variable !== "undefined" && variable !== null);
 };
 
@@ -28,7 +22,8 @@ global.defined = function (variable) {
  * Generate random string.
  * @param len Default: 7
  */
-global.randomStr = function(len) {
+global.randomStr = function (len) {
+    "use strict";
     const length = len || 7;
     return Math.random().toString(36).substring(length);
 };
@@ -36,13 +31,14 @@ global.randomStr = function(len) {
 /**
  * Create uptime from seconds.
  */
-global.uptimeFormat = function(seconds) {
-    const dayHours = Math.floor(seconds / (60*60));
-    const minutes = Math.floor(seconds % (60*60) / 60);
+global.uptimeFormat = function (seconds) {
+    "use strict";
+    const dayHours = Math.floor(seconds / (60 * 60));
+    const minutes = Math.floor(seconds % (60 * 60) / 60);
     const days = Math.floor(dayHours / 24);
-    const hours = Math.floor( (seconds - (days*86400)) / 3600 );
+    const hours = Math.floor((seconds - (days * 86400)) / 3600);
 
-    return days + " " + AppMain.t("DAYS", "global") + ", " + hours + " " + AppMain.t("HOURS", "global") +  ", " + minutes + " " + AppMain.t("MINUTES", "global");
+    return days + " " + AppMain.t("DAYS", "global") + ", " + hours + " " + AppMain.t("HOURS", "global") + ", " + minutes + " " + AppMain.t("MINUTES", "global");
 };
 
 /**

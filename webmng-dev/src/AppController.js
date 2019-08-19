@@ -1,12 +1,9 @@
-/* global defined, AppMain, dmp */
 /**
  * AppController component
  * @author LTFE
  * @module src/AppController
  */
 
-/*jshint esversion: 6 */
-/* jshint node: true */
 
 const modulewebservice = require("./AppWebserviceClient");
 const X2JS = require("xml-json-parser");

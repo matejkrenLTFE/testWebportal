@@ -2,8 +2,7 @@
  * Application localization and translation component.
  * @author LTFE
  */
-/*jshint esversion: 6 */
-/* jshint node: true */
+
 "use strict";
 
 module.exports.AppLocale = function(loc)
