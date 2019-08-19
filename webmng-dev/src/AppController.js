@@ -3,6 +3,11 @@
  * @author LTFE
  * @module src/AppController
  */
+/*jshint esversion: 6 */
+/* jshint node: true */
+/*global defined, AppMain */
+"use strict";
+
 const modulewebservice = require("./AppWebserviceClient");
 const X2JS = require("xml-json-parser");
 const Json2Xml = new X2JS();
@@ -265,16 +270,16 @@ module.exports.AppController = function () {
                     action: function () {
                         AppMain.user.logout();
                         return true;
-                    }
+                    },
                 },
                 cancel: {
                     text: AppMain.t("CANCEL", "global"),
                     action:
                         function () {
                             return true;
-                        }
-                }
-            }
+                        },
+                },
+            },
         });
     };
 
