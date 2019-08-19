@@ -1,12 +1,12 @@
+/* global defined, AppMain, dmp */
 /**
  * AppController component
  * @author LTFE
  * @module src/AppController
  */
+
 /*jshint esversion: 6 */
 /* jshint node: true */
-/*global defined, AppMain */
-"use strict";
 
 const modulewebservice = require("./AppWebserviceClient");
 const X2JS = require("xml-json-parser");
@@ -24,6 +24,7 @@ const Json2Xml = new X2JS();
  *
  */
 module.exports.AppController = function () {
+    "use strict";
     /**
      * AppView instance
      */
@@ -47,18 +48,18 @@ module.exports.AppController = function () {
      * AppWebservice instance.
      * @type AppWebserviceClient
      */
-    this._ws = null;
+    this.wsPom = null;
 
-    this._events = {};
+    this.eventsPom = {};
 
     /**
      * Attach component event. Events are executed in FIFO order.
      */
     this.attachEvent = function (eventName, callback) {
-        if (!defined(this._events[eventName])) {
-            this._events[eventName] = [];
+        if (!defined(this.eventsPom[eventName])) {
+            this.eventsPom[eventName] = [];
         }
-        this._events[eventName][this._events[eventName].length] = callback;
+        this.eventsPom[eventName][this.eventsPom[eventName].length] = callback;
     };
 
     /**
@@ -66,12 +67,14 @@ module.exports.AppController = function () {
      */
     this.executeEvent = function (eventName) {
         // Execute event callbacks
-            for(let i in this._events[eventName]) {
-                if (this._events[eventName].hasOwnProperty(i)) {
-                    if (typeof this._events[eventName][i] === "function")
-                        this._events[eventName][i]();
+        if (defined(this.eventsPom[eventName])) {
+            const self = this;
+            this.eventsPom[eventName].forEach(function (i) {
+                if (typeof self.eventsPom[eventName][i] === "function") {
+                    self.eventsPom[eventName][i]();
                 }
-            }
+            });
+        }
     };
 
     /**
@@ -89,7 +92,7 @@ module.exports.AppController = function () {
     }
 
     /**
-     * After controller action exceute.
+     * After controller action execute.
      */
     function _afterExec(_this) {
         _this.executeEvent("onAfterExecute", _this);
@@ -101,20 +104,27 @@ module.exports.AppController = function () {
 
         AppMain.log("AppController.exec");
 
-        if (this.view === null)
+        if (this.view === null) {
             throw "AppController: no view defined!";
+        }
 
-        if (typeof event !== "undefined")
+        if (event !== undefined) {
             this.event = event;
+        }
 
-        this.action = (typeof action !== "undefined" && action !== null && action !== "") ? action : this.actionDefault;
+        if (action !== undefined && action !== null && action !== "") {
+            this.action = action;
+        } else {
+            this.action = this.actionDefault;
+        }
         this.ctrlActionComp = null;
 
         AppMain.log("Execute CtrlAction: " + this.action);
 
         // Check if user has permission to execute action
-        if (this.action !== "Login" && !AppMain.rbac.hasExecCtrlActionPermission(this.action))
+        if (this.action !== "Login" && !AppMain.rbac.hasExecCtrlActionPermission(this.action)) {
             return this.actionForbidden();
+        }
 
         try {
             const execAction = this.resolveActionName();
@@ -122,13 +132,14 @@ module.exports.AppController = function () {
             try {
                 const controlleractioncomponent = require("./CtrlAction" + this.action);
                 if (!controlleractioncomponent["CtrlAction" + this.action].hasOwnProperty("exec")) {
-                    if (this.hasOwnProperty("exec" + this.action))
+                    if (this.hasOwnProperty("exec" + this.action)) {
                         this[execAction]();
+                    }
                 } else {
                     this.ctrlActionComp = controlleractioncomponent["CtrlAction" + this.action];
-
-                    if (this.ctrlActionComp.init instanceof Function)
+                    if (typeof this.ctrlActionComp.init === "function") {
                         this.ctrlActionComp.init();
+                    }
                     _beforeExec(this);
                     this.ctrlActionComp.exec();
                 }
@@ -137,8 +148,9 @@ module.exports.AppController = function () {
                 AppMain.log(ActionCompExc.message);
                 dmp("AppMain.exec controller action exception message: " + ActionCompExc.message);
                 // If no corresponding action component exists, try calling direct controller method
-                if (this.hasOwnProperty("exec" + this.action))
+                if (this.hasOwnProperty("exec" + this.action)) {
                     this[execAction]();
+                }
             }
             _afterExec(this);
         } catch (exc) {
@@ -162,9 +174,11 @@ module.exports.AppController = function () {
      * Get webservice instance.
      */
     this.ws = function () {
-        if (this._ws === null)
-            return this._ws = new modulewebservice.AppWebserviceClient();
-        return this._ws;
+        if (this.wsPom === null) {
+            this.wsPom = new modulewebservice.AppWebserviceClient();
+            return this.wsPom;
+        }
+        return this.wsPom;
     };
 
     this.EventsCallback = function (e) {
@@ -182,69 +196,71 @@ module.exports.AppController = function () {
      */
     this.userLogin = function (userLoginData) {
         AppMain.log("AppController.userLogin executed");
-
+        let username;
+        let password;
         // Authenticate user based on different authentication type
         switch (AppMain.getConfigParams("authType")) {
-            case AppMain.AUTH_TYPE_BASIC:
-                AppMain.dialog("CHECK_CREDENTIALS", undefined);
-                const username = $("[name='username']").val();
-                const password = $("[name='password']").val();
+        case AppMain.AUTH_TYPE_BASIC:
+            AppMain.dialog("CHECK_CREDENTIALS", undefined);
+            username = $("[name='username']").val();
+            password = $("[name='password']").val();
 
-                $.ajax({
-                    url: AppMain.getUrl("app") + "/index.html",
-                    method: "POST",
-                    data: {
-                        "httpd_username": username,
-                        "httpd_password": password
-                    }
-                }).done(function () {
-                    // HTTP auth succeeded, fetch user info from WS
-                    localStorage.setItem("authDigest", btoa(username + ":" + password));
-                    setTimeout(function () {//problem with localStorage authDigest being null
-                        const userData = AppMain.ws().exec("GetUserData", {username: username}).getResponse(false);
-                        AppMain.ws().exec("ExecuteAction", {"Command": "login"});
-                        dmp(userData);
+            $.ajax({
+                url: AppMain.getUrl("app") + "/index.html",
+                method: "POST",
+                data: {
+                    "httpd_username": username,
+                    "httpd_password": password
+                }
+            }).done(function () {
+                // HTTP auth succeeded, fetch user info from WS
+                localStorage.setItem("authDigest", btoa(username + ":" + password));
+                setTimeout(function () {//problem with localStorage authDigest being null
+                    const userData = AppMain.ws().exec("GetUserData", {username: username}).getResponse(false);
+                    AppMain.ws().exec("ExecuteAction", {"Command": "login"});
+                    dmp(userData);
 
-                        if (defined(userData.GetUserDataResponse) && defined(userData.GetUserDataResponse.user) && defined(userData.GetUserDataResponse.user["user-role-name"])) {
-                            const user = userData.GetUserDataResponse.user;
-                            const roleData = AppMain.ws().exec("GetUserData", {
-                                "user-role-name": user["user-role-name"],
-                                "operation": "ROLE"
-                            }).getResponse(false);
+                    if (defined(userData.GetUserDataResponse) && defined(userData.GetUserDataResponse.user) && defined(userData.GetUserDataResponse.user["user-role-name"])) {
+                        const user = userData.GetUserDataResponse.user;
+                        const roleData = AppMain.ws().exec("GetUserData", {
+                            "user-role-name": user["user-role-name"],
+                            "operation": "ROLE"
+                        }).getResponse(false);
 
-                            // Add role data to user object
-                            if (defined(roleData.GetUserDataResponse.role)) {
-                                const permissions = Json2Xml.xml_str2json("<role>" + roleData.GetUserDataResponse.role["user-role"] + "</role>");
-                                user.role = permissions.role;
-                                user["access-level"] = roleData.GetUserDataResponse.role["access-level"];
-                                AppMain.user.setUserData(user);
-                                AppMain.dialog("CREDENTIALS_OK_LOADING", "success");
-                                setTimeout(function () {
-                                    window.location = AppMain.getUrl("app");
-                                }, 1500);
-                            }
-                        } else {
-                            AppMain.dialog("USER_LOGIN_FAILED", "error");
-                            if (AppMain.environment === AppMain.ENVIRONMENT_DEV)
-                                AppMain.dialog("Response: " + userData.status + " " + userData.statusText, "error");
+                        // Add role data to user object
+                        if (defined(roleData.GetUserDataResponse.role)) {
+                            const permissions = Json2Xml.xml_str2json("<role>" + roleData.GetUserDataResponse.role["user-role"] + "</role>");
+                            user.role = permissions.role;
+                            user["access-level"] = roleData.GetUserDataResponse.role["access-level"];
+                            AppMain.user.setUserData(user);
+                            AppMain.dialog("CREDENTIALS_OK_LOADING", "success");
+                            setTimeout(function () {
+                                window.location = AppMain.getUrl("app");
+                            }, 1500);
                         }
-                    }, 300);
-                }).fail(function (resp) {
-                    if (resp.status === 401) {
-                        AppMain.dialog("Wrong username or password!", undefined);
-                        return;
+                    } else {
+                        AppMain.dialog("USER_LOGIN_FAILED", "error");
+                        if (AppMain.environment === AppMain.ENVIRONMENT_DEV) {
+                            AppMain.dialog("Response: " + userData.status + " " + userData.statusText, "error");
+                        }
                     }
-                    AppMain.dialog("Authentication problem occurred!", "error");
-                });
-                break;
+                }, 300);
+            }).fail(function (resp) {
+                if (resp.status === 401) {
+                    AppMain.dialog("Wrong username or password!", undefined);
+                    return;
+                }
+                AppMain.dialog("Authentication problem occurred!", "error");
+            });
+            break;
 
-            case AppMain.AUTH_TYPE_CERT:
-                AppMain.dialog("ROLE_SUCC_AUTHENTICATED", "success", [userLoginData["user-role-name"]]);
-                AppMain.user.setUserData(userLoginData);
-                break;
+        case AppMain.AUTH_TYPE_CERT:
+            AppMain.dialog("ROLE_SUCC_AUTHENTICATED", "success", [userLoginData["user-role-name"]]);
+            AppMain.user.setUserData(userLoginData);
+            break;
 
-            default:
-                AppMain.dialog("UNDEFINED_APP_AUTHENTICATION", "error");
+        default:
+            AppMain.dialog("UNDEFINED_APP_AUTHENTICATION", "error");
         }
     };
 
@@ -270,16 +286,15 @@ module.exports.AppController = function () {
                     action: function () {
                         AppMain.user.logout();
                         return true;
-                    },
+                    }
                 },
                 cancel: {
                     text: AppMain.t("CANCEL", "global"),
-                    action:
-                        function () {
-                            return true;
-                        },
-                },
-            },
+                    action: function () {
+                        return true;
+                    }
+                }
+            }
         });
     };
 
@@ -289,5 +304,5 @@ module.exports.AppController = function () {
 
     this.getRequestParam = function (name) {
         return localStorage.getItem(name);
-    }
+    };
 };

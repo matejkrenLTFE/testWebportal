@@ -4,7 +4,7 @@
  */
 /*jshint esversion: 6 */
 /* jshint node: true */
-/*global defined, AppMain */
+/* global defined, AppMain, componentHandler */
 "use strict";
 
 module.exports.AppHTML = function () {
@@ -38,9 +38,11 @@ module.exports.AppHTML = function () {
         html += '<input type="hidden" name="' + name + '" value="' + inputHiddenVal + '"  />';
         // html += '<input type="hidden" name="' + name + '" value="false"  />';
         let input = '<input type="checkbox" id="' + (defined(options.inputId) ? options.inputId : name) + '" class="mdl-switch__input ' + options.inputClass + ' " name="' + name + '" value="' + value + '" ' + options.checked + ' ';
-        for (let i in options.inputAttr)
-            if (options.inputAttr.hasOwnProperty(i))
+        for (let i in options.inputAttr) {
+            if (options.inputAttr.hasOwnProperty(i)) {
                 input += ' ' + i + '="' + options.inputAttr[i] + '"';
+            }
+        }
         input += "/>";
         html += input;
         html += '<span class="mdl-switch__label"></span>';
@@ -59,8 +61,9 @@ module.exports.AppHTML = function () {
         if (defined(width)) {
             widthHtml = " style='width:" + width + "'";
         }
-        if (!defined(additionalClass))
+        if (!defined(additionalClass)) {
             additionalClass = "";
+        }
         let html = "";
         if (defined(options.label) && options.label !== "") {
             html = '<div class="mdl-select mdl-js-select mdl-select--floating-label mdl-textfield-less-padding ' + additionalClass + '" ' + widthHtml + '>';
@@ -94,8 +97,9 @@ module.exports.AppHTML = function () {
      */
     this.updateElements = function (elements) {
         for (let i in elements) {
-            if (elements.hasOwnProperty(i))
+            if (elements.hasOwnProperty(i)) {
                 componentHandler.upgradeElements($(elements[i]));
+            }
         }
 
     };
@@ -190,5 +194,5 @@ module.exports.AppHTML = function () {
         const form = $(formSelector);
         const formData = form.serialize();
         return form.deserialize(formData);
-    }
+    };
 };
