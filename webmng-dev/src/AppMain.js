@@ -4,7 +4,7 @@
  */
 /* global console, document, AppMain, $, defined, dmp, window */
 /* jslint browser:true, node:true*/
-/* eslint es6:true */
+/* eslint es6:0 */
 
 global.dmp = function (input) {
     "use strict";
