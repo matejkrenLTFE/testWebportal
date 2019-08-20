@@ -1,6 +1,5 @@
 /**
  * Main application component
- * @author LTFE
  */
 /* global console, document, AppMain, $, defined, dmp, window */
 /* jshint maxstatements: false */
