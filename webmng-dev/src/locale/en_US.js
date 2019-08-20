@@ -1,3 +1,7 @@
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0, camelcase: 0 */
+
 const en_US = {
     global: {
         PER_DENIED: "Permission denied",
@@ -315,7 +319,6 @@ const en_US = {
         CONN_TYPE: "Connection type",
         ETHERNET_MODE: "Ethernet mode",
         ETHERNET_SPEED: "Ethernet speed",
-        CONN_TYaPE: "Connection",
         IP_ADDRESS: "IP address",
         DNS1: "DNS server 1",
         DNS2: "DNS server 2",

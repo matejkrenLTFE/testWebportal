@@ -1,3 +1,7 @@
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
 const eventList = {
     "events": [
         {
@@ -382,7 +386,8 @@ const eventList = {
             "id": "615",
             "enumeration": "EVT_WAN_WAN1_CMUX_ERROR",
             "name": "CMUX error",
-            "description": "Cellular modem didn't respond to CMUX command/setup request or CMUX virtual serial ports are not correctly opened. Due to this error, the system is set to operate without CMUX",
+            "description": "Cellular modem didn't respond to CMUX command/setup request or CMUX virtual serial ports are not "
+                    + "correctly opened. Due to this error, the system is set to operate without CMUX",
             "severity": "Error"
         },
         {
