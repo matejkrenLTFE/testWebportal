@@ -9,7 +9,9 @@
 
 global.dmp = function (input) {
     "use strict";
+    /* eslint-disable no-console */
     console.log(input);
+    /* eslint-enable no-console */
 };
 /**
  * Check if variable typeof in "not undefined" and is "not null".
