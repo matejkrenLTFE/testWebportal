@@ -3,8 +3,9 @@
  * @author LTFE
  */
 /* global console, document, AppMain, $, defined, dmp, window */
+/* jshint maxstatements: false */
 /* jslint browser:true, node:true*/
-/* eslint es6:0, no-undefined: 0 */
+/* eslint es6:0, no-undefined:  */
 
 global.dmp = function (input) {
     "use strict";
