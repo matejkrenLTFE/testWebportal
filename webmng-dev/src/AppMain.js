@@ -1,10 +1,11 @@
 /**
  * Main application component
+ * @author LTFE
  */
 /* global console, document, AppMain, $, defined, dmp, window */
 /* jshint maxstatements: false */
 /* jslint browser:true, node:true*/
-/* eslint es6:0, no-undefined:  */
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
 
 global.dmp = function (input) {
     "use strict";
