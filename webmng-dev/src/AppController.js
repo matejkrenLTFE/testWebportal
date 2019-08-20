@@ -3,7 +3,10 @@
  * @author LTFE
  * @module src/AppController
  */
-
+/* global console, AppMain, $, defined, dmp, window */
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:  */
 
 const modulewebservice = require("./AppWebserviceClient");
 const X2JS = require("xml-json-parser");

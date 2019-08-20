@@ -195,11 +195,11 @@ global.AppMain = function (conf) {
     /**
      * Triggered when application state changes:
      * - application was loaded (after AppMain.run)
-     * - controller action exected
+     * - controller action executed
      */
-    const _stateChanged = function (_this, state) {
+    const _stateChanged = function (_this, st) {
         if (typeof _this.onStateChange === "function") {
-            _this.onStateChange({"state": state});
+            _this.onStateChange({"state": st});
         }
     };
 
@@ -356,9 +356,8 @@ global.AppMain = function (conf) {
         const locale = sessionStorage.getItem("locale");
         if (locale) {
             return locale;
-        } else {
-            return "en_US";
         }
+        return "en_US";
     };
 
     /**
