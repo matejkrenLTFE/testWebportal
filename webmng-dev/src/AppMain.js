@@ -4,6 +4,7 @@
  */
 /* global console, document, AppMain, $, defined, dmp, window */
 /* jslint browser:true, node:true*/
+/* eslint es6:true */
 
 global.dmp = function (input) {
     "use strict";
@@ -500,10 +501,8 @@ global.AppMain = function (conf) {
  */
 global.uptimeFormat = function (seconds) {
     "use strict";
-    const dayHours = Math.floor(seconds / (60 * 60));
-    const minutes = Math.floor(seconds % (60 * 60) / 60);
-    const days = Math.floor(dayHours / 24);
-    const hours = Math.floor((seconds - (days * 86400)) / 3600);
 
-    return days + " " + AppMain.t("DAYS", "global") + ", " + hours + " " + AppMain.t("HOURS", "global") + ", " + minutes + " " + AppMain.t("MINUTES", "global");
+    return Math.floor(Math.floor(seconds / (60 * 60)) / 24) + " " + AppMain.t("DAYS", "global") + ", "
+            + Math.floor((seconds - (Math.floor(Math.floor(seconds / (60 * 60)) / 24) * 86400)) / 3600) + " "
+            + AppMain.t("HOURS", "global") + ", " + Math.floor(seconds % (60 * 60) / 60) + " " + AppMain.t("MINUTES", "global");
 };
