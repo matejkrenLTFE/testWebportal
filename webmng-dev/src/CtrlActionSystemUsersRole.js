@@ -2,33 +2,32 @@
  * @class CtrlActionSystemUsersRole Controller action using IControllerAction interface.
  */
 // var moment = require("moment");
-const modulecontrolleraction = require("./IControllerAction");
-const moduleapprbac = require("./AppRBAC");
-let CtrlActionSystemUsersRole = Object.create(new modulecontrolleraction.IControllerAction);
-const X2JS = require("xml-json-parser");
-const Json2Xml = new X2JS();
+var modulecontrolleraction = require("./IControllerAction");
+var moduleapprbac = require("./AppRBAC");
+var CtrlActionSystemUsersRole = Object.create(new modulecontrolleraction.IControllerAction);
+var X2JS = require("xml-json-parser");
 
 CtrlActionSystemUsersRole.exec = function() {
     this.view.setTitle("SYS_USER_ROLE_MNG");
-
-    let selectedRole = this.getSelectedRole();
-    let selectedRolePermissions = {};
+    var Json2Xml = new X2JS();
+    var selectedRole = this.getSelectedRole();
+    var selectedRolePermissions = {};
 
     // Read user roles from DB
-    let roles = AppMain.ws().exec("GetUserData", {operation: "ROLE"}).getResponse(false);
+    var roles = AppMain.ws().exec("GetUserData", {operation: "ROLE"}).getResponse();
     roles = defined(roles.GetUserDataResponse.role) ? roles.GetUserDataResponse.role : {};
-    let rolesList={};
+    var rolesList={};
 
-    roles.forEach(function (i) {
+    for(i in roles) {
         rolesList[roles[i]["user-role-name"]] = roles[i]["user-role-name"];
-        if (roles[i]["user-role-name"]===selectedRole) {
+        if (roles[i]["user-role-name"]===selectedRole) {  
             selectedRolePermissions = Json2Xml.xml_str2json( "<role>" + roles[i]["user-role"] + "</role>" );
             selectedRolePermissions = defined(selectedRolePermissions.role) ? selectedRolePermissions.role : null;
 
-            if (selectedRolePermissions)
+            if (selectedRolePermissions)            
                 selectedRolePermissions["access-level"] = roles[i]["access-level"];
         }
-    });
+    }
     
 
     this.view.render(this.controller.action, {
@@ -90,14 +89,14 @@ CtrlActionSystemUsersRole.changeMode = function(mode) {
  * Binded method callback.
  */
 CtrlActionSystemUsersRole.__changeRole = function(event) {
-    let $element = $(event.target);
+    var $element = $(event.target);
     this.controller.setRequestParam("selectedRole", $element.val());
     this.exec();
 };
 
 CtrlActionSystemUsersRole.selectedRole = null;
 CtrlActionSystemUsersRole.__selectRBACColumn = function(e) {
-    let target = $(e.target).val();
+    var target = $(e.target).val();
 
     if(target === "0"){
         $("input.fullControl").prop("checked", true);
@@ -113,11 +112,11 @@ CtrlActionSystemUsersRole.__selectRBACColumn = function(e) {
 };
 
 CtrlActionSystemUsersRole._htmlRoleTable = function(rolePermissions) {
-    let AppRBAC = new moduleapprbac.AppRBAC();
-    let tableBody = "";
-    let rbac = AppRBAC.getDefaultRBACMap();
+    var AppRBAC = new moduleapprbac.AppRBAC();
+    var tableBody = "";
+    var rbac = AppRBAC.getDefaultRBACMap();        
     
-    let rbacPermissions = rolePermissions;
+    var rbacPermissions = rolePermissions;
 
     tableBody += "<tr>";
     tableBody += "<td></td>";
@@ -126,7 +125,7 @@ CtrlActionSystemUsersRole._htmlRoleTable = function(rolePermissions) {
     tableBody += "<td><input value='2' name='columnSelect' data-bind-event='click' data-bind-method='SystemUsersRole.__selectRBACColumn' type='radio' /></td>";
     tableBody += "</tr>";
 
-    rbac.forEach(function (category) {
+    for (category in rbac) {
         tableBody += "<tr>";
         tableBody += "<td style='background-color:#eee' class='mdl-cell--left'><b>" + AppRBAC.getRBACNameTranslation(category.toUpperCase()) + "</b></td>";
         tableBody += "<td style='background-color:#eee' ></td>";
@@ -134,16 +133,16 @@ CtrlActionSystemUsersRole._htmlRoleTable = function(rolePermissions) {
         tableBody += "<td style='background-color:#eee'></td>";
         tableBody += "</tr>";
 
-        rbac[category].forEach(function (item) {
-            let permission = {};
+        for (item in rbac[category]) {
+            var permission = {};
             if (defined(rbacPermissions[category])) {
                 permission = {
                     fullControl: (!defined(rbacPermissions[category][rbac[category][item]]) ||
                         rbacPermissions[category][rbac[category][item]] === "*") ? "checked" : "",
                     read: defined(rbacPermissions[category][rbac[category][item]]) &&
-                    rbacPermissions[category][rbac[category][item]] === "r" ? "checked" : "",
+                        rbacPermissions[category][rbac[category][item]] === "r" ? "checked" : "",
                     disabled: defined(rbacPermissions[category][rbac[category][item]]) &&
-                    rbacPermissions[category][rbac[category][item]] === "h" ? "checked" : ""
+                        rbacPermissions[category][rbac[category][item]] === "h" ? "checked" : ""
                 };
             }
             else {
@@ -152,19 +151,19 @@ CtrlActionSystemUsersRole._htmlRoleTable = function(rolePermissions) {
 
             tableBody += "<tr>";
             tableBody += "<td>" + AppRBAC.getRBACNameTranslation(category + "." + rbac[category][item]) + "</td>";
-            tableBody += "<td class='inputField_0'><input value='*' class='fullControl' type='radio' name='" + category + "__" + rbac[category][item] + "' " + permission.fullControl + " /></td>";
-            tableBody += "<td class='inputField_1'><input value='r' class='read' type='radio' name='" + category + "__" + rbac[category][item] + "' " + permission.read + " /></td>";
-            tableBody += "<td class='inputField_2'><input value='h' class='disabled' type='radio' name='" + category + "__" + rbac[category][item] + "' " + permission.disabled + " /></td>";
+                tableBody += "<td class='inputField_0'><input value='*' class='fullControl' type='radio' name='" + category + "__" + rbac[category][item] + "' " + permission.fullControl + " /></td>";
+                tableBody += "<td class='inputField_1'><input value='r' class='read' type='radio' name='" + category + "__" + rbac[category][item] + "' " + permission.read + " /></td>";
+                tableBody += "<td class='inputField_2'><input value='h' class='disabled' type='radio' name='" + category + "__" + rbac[category][item] + "' " + permission.disabled + " /></td>";
             tableBody += "</tr>";
-        });
-    });
+        }
+    }
 
     // Webservice access level config
     tableBody += "<tr>";
     tableBody += "<td style='background-color:#eee' class='mdl-cell--left'><b>WEB SERVICE</b></td><td style='background-color:#eee' ></td><td style='background-color:#eee'></td><td style='background-color:#eee'></td>";
     tableBody += "</tr>";
 
-    let accessLevelSelect = AppMain.html.formElementSelect("access-level", [
+    var accessLevelSelect = AppMain.html.formElementSelect("access-level", [
         " --- ",
         AppMain.t("FULL_ACC", "SYS_USER_ROLE_MNG"),
         AppMain.t("SERVICE_ACC", "SYS_USER_ROLE_MNG"),
@@ -185,43 +184,44 @@ CtrlActionSystemUsersRole._htmlRoleTable = function(rolePermissions) {
 };
 
 CtrlActionSystemUsersRole._getFormData = function() {
-    let form = $('#SystemUsersRoleForm');
-    let formData = form.serialize();
+    var form = $('#SystemUsersRoleForm');
+    var formData = form.serialize();
     return form.deserialize(formData);    
 };
 
 CtrlActionSystemUsersRole.readRolePermissionTable = function() {    
-    let formData = CtrlActionSystemUsersRole._getFormData();
-    let rolePermissions = {};
+    var formData = CtrlActionSystemUsersRole._getFormData();    
+    var rolePermissions = {};
 
-    formData.forEach(function (item) {
+    for (item in formData) {        
         if (item.indexOf("__") > 0) {
-            let permission = item.split("__");
-            if (!defined(rolePermissions[ permission[0] ])) {
-                rolePermissions[permission[0]] = {};
-            }
+            var permission = item.split("__");
+            if (!defined(rolePermissions[ permission[0] ])) 
+                rolePermissions[ permission[0] ] = {};
+
             rolePermissions[ permission[0] ][ permission[1] ] = formData[item];
         }
-    });
+    }
     return rolePermissions;
 };
 
 CtrlActionSystemUsersRole.__addNewRole = function() {    
-    let form = $('#SystemUsersRoleForm');
-    let formData = form.serialize();
+    var form = $('#SystemUsersRoleForm');
+    var formData = form.serialize();
     formData = form.deserialize(formData);    
-    let rolePermissions = CtrlActionSystemUsersRole.readRolePermissionTable();
+    var rolePermissions = CtrlActionSystemUsersRole.readRolePermissionTable();
 
-    if (defined(formData.roleName) && formData.roleName !== "") {
-        let xmlPermissions = Json2Xml.json2xml_str(rolePermissions);
+    if (defined(formData.roleName) && formData.roleName != "") {
+        var Json2Xml = new X2JS();
+        var xmlPermissions = Json2Xml.json2xml_str(rolePermissions);
 
-        AppMain.ws().exec("SetUserData", {
+        var response = AppMain.ws().exec("SetUserData", {
             operation: "ADD-ROLE",
             "user-role-name": formData.roleName,
             //"role-description": formData.roleDesc,
             "user-role": xmlPermissions,
             "access-level": AppMain.rbac.WS_ACCESS_LEVEL_FULL
-        }).getResponse(false);
+        }).getResponse();
 
         this.controller.setRequestParam("selectedRole", formData.roleName);
         this.exec();
@@ -233,27 +233,33 @@ CtrlActionSystemUsersRole.__addNewRole = function() {
 };
 
 CtrlActionSystemUsersRole.__save = function() {
-    let formData = CtrlActionSystemUsersRole._getFormData();
+    var formData = CtrlActionSystemUsersRole._getFormData();
+    dmp("__FORM_DATA__");
+    dmp(formData);
 
     if (defined(formData.role)) {
-        let rolePermissions = CtrlActionSystemUsersRole.readRolePermissionTable();
-        AppMain.ws().exec("SetUserData", {
+        var rolePermissions = CtrlActionSystemUsersRole.readRolePermissionTable();
+        var response = AppMain.ws().exec("SetUserData", {
             "operation": "DELETE-ROLE",
             "user-role-name": formData.role
-        }).getResponse(false);
+        }).getResponse();
 
-        let xmlPermissions = Json2Xml.json2xml_str(rolePermissions);
+        var Json2Xml = new X2JS();
+        var xmlPermissions = Json2Xml.json2xml_str(rolePermissions);
 
-        AppMain.ws().exec("SetUserData", {
+        var response = AppMain.ws().exec("SetUserData", {
             "operation": "ADD-ROLE",
             "user-role-name": formData.role,            
             "user-role": xmlPermissions,
             "access-level": formData["access-level"]
-        }).getResponse(false);
+        }).getResponse();
 
         this.exec();
         AppMain.dialog("SUCC_ROLE_UPDATED", "success");
 
+        dmp("RESPONSE2: ");
+        dmp(response);
+        dmp(rolePermissions);
         // go to top of the page to see dialog
         this.goToTop();
         location.reload();
@@ -266,11 +272,11 @@ CtrlActionSystemUsersRole.getSelectedRole = function() {
 
 CtrlActionSystemUsersRole.__remove = function() {
     
-    const roleName = this.getSelectedRole();
-    AppMain.ws().exec("SetUserData", {
+    var roleName = this.getSelectedRole();
+    var response = AppMain.ws().exec("SetUserData", {
         "operation": "DELETE-ROLE",
         "user-role-name": roleName
-    }).getResponse(false);
+    }).getResponse();
 
     this.exec();
     AppMain.dialog("SUCC_ROLE_REMOVED", "success", [roleName]);

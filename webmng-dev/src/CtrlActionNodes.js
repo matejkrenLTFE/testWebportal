@@ -134,7 +134,7 @@ CtrlActionNodes.exec = function () {
             },
             elements: {
                 center: {
-                    text: totalDC > 0 ? parseInt((list.activeNodes / totalDC) * 100, 10) + "%" : "",
+                    text: totalDC > 0 ? parseInt((list.activeNodes / totalDC) * 100) + "%" : "",
                     color: centerColor,
                     fontStyle: 'Arial',
                     sidePadding: 20
@@ -195,7 +195,7 @@ CtrlActionNodes._buildNodeListHTML = function (_this, nodes) {
         if (node["node-last-comm"] && node["node-last-comm"]!== "0" && node["node-last-comm"]!== "---" && node["node-last-comm"] !== 0)
             lastSuccTime = moment(node["node-last-comm"]).format(AppMain.localization("DATETIME_FORMAT"));
 
-        successRate = (node["tx-ack-packets"] > 0) ? Math.ceil((parseInt(node["tx-ack-packets"], 10) / (parseInt(node["tx-ack-packets"], 10) + parseInt(node["tx-no-ack-packets"], 10))) * 100) : 0;
+        successRate = (node["tx-ack-packets"] > 0) ? Math.ceil((parseInt(node["tx-ack-packets"]) / (parseInt(node["tx-ack-packets"]) + parseInt(node["tx-no-ack-packets"]))) * 100) : 0;
         if (isNaN(successRate)) {
             successRate = 0;
         }
@@ -628,9 +628,9 @@ CtrlActionNodes.arrangeNodes = function (nodes, nodesCosemStat) {
             node["node-commissioned"] = nodesObj[node["mac-address"]]["commissioned"] ? nodesObj[node["mac-address"]]["commissioned"].toString(): "";
             node["node-last-comm"] = nodesObj[node["mac-address"]]["last-successful-communication"] ? nodesObj[node["mac-address"]]["last-successful-communication"].toString(): "";
             node["dc-state"] = defined(nodesObj[node["mac-address"]]["meter-state"]) ? nodesObj[node["mac-address"]]["meter-state"].toString() : "METER-JOINED";
-            const succ = parseInt(nodesObj[node["mac-address"]]["successful-communications"], 10);
-            const unsucc = parseInt(nodesObj[node["mac-address"]]["unsuccessful-communications"], 10);
-            node["success-rate"] = (!isNaN(succ) && !isNaN(unsucc) && succ + unsucc !== 0) ? parseInt((succ / (succ + unsucc)) * 100, 10) : 100;
+            const succ = parseInt(nodesObj[node["mac-address"]]["successful-communications"]);
+            const unsucc = parseInt(nodesObj[node["mac-address"]]["unsuccessful-communications"]);
+            node["success-rate"] = (!isNaN(succ) && !isNaN(unsucc) && succ + unsucc !== 0) ? parseInt((succ / (succ + unsucc)) * 100) : 100;
             node["successful-communications"] = nodesObj[node["mac-address"]]["successful-communications"];
             if (nodesObj[node["mac-address"]]["last-successful-communication"] && nodesObj[node["mac-address"]]["last-successful-communication"].toString() !== "0")
                 node["last-successful-communication"] = moment(nodesObj[node["mac-address"]]["last-successful-communication"].toString()).format(AppMain.localization("DATETIME_FORMAT"));

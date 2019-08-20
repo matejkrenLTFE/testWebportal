@@ -574,7 +574,7 @@ CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
                 }
                 for (let index in allTextLines) {
                     if (allTextLines.hasOwnProperty(index)) {
-                        if (parseInt(index, 10) < startInd)
+                        if (parseInt(index) < startInd)
                             continue;
                         const line = allTextLines[index];
                         if (line !== "")

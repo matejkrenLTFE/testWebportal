@@ -1,23 +1,25 @@
 /**
  * @class CtrlActionSystemCertManager Controller action using IControllerAction interface.
  */
-const modulecontrolleraction = require("./IControllerAction");
-let CtrlActionSystemCertManager = Object.create(new modulecontrolleraction.IControllerAction);
-const download = require("./vendor/download.js");
-
+var modulecontrolleraction = require("./IControllerAction");
+var CtrlActionSystemCertManager = Object.create(new modulecontrolleraction.IControllerAction);
+var X2JS = require("xml-json-parser");
 
 CtrlActionSystemCertManager.exec = function() {
     this.view.setTitle("SYS_CER_MNG");
 
-    let resp = AppMain.ws().exec("GetCertificates", {}).getResponse(false);
+    var resp = AppMain.ws().exec("GetCertificates", {}).getResponse();
 
-    let certs = [];
+    var certs = [];
     if (defined(resp.GetCertificatesResponse.certificate)) {
         if(resp.GetCertificatesResponse.certificate instanceof Array)
             certs = resp.GetCertificatesResponse.certificate;
         if (defined(resp.GetCertificatesResponse.certificate.id))
             certs = [resp.GetCertificatesResponse.certificate];
     }
+
+    dmp( "<CERTS>");
+    dmp( certs );
 
     this.view.render(this.controller.action, {
         _title: AppMain.t("CERTIFICATES", "SYS_CER_MNG"),
@@ -80,24 +82,24 @@ CtrlActionSystemCertManager.exec = function() {
 };
 
 CtrlActionSystemCertManager.__showForm = function(e) {
-    let id = $(e.target).data("form-id");
+    var id = $(e.target).data("form-id");
     $(".tr-form").addClass("hidden");
     $("#"+ id).removeClass("hidden");
     componentHandler.upgradeDom(); //fix for input elements not being initialized
 };
 
-CtrlActionSystemCertManager.__closeForm = function() {
+CtrlActionSystemCertManager.__closeForm = function(e) {
     $(".tr-form").addClass("hidden");
 };
 
-CtrlActionSystemCertManager.__generateCert = function() {
-    let keyType = $("input[name='cert-generate-key-type']").val();
-    let parameters = $("input[name='cert-generate-parameters']").val();
-    let subject = $("input[name='cert-subject']").val();
-    let email = $("input[name='cert-email']").val();
-    let validity = $("input[name='cert-validity']").val();
+CtrlActionSystemCertManager.__generateCert = function(e) {
+    var keyType = $("input[name='cert-generate-key-type']").val();
+    var parameters = $("input[name='cert-generate-parameters']").val();
+    var subject = $("input[name='cert-subject']").val();
+    var email = $("input[name='cert-email']").val();
+    var validity = $("input[name='cert-validity']").val();
     try{
-        validity = parseInt(validity, 10);
+        validity = parseInt(validity);
     }catch (e){
         validity = 0;
     }finally {
@@ -106,22 +108,22 @@ CtrlActionSystemCertManager.__generateCert = function() {
         }
     }
 
-    let result = AppMain.ws().exec("CreateSelfSignCertificate", {
+    var result = AppMain.ws().exec("CreateSelfSignCertificate", {
         "key-type": keyType,
         "key-parameters": parameters,
         "cert-subject": subject,
         "cert-email": email,
         "validity-days": validity
-    }).getResponse(false);
+    }).getResponse();
 
     if (result.CreateSelfSignCertificateResponse && result.CreateSelfSignCertificateResponse["cert-nick"])
         AppMain.dialog("SELF_SIGNED_CERT_GEN", "success");
     else{
-        let messageId = result.Fault.Reason.Text.toString();
-        let message = AppMain.getAppMessage(messageId);
+        var messageId = result.Fault.Reason.Text.toString();
+        var message = AppMain.getAppMessage(messageId);
         if (message) {
             // Translate application message
-            message = AppMain.t(message, undefined);
+            message = AppMain.t(message);
         }else{
             message = messageId;
         }
@@ -134,45 +136,52 @@ CtrlActionSystemCertManager.__generateCert = function() {
 };
 
 CtrlActionSystemCertManager._htmlCertList = function(certs) {
-    let html = "";
+    var html = "";
 
-    certs.forEach(function (i) {
+    var i = null;
+    for (i in certs) {
+        /*var selectRoleMenu = AppMain.html.formElementSelect("role", roles, {
+            elementAttr: ' data-bind-event="change" data-bind-method="CtrlActionSystemCertManager.update" '
+            //elementSelected: users[i]["user-role-name"]
+        });*/
         html += "<tr>";
         html += "<td>" + certs[i]["cert-nick"] + "</td>";
+        // html += "<td>" + certs[i].label + "</td>";
         html += "<td></td>";
+        // html += "<td>" + certs[i]["cert-type"] + "</td>";
         html += "<td></td>";
+        //html += "<td>" + selectRoleMenu + "</td>";
 
         html += '<td colspan="2">';
-        html += '<a data-rbac-element="cert-manager.button-remove-cert" href="" data-cert-id="' + certs[i]["cert-nick"] + '" data-bind-method="CtrlActionSystemCertManager.__remove" data-bind-event="click">' + AppMain.t("REMOVE", "global") + '</a> | ';
-        html += '<a data-rbac-element="cert-manager.button-export-cert" href="" data-cert-id="' + certs[i]["cert-nick"] + '" data-bind-method="CtrlActionSystemCertManager.__export" data-bind-event="click">' + AppMain.t("EXPORT", "global") + '</a></td>';
+            html += '<a data-rbac-element="cert-manager.button-remove-cert" href="" data-cert-id="' + certs[i]["cert-nick"] + '" data-bind-method="CtrlActionSystemCertManager.__remove" data-bind-event="click">' + AppMain.t("REMOVE", "global") + '</a> | ';
+            html += '<a data-rbac-element="cert-manager.button-export-cert" href="" data-cert-id="' + certs[i]["cert-nick"] + '" data-bind-method="CtrlActionSystemCertManager.__export" data-bind-event="click">' + AppMain.t("EXPORT", "global") + '</a></td>';
         html += "</tr>";
-    });
-
+    }
     return html;
 };
 
-CtrlActionSystemCertManager.__importCert = function() {
-    let files = document.getElementById("upload-cert").files;
+CtrlActionSystemCertManager.__importCert = function(e) {
+    var files = document.getElementById("upload-cert").files;
     if(!files.length){
         AppMain.dialog("PLEASE_SEL_FILE", "error");
         return;
     }
-    let file = files[0];
+    var file = files[0];
 
-    let reader = new FileReader();
+    var reader = new FileReader();
     reader.onload = function(e) { // to be changed
-        let data = btoa(e.target.result);
+        var data = btoa(e.target.result);
         // dmp(data);
-        let nick = $("input[name='cert-nick']").val();
-        let type = $("select[name='type']").val();
-        let userRoleName = $("select[name='cert-user-role-name']").val();
+        var nick = $("input[name='cert-nick']").val();
+        var type = $("select[name='type']").val();
+        var userRoleName = $("select[name='cert-user-role-name']").val();
 
-        let result = AppMain.ws().exec("ImportCertificate", {
+        var result = AppMain.ws().exec("ImportCertificate", {
             "cert-nick": nick,
             "cert-type": type,
             "data": data,
             "user-role-name": userRoleName
-        }).getResponse(false);
+        }).getResponse();
 
         if (result.ImportCertificateResponse.toString()==="OK")
             AppMain.dialog("CERT_SUCC_UPLOADED", "success", [nick]);
@@ -230,12 +239,13 @@ CtrlActionSystemCertManager.__importCert = function() {
  * Export certificate into a file.
  */
 CtrlActionSystemCertManager.__export = function(e) {
-    let certId = $(e.target).data("cert-id");
+    var certId = $(e.target).data("cert-id");
     if (certId) {
-        let cert = AppMain.ws().exec("ExportCertificate", {"cert-nick": certId}).getResponse(false);
+        var cert = AppMain.ws().exec("ExportCertificate", {"cert-nick": certId}).getResponse();
         if (defined(cert.ExportCertificateResponse) && defined(cert.ExportCertificateResponse["cert-nick"])) {
             cert = cert.ExportCertificateResponse;
-            const data = atob(cert.data);
+            var download = require("./vendor/download.js");
+            var data = atob(cert.data);
             download("data:text/plain;charset=utf-8;base64," + btoa(data), cert["cert-nick"], "text/plain");
         }
     }
@@ -245,9 +255,10 @@ CtrlActionSystemCertManager.__export = function(e) {
  * Remove certificate.
  */
 CtrlActionSystemCertManager.__remove = function(e) {
-    let certId = $(e.target).data("cert-id");
+    var certId = $(e.target).data("cert-id");
     if (certId) {
-        AppMain.ws().exec("DeleteCertificate", {"cert-nick": certId}).getResponse(false);
+        var resp = AppMain.ws().exec("DeleteCertificate", {"cert-nick": certId}).getResponse();
+        dmp(resp);
         AppMain.dialog("CERT_SUCC_REMOVED", "success", [certId]);
     }
     this.exec();

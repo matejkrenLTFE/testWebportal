@@ -21,7 +21,7 @@ require("./AppMain");
 
 // Application bootstrap
 // AppMain must be global singelton instance.
-window.AppMain = new AppMain({
+window["AppMain"] = new AppMain({
 	environment: "dev", // dev | prod
     httpsEnabled: true,
 	supportedLocale: [],

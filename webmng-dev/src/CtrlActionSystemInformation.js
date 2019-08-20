@@ -1,20 +1,20 @@
 /**
  * @class CtrlActionSystemInformation Controller action using IControllerAction interface.
  */
-const modulecontrolleraction = require("./IControllerAction");
-let CtrlActionSystemInformation = Object.create(new modulecontrolleraction.IControllerAction);
+var modulecontrolleraction = require("./IControllerAction");
+var CtrlActionSystemInformation = Object.create(new modulecontrolleraction.IControllerAction);
 //var fs = require("fs");
 
 CtrlActionSystemInformation.exec = function() {    
     this.view.setTitle("SYS_INFO");
 
-     let generalInfo = {
+     var generalInfo = { 
         system: {},
         wan: {},
         PLC:{}
     };
 
-    let info = AppMain.ws().getResponseCache("GetInfos", undefined);
+    var info = AppMain.ws().getResponseCache("GetInfos");
     // Prepare params
     $.each(info.GetInfosResponse.info, function(i, obj){	
         if (typeof generalInfo[obj.category] !== "undefined")		

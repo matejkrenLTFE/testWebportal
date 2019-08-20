@@ -24,7 +24,7 @@ CtrlActionSystemFirewallManager.exec = function(e) {
         if(rule["id-number"] === undefined){
             rule["id-number"] = index + 1;
         }
-        rule["id-number"] = parseInt(rule["id-number"], 10);
+        rule["id-number"] = parseInt(rule["id-number"]);
     });
 
     this.view.render(this.controller.action, {
@@ -163,7 +163,7 @@ CtrlActionSystemFirewallManager.addFirewallRule = function() {
 CtrlActionSystemFirewallManager.removeFirewallRule = function(e) {
     var $this = $(e.target);
     var ruleId = $this.attr("data-node-ruleId");
-    ruleId = parseInt(ruleId, 10);
+    ruleId = parseInt(ruleId);
     if(!isNaN(ruleId)){
         for(var i = 0; i < this.settings.rules.length; i++){
             if (this.settings.rules[i]["id-number"] === ruleId){

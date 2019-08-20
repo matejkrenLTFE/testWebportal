@@ -5,7 +5,7 @@
 
         var space = '    ';
 
-        if ( isNaN(parseInt(step, 10)) ) {  // argument is string
+        if ( isNaN(parseInt(step)) ) {  // argument is string
             space = step;
         } else { // argument is integer
             switch(step) {

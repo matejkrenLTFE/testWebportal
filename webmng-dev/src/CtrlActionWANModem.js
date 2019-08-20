@@ -86,7 +86,7 @@ CtrlActionWANModem.exec = function() {
         $(".just-number").on("input", function() {
             const nonNumReg = /[^0-9]/g;
             $(this).val($(this).val().replace(nonNumReg, ''));
-            const v = parseInt($(this).val(), 10);
+            const v = parseInt($(this).val());
             if(v > 128){
                 $(this).val("128");
             }

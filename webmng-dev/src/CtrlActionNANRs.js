@@ -1,16 +1,15 @@
 /**
  * @class CtrlActionNANRs Controller action using IControllerAction interface.
  */
-const modulecontrolleraction = require("./IControllerAction");
-let CtrlActionNANRs = Object.create(new modulecontrolleraction.IControllerAction);
-const moment = require("moment");
-const build = require("../build.info");
-const download = require("./vendor/download.js");
+var modulecontrolleraction = require("./IControllerAction");
+var CtrlActionNANRs = Object.create(new modulecontrolleraction.IControllerAction);
+var moment = require("moment");
+var build = require("../build.info");
 
-CtrlActionNANRs.exec = function() {
+CtrlActionNANRs.exec = function(e) {
     this.view.setTitle("NAN_RS485");
 
-    let params = AppMain.ws().exec("GetParameters", {"rs485":""}).getResponse(false);
+    var params = AppMain.ws().exec("GetParameters", {"rs485":""}).getResponse();
     params = defined(params.GetParametersResponse.rs485) ? params.GetParametersResponse.rs485 : {};
 
     dmp(params);    
@@ -55,12 +54,15 @@ CtrlActionNANRs.exec = function() {
     });
 };
 
-CtrlActionNANRs.setParams = function() {
-    let form = $("#NANRsForm");
-    let data = form.serialize();
+CtrlActionNANRs.setParams = function(e) {
+    dmp("setParams");
+    var form = $("#NANRsForm");
+    var data = form.serialize();
     data = form.deserialize(data);
+    dmp("FormData");
+    dmp(data);
     
-    let response = AppMain.ws().exec("SetParameters", {"rs485": data }).getResponse(false);
+    var response = AppMain.ws().exec("SetParameters", {"rs485": data }).getResponse();
     if(defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK")
         AppMain.dialog( "SUCC_UPDATED", "success" );
     else
@@ -68,18 +70,19 @@ CtrlActionNANRs.setParams = function() {
     AppMain.html.updateElements([".mdl-button"]);
 };
 
-CtrlActionNANRs.exportParams = function() {
-    let response = AppMain.ws().exec("GetParameters", {"rs485": "" }).getResponse(false);
+CtrlActionNANRs.exportParams = function(e) {
+    var response = AppMain.ws().exec("GetParameters", {"rs485": "" }).getResponse();
+    dmp("EXPORT PARAMS");
+    dmp(response);
 
     if (defined(response.GetParametersResponse.rs485)) {
-        let xml="<rs485>\n";
-        response.GetParametersResponse.rs485.forEach(function (elm) {
+        var xml="<rs485>\n";
+        for (elm in response.GetParametersResponse.rs485)
             xml += "<" + elm + ">" + response.GetParametersResponse.rs485[elm] + "</" + elm + ">\n";
-        });
-
         xml += "</rs485>";
 
-        const dateStr = moment(new Date()).format( AppMain.localization("EXPORT_DATETIME_FORMAT") );
+        var download = require("./vendor/download.js");
+        var dateStr = moment(new Date()).format( AppMain.localization("EXPORT_DATETIME_FORMAT") );
         download("data:application/xml;charset=utf-8;base64," + btoa(xml), build.device + "_Parameters_RS485_" + dateStr + ".xml", "application/xml");
     }
 };

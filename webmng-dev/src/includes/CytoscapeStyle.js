@@ -25,7 +25,7 @@ const cyStyle = [
             "color": "#fff",
             "opacity": 0.7,
             'border-width': function (node) {
-                let busyness = parseInt(node.data("busyness"), 10);
+                let busyness = parseInt(node.data("busyness"));
                 if(isNaN(busyness) || busyness === 0)
                     return 0;
                 if (busyness <= 5)
@@ -98,7 +98,7 @@ const cyStyle = [
                 }
             },
             'line-color': function (e) {
-                const linkCost = parseInt(e.data("linkCount"), 10);
+                const linkCost = parseInt(e.data("linkCount"));
                 if(isNaN(linkCost) || linkCost<=12)
                     return "#009E00";
                 if(linkCost<=254)
@@ -106,7 +106,7 @@ const cyStyle = [
                 return "rgb(255, 0, 0)";
                 },
             'target-arrow-color': function (e) {
-                const linkCost = parseInt(e.data("linkCount"), 10);
+                const linkCost = parseInt(e.data("linkCount"));
                 if(isNaN(linkCost) || linkCost<=12)
                     return "#009E00";
                 if(linkCost<=254)

@@ -457,9 +457,9 @@ CtrlActionMonitoringManager.setCounters = function(counters,profileCategory,prof
         this.chartLabels.push(moment(counters[i]["time-stamp"]).format(AppMain.localization("DATETIME_FORMAT")));
         let value = 0;
         if(this.typeObj[profileType] === "COUNTER"){
-            value = Math.max(parseInt(counters[i][profileCategory][profileType], 10) - parseInt(counters[i-1][profileCategory][profileType], 10), 0);
+            value = Math.max(parseInt(counters[i][profileCategory][profileType]) - parseInt(counters[i-1][profileCategory][profileType]), 0);
         }else{
-            value = parseInt(counters[i][profileCategory][profileType], 10);
+            value = parseInt(counters[i][profileCategory][profileType]);
         }
         this.chartDatasets[0].data.push(value);
         this.bodyHTML +="<tr><td style='text-align: left!important;'>" + moment(counters[i]["time-stamp"]).format(AppMain.localization("DATETIME_FORMAT")) + "</td>" +

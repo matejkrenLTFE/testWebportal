@@ -1,16 +1,17 @@
 
-const List = require("list.js");
+const List = require('list.js');
 
 /**
  * @class IControllerAction Action component interface
  */
-module.exports.IControllerAction = function(){
+module.exports.IControllerAction = function() 
+{
     this.view = AppMain.getAppComponent("view");
 
     this.controller = AppMain.getAppComponent("controller");
 
     /**
-     * @method Main method to execute controller action. All classes
+     * @method Main method to execute controller action. All classes 
      * extending IControllerAction must implement this method.
      */
     this.exec = null;
@@ -24,7 +25,7 @@ module.exports.IControllerAction = function(){
         const TS = $("#table-search");
         const search = $("input.search");
         if(!this.isSearchOpened){
-            let w = this.calculateRemainingWidth();
+            let w = this._calculateRemainingWidth();
             if(w > 0){
                 w = w + "px";
                 TS.show().animate({width: w}, {duration: 500});
@@ -35,14 +36,14 @@ module.exports.IControllerAction = function(){
             search.focus();
             this.isSearchOpened = true;
         }else{
-            this.closeFilter();
+            this._closeFilter();
         }
     };
 
     /**
      * close filter function
      */
-    this.closeFilter = function(){
+    this._closeFilter = function(){
         const TS = $("#table-search");
         const search = $("input.search");
         TS.animate({width: "0px"}, {duration: 500});
@@ -58,20 +59,18 @@ module.exports.IControllerAction = function(){
     /**
      * helper function for calculating remaining filter space
      */
-    this.calculateRemainingWidth = function(){
+    this._calculateRemainingWidth = function(){
         let avWidth = $("#title-row").width() - $("#title-row .mdl-card__title-text").width() - 16
             - $("#title-row .mdl-cell-icons").width();
         if(!$( "#table-search.table-search-absolute" ).length){
-            avWidth += $("#table-search").width();
+            avWidth += $("#table-search").width()
         }
-        if(avWidth > 160){
+        if(avWidth > 160)
             return 150;
-        }
-        if(avWidth > 70) {
+        if(avWidth > 70)
             return (avWidth - 10);
-        }else{
+        else
             return 0;
-        }
     };
 
     this.initTable = function (tableID, tableWrapper, tableOptions) {
@@ -117,7 +116,7 @@ module.exports.IControllerAction = function(){
                 if($this.isSearchOpened){
                     setTimeout(function () {
                         if($(e.currentTarget).val() === ""){
-                            $this.closeFilter();
+                            $this._closeFilter();
                         }
                     },100);
                 }
@@ -126,7 +125,7 @@ module.exports.IControllerAction = function(){
             $(window).on("load resize ", function() {
                 if($this.isSearchOpened){
                     const TS = $("#table-search");
-                    let w = $this.calculateRemainingWidth();
+                    let w = $this._calculateRemainingWidth();
                     if(w > 0){
                         w = w + "px";
                         TS.animate({width: w}, {duration: 0});

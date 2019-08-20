@@ -2,9 +2,6 @@
  * Application localization and translation component.
  * @author LTFE
  */
-
-"use strict";
-
 module.exports.AppLocale = function(loc)
 {
     const localeDefault = "en_US";
