@@ -79,7 +79,7 @@ module.exports.AppController = function () {
         // Execute event callbacks
         if (eventsMap[eventName]) {
             const ind = parseInt(eventsMap[eventName]);
-            if (defined(this.eventsPom[ind])) {
+            if (defined(this.eventsPom[parseInt(eventsMap[eventName])])) {
                 this.eventsPom[ind].forEach(function (value) {
                     if (typeof value === "function") {
                         value();
