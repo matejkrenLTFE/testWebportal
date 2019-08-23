@@ -64,10 +64,11 @@ module.exports.AppController = function () {
      */
     this.attachEvent = function (eventName, callback) {
         if (eventsMap[eventName]) {
-            if (!defined(this.eventsPom[eventsMap[eventName]])) {
-                this.eventsPom[eventsMap[eventName]] = [];
+            const ind = parseInt(eventsMap[eventName]);
+            if (!defined(this.eventsPom[ind])) {
+                this.eventsPom[ind] = [];
             }
-            this.eventsPom[eventsMap[eventName]][this.eventsPom[eventsMap[eventName]].length] = callback;
+            this.eventsPom[ind][this.eventsPom[ind].length] = callback;
         }
     };
 
@@ -77,8 +78,9 @@ module.exports.AppController = function () {
     this.executeEvent = function (eventName) {
         // Execute event callbacks
         if (eventsMap[eventName]) {
-            if (defined(this.eventsPom[eventsMap[eventName]])) {
-                this.eventsPom[eventsMap[eventName]].forEach(function (value) {
+            const ind = parseInt(eventsMap[eventName]);
+            if (defined(this.eventsPom[ind])) {
+                this.eventsPom[ind].forEach(function (value) {
                     if (typeof value === "function") {
                         value();
                     }
