@@ -126,7 +126,9 @@ module.exports.AppController = function () {
     function getControllerActionComponent(action) {
         let controlleractioncomponent = null;
         if (controllers.indexOf(action) !== -1) { // protect dynamic require
-            controlleractioncomponent = require("./CtrlAction" + action); // eslint-disable-line import/no-dynamic-require
+            /* eslint-disable import/no-dynamic-require */
+            controlleractioncomponent = require("./CtrlAction" + action);
+            /* eslint-enable import/no-dynamic-require */
         } else {
             AppMain.log("Module not found.");
             dmp("AppMain.exec controller action exception message: Module not found.");
@@ -196,6 +198,20 @@ module.exports.AppController = function () {
         dmp(e);
     };
 
+    function addRoleDataToUserObject(roleData, user) {
+        // Add role data to user object
+        if (defined(roleData.GetUserDataResponse.role)) {
+            const permissions = Json2Xml.xml_str2json("<role>" + roleData.GetUserDataResponse.role["user-role"] + "</role>");
+            user.role = permissions.role;
+            user["access-level"] = roleData.GetUserDataResponse.role["access-level"];
+            AppMain.user.setUserData(user);
+            AppMain.dialog("CREDENTIALS_OK_LOADING", "success");
+            setTimeout(function () {
+                window.location = AppMain.getUrl("app");
+            }, 1500);
+        }
+    }
+
     /**
      * Application login action.
      * @param {object} userLoginData Required for: AUTH_TYPE_CERT
@@ -236,18 +252,7 @@ module.exports.AppController = function () {
                             "user-role-name": user["user-role-name"],
                             "operation": "ROLE"
                         }).getResponse(false);
-
-                        // Add role data to user object
-                        if (defined(roleData.GetUserDataResponse.role)) {
-                            const permissions = Json2Xml.xml_str2json("<role>" + roleData.GetUserDataResponse.role["user-role"] + "</role>");
-                            user.role = permissions.role;
-                            user["access-level"] = roleData.GetUserDataResponse.role["access-level"];
-                            AppMain.user.setUserData(user);
-                            AppMain.dialog("CREDENTIALS_OK_LOADING", "success");
-                            setTimeout(function () {
-                                window.location = AppMain.getUrl("app");
-                            }, 1500);
-                        }
+                        addRoleDataToUserObject(roleData, user);
                     } else {
                         AppMain.dialog("USER_LOGIN_FAILED", "error");
                         if (AppMain.environment === AppMain.ENVIRONMENT_DEV) {
