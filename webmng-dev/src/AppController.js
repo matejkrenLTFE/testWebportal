@@ -125,8 +125,8 @@ module.exports.AppController = function () {
 
     function getControllerActionComponent(action) {
         let controlleractioncomponent = null;
-        if (controllers.indexOf(action) !== -1) {
-            controlleractioncomponent = require("./CtrlAction" + action);
+        if (controllers.indexOf(action) !== -1) { // protect dynamic require
+            controlleractioncomponent = require("./CtrlAction" + action); // eslint-disable-line import/no-dynamic-require
         } else {
             AppMain.log("Module not found.");
             dmp("AppMain.exec controller action exception message: Module not found.");
