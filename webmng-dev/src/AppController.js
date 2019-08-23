@@ -64,11 +64,11 @@ module.exports.AppController = function () {
      */
     this.attachEvent = function (eventName, callback) {
         if (eventsMap[eventName]) {
-            // const ind = parseInt(eventsMap[eventName], 10);
-            if (!defined(this.eventsPom[parseInt(eventsMap[eventName], 10)])) {
-                this.eventsPom[parseInt(eventsMap[eventName], 10)] = [];
-            }
-            this.eventsPom[parseInt(eventsMap[eventName], 10)][this.eventsPom[parseInt(eventsMap[eventName], 10)].length] = callback;
+            const ind = parseInt(eventsMap[eventName], 10);
+            // if (!defined(this.eventsPom[ind])) {
+            //     this.eventsPom[ind] = [];
+            // }
+            // this.eventsPom[ind][this.eventsPom[ind].length] = callback;
         }
     };
 
@@ -78,14 +78,14 @@ module.exports.AppController = function () {
     this.executeEvent = function (eventName) {
         // Execute event callbacks
         if (eventsMap[eventName]) {
-            // const ind = parseInt(eventsMap[eventName], 10);
-            if (defined(this.eventsPom[parseInt(eventsMap[eventName])])) {
-                this.eventsPom[parseInt(eventsMap[eventName], 10)].forEach(function (value) {
-                    if (typeof value === "function") {
-                        value();
-                    }
-                });
-            }
+            const ind = parseInt(eventsMap[eventName], 10);
+            // if (defined(this.eventsPom[parseInt(eventsMap[eventName])])) {
+            //     this.eventsPom[ind].forEach(function (value) {
+            //         if (typeof value === "function") {
+            //             value();
+            //         }
+            //     });
+            // }
         }
     };
 
