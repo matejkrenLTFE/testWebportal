@@ -126,15 +126,28 @@ module.exports.AppController = function () {
     function getControllerActionComponent(action) {
         let controlleractioncomponent = null;
         if (controllers.indexOf(action) !== -1) { // protect dynamic require
-            /* eslint-disable import/no-dynamic-require */
             controlleractioncomponent = require("./CtrlAction" + action); // eslint-disable-line import/no-dynamic-require
-            /* eslint-enable import/no-dynamic-require */
         } else {
             AppMain.log("Module not found.");
             dmp("AppMain.exec controller action exception message: Module not found.");
         }
         return controlleractioncomponent;
     }
+
+    this.executeCtrl = function () {
+        let controlleractioncomponent = getControllerActionComponent(this.action);
+
+        if (controlleractioncomponent !== null) {
+            this.ctrlActionComp = controlleractioncomponent["CtrlAction" + this.action];
+
+            if (typeof this.ctrlActionComp.init === "function") {
+                this.ctrlActionComp.init();
+            }
+            _beforeExec(this);
+            this.ctrlActionComp.exec();
+            _afterExec(this);
+        }
+    };
 
     this.exec = function (action, event) {
         AppMain.log("AppController.exec");
@@ -159,20 +172,7 @@ module.exports.AppController = function () {
         if (this.action !== "Login" && !AppMain.rbac.hasExecCtrlActionPermission(this.action)) {
             return this.actionForbidden();
         }
-
-        let controlleractioncomponent = getControllerActionComponent(this.action);
-
-        if (controlleractioncomponent !== null) {
-            this.ctrlActionComp = controlleractioncomponent["CtrlAction" + this.action];
-
-            if (typeof this.ctrlActionComp.init === "function") {
-                this.ctrlActionComp.init();
-            }
-            _beforeExec(this);
-            this.ctrlActionComp.exec();
-        }
-
-        _afterExec(this);
+        this.executeCtrl();
     };
 
     this.actionForbidden = function () {
