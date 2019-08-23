@@ -54,21 +54,28 @@ module.exports.AppController = function () {
 
     this.eventsPom = {};
 
-    const eventsMap = {
-        "onBeforeExecute": 1,
-        "onAfterExecute": 2
-    };
-
     /**
      * Attach component event. Events are executed in FIFO order.
      */
     this.attachEvent = function (eventName, callback) {
-        if (eventsMap[eventName]) {
-            const ind = parseInt(eventsMap[eventName], 10);
-            // if (!defined(this.eventsPom[ind])) {
-            //     this.eventsPom[ind] = [];
-            // }
-            // this.eventsPom[ind][this.eventsPom[ind].length] = callback;
+        if (eventName === "onBeforeExecute") {
+            if (!defined(this.eventsPom.onBeforeExecute)) {
+                this.eventsPom.onBeforeExecute = [];
+            }
+            this.eventsPom.onBeforeExecute.push(callback);
+        } else {
+            if (eventName === "onAfterExecute") {
+                if (!defined(this.eventsPom.onAfterExecute)) {
+                    this.eventsPom.onAfterExecute = [];
+                }
+                this.eventsPom.onAfterExecute.push(callback);
+            }
+        }
+    };
+
+    let executeFunction = function (value) {
+        if (typeof value === "function") {
+            value();
         }
     };
 
@@ -77,15 +84,12 @@ module.exports.AppController = function () {
      */
     this.executeEvent = function (eventName) {
         // Execute event callbacks
-        if (eventsMap[eventName]) {
-            const ind = parseInt(eventsMap[eventName], 10);
-            // if (defined(this.eventsPom[parseInt(eventsMap[eventName])])) {
-            //     this.eventsPom[ind].forEach(function (value) {
-            //         if (typeof value === "function") {
-            //             value();
-            //         }
-            //     });
-            // }
+        if (eventName === "onBeforeExecute") {
+            this.eventsPom.onBeforeExecute.forEach(executeFunction);
+        } else {
+            if (eventName === "onAfterExecute") {
+                this.eventsPom.onAfterExecute.forEach(executeFunction);
+            }
         }
     };
 
