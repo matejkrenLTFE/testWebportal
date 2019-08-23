@@ -152,10 +152,6 @@ module.exports.AppController = function () {
     this.exec = function (action, event) {
         AppMain.log("AppController.exec");
 
-        if (this.view === null) {
-            throw "AppController: no view defined!";
-        }
-
         if (defined(event)) {
             this.event = event;
         }
@@ -163,8 +159,6 @@ module.exports.AppController = function () {
         this.action = (defined(action) && action !== "")
             ? action
             : this.actionDefault;
-
-        this.ctrlActionComp = null;
 
         AppMain.log("Execute CtrlAction: " + this.action);
 
