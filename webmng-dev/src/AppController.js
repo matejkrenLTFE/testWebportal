@@ -127,7 +127,7 @@ module.exports.AppController = function () {
         let controlleractioncomponent = null;
         if (controllers.indexOf(action) !== -1) { // protect dynamic require
             /* eslint-disable import/no-dynamic-require */
-            controlleractioncomponent = require("./CtrlAction" + action);
+            controlleractioncomponent = require("./CtrlAction" + action); // eslint-disable-line import/no-dynamic-require
             /* eslint-enable import/no-dynamic-require */
         } else {
             AppMain.log("Module not found.");
@@ -241,25 +241,19 @@ module.exports.AppController = function () {
             }).done(function () {
                 // HTTP auth succeeded, fetch user info from WS
                 localStorage.setItem("authDigest", btoa(username + ":" + password));
-                setTimeout(function () {//problem with localStorage authDigest being null
-                    const userData = AppMain.ws().exec("GetUserData", {username: username}).getResponse(false);
-                    AppMain.ws().exec("ExecuteAction", {"Command": "login"});
-                    dmp(userData);
+                const userData = AppMain.ws().exec("GetUserData", {username: username}).getResponse(false);
+                AppMain.ws().exec("ExecuteAction", {"Command": "login"});
 
-                    if (defined(userData.GetUserDataResponse) && defined(userData.GetUserDataResponse.user) && defined(userData.GetUserDataResponse.user["user-role-name"])) {
-                        const user = userData.GetUserDataResponse.user;
-                        const roleData = AppMain.ws().exec("GetUserData", {
-                            "user-role-name": user["user-role-name"],
-                            "operation": "ROLE"
-                        }).getResponse(false);
-                        addRoleDataToUserObject(roleData, user);
-                    } else {
-                        AppMain.dialog("USER_LOGIN_FAILED", "error");
-                        if (AppMain.environment === AppMain.ENVIRONMENT_DEV) {
-                            AppMain.dialog("Response: " + userData.status + " " + userData.statusText, "error");
-                        }
-                    }
-                }, 300);
+                if (defined(userData.GetUserDataResponse) && defined(userData.GetUserDataResponse.user) && defined(userData.GetUserDataResponse.user["user-role-name"])) {
+                    const user = userData.GetUserDataResponse.user;
+                    const roleData = AppMain.ws().exec("GetUserData", {
+                        "user-role-name": user["user-role-name"],
+                        "operation": "ROLE"
+                    }).getResponse(false);
+                    addRoleDataToUserObject(roleData, user);
+                } else {
+                    AppMain.dialog("USER_LOGIN_FAILED", "error");
+                }
             }).fail(function (resp) {
                 if (resp.status === 401) {
                     AppMain.dialog("Wrong username or password!", undefined);
