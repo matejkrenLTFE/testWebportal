@@ -51,18 +51,15 @@ module.exports.AppController = function () {
      */
     this.wsPom = null;
 
-    this.eventsPom = {};
+    this.eventsPom = {
+        onBeforeExecute: [],
+        onAfterExecute: []
+    };
 
     /**
      * Attach component event. Events are executed in FIFO order.
      */
     this.attachEvent = function (eventName, callback) {
-        if (!defined(this.eventsPom.onBeforeExecute)) {
-            this.eventsPom.onBeforeExecute = [];
-        }
-        if (!defined(this.eventsPom.onAfterExecute)) {
-            this.eventsPom.onAfterExecute = [];
-        }
         switch (eventName) {
         case "onBeforeExecute":
             this.eventsPom.onBeforeExecute.push(callback);
@@ -121,82 +118,16 @@ module.exports.AppController = function () {
         AppMain.html.updateElements([".mdl-select", ".mdl-switch", ".mdl-tooltip"]);
     }
 
-    function getControlerActionComponent(action) {
+    const controllers = ["Default", "Nodes", "PLCNeighbor", "PLCRouting", "WhiteList", "Events", "EventsSettings", "WANModem",
+            "WANEthernet", "NANPlc", "NANRs", "LANEthernet", "TaskManager", "GroupTable", "MonitoringManager", "PLCdiagnostics",
+            "Network", "SystemSettings", "SystemSettingsExport", "SystemUsers", "SystemUpgrade", "SystemReboot", "SystemInformation",
+            "Login"];
+
+    function getControllerActionComponent(action) {
         let controlleractioncomponent = null;
-        switch (action) {
-        case "Default":
-            controlleractioncomponent = require("./CtrlActionDefault");
-            break;
-        case "Nodes":
-            controlleractioncomponent = require("./CtrlActionNodes");
-            break;
-        case "PLCNeighbor":
-            controlleractioncomponent = require("./CtrlActionPLCNeighbor");
-            break;
-        case "PLCRouting":
-            controlleractioncomponent = require("./CtrlActionPLCRouting");
-            break;
-        case "WhiteList":
-            controlleractioncomponent = require("./CtrlActionWhiteList");
-            break;
-        case "Events":
-            controlleractioncomponent = require("./CtrlActionEvents");
-            break;
-        case "EventsSettings":
-            controlleractioncomponent = require("./CtrlActionEventsSettings");
-            break;
-        case "WANModem":
-            controlleractioncomponent = require("./CtrlActionWANModem");
-            break;
-        case "WANEthernet":
-            controlleractioncomponent = require("./CtrlActionWANEthernet");
-            break;
-        case "NANPlc":
-            controlleractioncomponent = require("./CtrlActionNANPlc");
-            break;
-        case "NANRs":
-            controlleractioncomponent = require("./CtrlActionNANRs");
-            break;
-        case "LANEthernet":
-            controlleractioncomponent = require("./CtrlActionLANEthernet");
-            break;
-        case "TaskManager":
-            controlleractioncomponent = require("./CtrlActionTaskManager");
-            break;
-        case "GroupTable":
-            controlleractioncomponent = require("./CtrlActionGroupTable");
-            break;
-        case "MonitoringManager":
-            controlleractioncomponent = require("./CtrlActionMonitoringManager");
-            break;
-        case "PLCdiagnostics":
-            controlleractioncomponent = require("./CtrlActionPLCdiagnostics");
-            break;
-        case "Network":
-            controlleractioncomponent = require("./CtrlActionNetwork");
-            break;
-        case "SystemSettings":
-            controlleractioncomponent = require("./CtrlActionSystemSettings");
-            break;
-        case "SystemSettingsExport":
-            controlleractioncomponent = require("./CtrlActionSystemSettingsExport");
-            break;
-        case "SystemUsers":
-            controlleractioncomponent = require("./CtrlActionSystemUsers");
-            break;
-        case "SystemUpgrade":
-            controlleractioncomponent = require("./CtrlActionSystemUpgrade");
-            break;
-        case "SystemReboot":
-            controlleractioncomponent = require("./CtrlActionSystemReboot");
-            break;
-        case "SystemInformation":
-            controlleractioncomponent = require("./CtrlActionSystemInformation");
-            break;
-        case "Login":
-            controlleractioncomponent = require("./CtrlActionLogin");
-            break;
-        default:
+        if (controllers.indexOf(action) !== -1) {
+            controlleractioncomponent = require("./CtrlAction" + action);
+        } else {
             AppMain.log("Module not found.");
             dmp("AppMain.exec controller action exception message: Module not found.");
         }
@@ -227,7 +158,7 @@ module.exports.AppController = function () {
             return this.actionForbidden();
         }
 
-        let controlleractioncomponent = getControlerActionComponent(this.action);
+        let controlleractioncomponent = getControllerActionComponent(this.action);
 
         if (controlleractioncomponent !== null) {
             this.ctrlActionComp = controlleractioncomponent["CtrlAction" + this.action];
