@@ -32,7 +32,6 @@ module.exports.AppController = function () {
      */
     this.view = null;
     this.action = null;
-    this.actionName = null;
     this.actionDefault = "Default";
     this.event = null;
 
@@ -58,18 +57,21 @@ module.exports.AppController = function () {
      * Attach component event. Events are executed in FIFO order.
      */
     this.attachEvent = function (eventName, callback) {
-        if (eventName === "onBeforeExecute") {
-            if (!defined(this.eventsPom.onBeforeExecute)) {
-                this.eventsPom.onBeforeExecute = [];
-            }
+        if (!defined(this.eventsPom.onBeforeExecute)) {
+            this.eventsPom.onBeforeExecute = [];
+        }
+        if (!defined(this.eventsPom.onAfterExecute)) {
+            this.eventsPom.onAfterExecute = [];
+        }
+        switch (eventName) {
+        case "onBeforeExecute":
             this.eventsPom.onBeforeExecute.push(callback);
-        } else {
-            if (eventName === "onAfterExecute") {
-                if (!defined(this.eventsPom.onAfterExecute)) {
-                    this.eventsPom.onAfterExecute = [];
-                }
-                this.eventsPom.onAfterExecute.push(callback);
-            }
+            break;
+        case "onAfterExecute":
+            this.eventsPom.onAfterExecute.push(callback);
+            break;
+        default:
+            dmp("Unknown event name to execute: " + eventName);
         }
     };
 
@@ -84,12 +86,15 @@ module.exports.AppController = function () {
      */
     this.executeEvent = function (eventName) {
         // Execute event callbacks
-        if (eventName === "onBeforeExecute") {
+        switch (eventName) {
+        case "onBeforeExecute":
             this.eventsPom.onBeforeExecute.forEach(executeFunction);
-        } else {
-            if (eventName === "onAfterExecute") {
-                this.eventsPom.onAfterExecute.forEach(executeFunction);
-            }
+            break;
+        case "onAfterExecute":
+            this.eventsPom.onAfterExecute.forEach(executeFunction);
+            break;
+        default:
+            dmp("Unknown event name to execute: " + eventName);
         }
     };
 
@@ -116,8 +121,89 @@ module.exports.AppController = function () {
         AppMain.html.updateElements([".mdl-select", ".mdl-switch", ".mdl-tooltip"]);
     }
 
-    this.exec = function (action, event) {
+    function getControlerActionComponent(action) {
+        let controlleractioncomponent = null;
+        switch (action) {
+        case "Default":
+            controlleractioncomponent = require("./CtrlActionDefault");
+            break;
+        case "Nodes":
+            controlleractioncomponent = require("./CtrlActionNodes");
+            break;
+        case "PLCNeighbor":
+            controlleractioncomponent = require("./CtrlActionPLCNeighbor");
+            break;
+        case "PLCRouting":
+            controlleractioncomponent = require("./CtrlActionPLCRouting");
+            break;
+        case "WhiteList":
+            controlleractioncomponent = require("./CtrlActionWhiteList");
+            break;
+        case "Events":
+            controlleractioncomponent = require("./CtrlActionEvents");
+            break;
+        case "EventsSettings":
+            controlleractioncomponent = require("./CtrlActionEventsSettings");
+            break;
+        case "WANModem":
+            controlleractioncomponent = require("./CtrlActionWANModem");
+            break;
+        case "WANEthernet":
+            controlleractioncomponent = require("./CtrlActionWANEthernet");
+            break;
+        case "NANPlc":
+            controlleractioncomponent = require("./CtrlActionNANPlc");
+            break;
+        case "NANRs":
+            controlleractioncomponent = require("./CtrlActionNANRs");
+            break;
+        case "LANEthernet":
+            controlleractioncomponent = require("./CtrlActionLANEthernet");
+            break;
+        case "TaskManager":
+            controlleractioncomponent = require("./CtrlActionTaskManager");
+            break;
+        case "GroupTable":
+            controlleractioncomponent = require("./CtrlActionGroupTable");
+            break;
+        case "MonitoringManager":
+            controlleractioncomponent = require("./CtrlActionMonitoringManager");
+            break;
+        case "PLCdiagnostics":
+            controlleractioncomponent = require("./CtrlActionPLCdiagnostics");
+            break;
+        case "Network":
+            controlleractioncomponent = require("./CtrlActionNetwork");
+            break;
+        case "SystemSettings":
+            controlleractioncomponent = require("./CtrlActionSystemSettings");
+            break;
+        case "SystemSettingsExport":
+            controlleractioncomponent = require("./CtrlActionSystemSettingsExport");
+            break;
+        case "SystemUsers":
+            controlleractioncomponent = require("./CtrlActionSystemUsers");
+            break;
+        case "SystemUpgrade":
+            controlleractioncomponent = require("./CtrlActionSystemUpgrade");
+            break;
+        case "SystemReboot":
+            controlleractioncomponent = require("./CtrlActionSystemReboot");
+            break;
+        case "SystemInformation":
+            controlleractioncomponent = require("./CtrlActionSystemInformation");
+            break;
+        case "Login":
+            controlleractioncomponent = require("./CtrlActionLogin");
+            break;
+        default:
+            AppMain.log("Module not found.");
+            dmp("AppMain.exec controller action exception message: Module not found.");
+        }
+        return controlleractioncomponent;
+    }
 
+    this.exec = function (action, event) {
         AppMain.log("AppController.exec");
 
         if (this.view === null) {
@@ -131,6 +217,7 @@ module.exports.AppController = function () {
         this.action = (defined(action) && action !== "")
             ? action
             : this.actionDefault;
+
         this.ctrlActionComp = null;
 
         AppMain.log("Execute CtrlAction: " + this.action);
@@ -140,37 +227,19 @@ module.exports.AppController = function () {
             return this.actionForbidden();
         }
 
-        try {
-            const execAction = this.resolveActionName();
-            // Try loading corresponding action component if exists
-            try {
-                const controlleractioncomponent = require("./CtrlAction" + this.action);
-                if (!controlleractioncomponent["CtrlAction" + this.action].hasOwnProperty("exec")) {
-                    if (this.hasOwnProperty("exec" + this.action)) {
-                        this[execAction]();
-                    }
-                } else {
-                    this.ctrlActionComp = controlleractioncomponent["CtrlAction" + this.action];
+        let controlleractioncomponent = getControlerActionComponent(this.action);
 
-                    if (typeof this.ctrlActionComp.init === "function") {
-                        this.ctrlActionComp.init();
-                    }
-                    _beforeExec(this);
-                    this.ctrlActionComp.exec();
-                }
+        if (controlleractioncomponent !== null) {
+            this.ctrlActionComp = controlleractioncomponent["CtrlAction" + this.action];
 
-            } catch (ActionCompExc) {
-                AppMain.log(ActionCompExc.message);
-                dmp("AppMain.exec controller action exception message: " + ActionCompExc.message);
-                // If no corresponding action component exists, try calling direct controller method
-                if (this.hasOwnProperty("exec" + this.action)) {
-                    this[execAction]();
-                }
+            if (typeof this.ctrlActionComp.init === "function") {
+                this.ctrlActionComp.init();
             }
-            _afterExec(this);
-        } catch (exc) {
-            dmp(exc);
+            _beforeExec(this);
+            this.ctrlActionComp.exec();
         }
+
+        _afterExec(this);
     };
 
     this.actionForbidden = function () {
@@ -181,10 +250,6 @@ module.exports.AppController = function () {
         });
     };
 
-    this.resolveActionName = function () {
-        this.actionName = "exec" + this.action;
-        return this.actionName;
-    };
     /**
      * Get webservice instance.
      */
