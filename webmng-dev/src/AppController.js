@@ -148,6 +148,14 @@ module.exports.AppController = function () {
         }
     };
 
+    this.test = function () {
+        // Check if user has permission to execute action
+        if (this.action !== "Login" && !AppMain.rbac.hasExecCtrlActionPermission(this.action)) {
+            return this.actionForbidden();
+        }
+        this.executeCtrl();
+    };
+
     this.exec = function (action) {
         AppMain.log("AppController.exec");
 
@@ -157,11 +165,7 @@ module.exports.AppController = function () {
 
         AppMain.log("Execute CtrlAction: " + this.action);
 
-        // Check if user has permission to execute action
-        if (this.action !== "Login" && !AppMain.rbac.hasExecCtrlActionPermission(this.action)) {
-            return this.actionForbidden();
-        }
-        this.executeCtrl();
+        this.test();
     };
 
     this.actionForbidden = function () {
