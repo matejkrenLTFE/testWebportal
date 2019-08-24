@@ -33,7 +33,6 @@ module.exports.AppController = function () {
     this.view = null;
     this.action = null;
     this.actionDefault = "Default";
-    this.event = null;
 
     /**
      * @type AppController Self reference for easier action component migration.
@@ -149,12 +148,8 @@ module.exports.AppController = function () {
         }
     };
 
-    this.exec = function (action, event) {
+    this.exec = function (action) {
         AppMain.log("AppController.exec");
-
-        if (defined(event)) {
-            this.event = event;
-        }
 
         this.action = (defined(action) && action !== "")
             ? action
@@ -185,11 +180,6 @@ module.exports.AppController = function () {
             this.wsPom = new modulewebservice.AppWebserviceClient();
         }
         return this.wsPom;
-    };
-
-    this.EventsCallback = function (e) {
-        dmp("EventsCallback");
-        dmp(e);
     };
 
     function addRoleDataToUserObject(roleData, user) {
