@@ -154,7 +154,7 @@ module.exports.AppMainBootstrap = function () {
                 mainmenu: {
                     dashboard: AppMain.t("DASHBOARD", "mainmenu"),
                     nodes: AppMain.t("ATTACHED_DEVICES", "mainmenu"),
-                    nodes_list: AppMain.t("ATTACHED_DEVICES_LIST", "mainmenu"),
+                    nodesList: AppMain.t("ATTACHED_DEVICES_LIST", "mainmenu"),
                     whiteList: AppMain.t("WHITE_LIST", "mainmenu"),
                     networkTopology: AppMain.t("NETWORK_TOPOLOGY", "mainmenu"),
                     plcNeighbor: AppMain.t("PLC_NEIGHBOR", "mainmenu"),

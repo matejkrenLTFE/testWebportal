@@ -357,9 +357,8 @@ global.AppMain = function (conf) {
         const locale = sessionStorage.getItem("locale");
         if (locale) {
             return locale;
-        } else {
-            return "en_US";
         }
+        return "en_US";
     };
 
     /**
