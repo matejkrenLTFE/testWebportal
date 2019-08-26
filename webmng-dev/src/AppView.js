@@ -3,6 +3,12 @@
  * @author LTFE
  * @module src/AppView
  */
+
+/* global  AppMain, defined */
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
 const modulerbac = require("./AppRBAC.js");
 
 /**
@@ -20,18 +26,12 @@ const modulerbac = require("./AppRBAC.js");
  *
  */
 module.exports.AppView = function () {
+    "use strict";
+
     /**
      * Canvas selector (e.g. #main) where app view will be rendered.
      */
     this.canvas = null;
-
-    /**
-     * Display variable names if variable data is empty ($variableName$).
-     * Helpful for debuging, should be set to false when in production.
-     *
-     * @type {Boolean}
-     */
-    //this.displayVars = false;
 
     /**
      * Render empty template - replace placeholder vars with AppView.emptyValuePlaceholder
@@ -62,7 +62,7 @@ module.exports.AppView = function () {
     /**
      * Loaded view templates cache.
      */
-    this._cache = {};
+    this.cachePom = {};
 
     /**
      * Include template from file or grab from current current HTML <script type="template/text">
@@ -75,6 +75,191 @@ module.exports.AppView = function () {
     this.includeUrl = "/views/";
 
     /**
+     * Resolve section name selector from view template name.
+     * @param {String} viewName
+     * @return {String} Selector name.
+     */
+    function _resolveViewNameSectionSelector(viewName) {
+        if (viewName.indexOf("#") > 0) {
+            const _viewName = viewName.split("#");
+            return defined(_viewName[1])
+                ? _viewName[1]
+                : null;
+        }
+        return null;
+    }
+
+    /**
+     * Resolve template view name and strip any section selector.
+     * @param {String} viewName
+     * @return {String} Template view name without section selector.
+     */
+    function _resolveViewName(viewName) {
+        if (viewName.indexOf("#") > 0) {
+            const _viewName = viewName.split("#");
+            if (defined(_viewName[0])) {
+                viewName = _viewName[0];
+            } else {
+                throw "Error reading view template name";
+            }
+            return viewName;
+        }
+        return viewName;
+    }
+
+    /**
+     * Load view template from HTML or include view file from server.
+     * If AppView.include=true view template will be loaded from the server.
+     *
+     * @param {AppView} _this Self instance.
+     * @param {String} viewName View name which can also include custom section selector. E.g.: dashboard#listNodes
+     * @return {String} View template ready for processing.
+     */
+    const _loadViewTemplate = function (_this, viewName) {
+        let html = "";
+        viewName = _resolveViewName(viewName);
+
+        AppMain.log("Load template file: " + AppMain.getUrl("app") + _this.includeUrl + viewName + ".html");
+
+        // Return view template from cache
+        if (_this.cached(viewName, false)) {
+            html = _this.cachePom["_" + viewName];
+        } else {
+            if (_this.include === true) {
+                // Request credentials
+                // var credentials = sessionStorage.getItem("authDigest");
+                const requestData = {
+                    url: AppMain.getUrl("app") + _this.includeUrl + viewName + ".html",
+                    async: false
+                };
+
+                $.ajax(requestData).done(function (resp) {
+                    AppMain.log("Include view file " + viewName);
+                    html = resp;
+                }).fail(function (e) {
+                    dmp(e);
+                    throw "Error loading view file " + AppMain.getUrl("app") + _this.includeUrl + viewName + ".html";
+                });
+            } else {
+                html = $("#view" + viewName).html();
+            }
+            html = html.trim();
+            _this.cachePom["_" + viewName] = html;
+        }
+        return html;
+    };
+
+    /**
+     * View template processor which replace variables with provided placeholder data.
+     * @param {AppView} _this Self reference.
+     * @param {String} viewContent View template.
+     * @param {Object} placeholderData
+     * @return {String} Processed view template.
+     */
+    const _processTemplate = function (_this, viewContent, placeholderData) {
+        //dmp("_processTemplate-BEFORE");
+        //dmp(viewContent);
+        $.each(placeholderData, function (placeholder) {
+            let replace = "";
+            if (typeof placeholderData[placeholder] === "object") {
+                $.each(placeholderData[placeholder], function (property) {
+                    replace = "$" + placeholder + "." + property + "$";
+                    viewContent = viewContent.replace(replace, (_this.renderEmptyTemplate && replace.indexOf("$_") < 0)
+                        ? _this.emptyValuePlaceholder
+                        : placeholderData[placeholder][property]);
+                });
+            } else {
+                replace = "$" + placeholder + "$";
+                viewContent = viewContent.replace(replace, (_this.renderEmptyTemplate && replace.indexOf("$_") < 0)
+                    ? _this.emptyValuePlaceholder
+                    : placeholderData[placeholder]);
+
+            }
+        });
+        if (_this.renderEmptyTemplate) {
+            viewContent = viewContent.replace(/\$.+\$/g, _this.emptyValuePlaceholder);
+        }
+
+        if (_this.replaceEmptyVars) {
+            viewContent = viewContent.replace(/\$.+\$/g, _this.emptyValuePlaceholder);
+        }
+
+        return viewContent;
+    };
+
+
+    /**
+     * Bind controller actions and methods defined by view template elements elements.<br>
+     *
+     * Supported bindings:<br>
+     * - data-bind-action: executes AppController action <br>
+     * - data-bind-method: executes AppController method <br>
+     * - data-bind-event: DOM event on which binded method|action will be triggered.
+     */
+    const _bindElementControllerEvents = function (_this) {
+        AppMain.log("AppView._bindElementControllerEvents");
+        let comp;
+        // Bind controller "action" & "method" from elements
+        const arr = $("[data-bind-action],[data-bind-method]");
+        arr.each(function (i) {
+            const element = arr[i];
+            const actionName = element.getAttribute("data-bind-action");
+            const methodName = element.getAttribute("data-bind-method");
+
+            // Action callback to component controller
+            if (actionName && actionName.indexOf(".") > 0 && _this.controller.ctrlActionComp !== null) {
+                comp = actionName.split(".");
+                if (comp[1] === "exec") {
+                    $(element).on(element.getAttribute("data-bind-event"), function (e) {
+                        e.stopImmediatePropagation();
+                        _this.controller.ctrlActionComp.exec(actionName, {event: e, target: element});
+                        return false;
+                    });
+                }
+            }
+
+            // Method callback to controller action component
+            if (methodName && methodName.indexOf(".") > 0) {
+                comp = methodName.split(".");
+
+                if (defined(_this.controller.ctrlActionComp) && defined(_this.controller.ctrlActionComp[comp[1]])) {
+                    $(element).on(element.getAttribute("data-bind-event"), function (e) {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        _this.controller.ctrlActionComp[comp[1]]({event: e, target: element});
+                        return false;
+                    });
+                }
+            }
+
+            // Bind default controller action
+            if (_this.controller["exec" + actionName] !== undefined) {
+                $(element).on(element.getAttribute("data-bind-event"), function (e) {
+                    e.stopImmediatePropagation();
+                    _this.controller.exec(actionName, {event: e, target: element});
+                    return false;
+                });
+            }
+            // Bind default controller method
+            if (_this.controller[methodName] !== undefined) {
+                $(element).on(element.getAttribute("data-bind-event"), function (e) {
+                    e.stopImmediatePropagation();
+                    e.preventDefault();
+                    _this.controller[methodName]({event: e, target: element});
+                    return false;
+                });
+            }
+        });
+    };
+
+    /**
+     * Called after AppView.render()
+     */
+    const _afterRender = function (_this) {
+        _bindElementControllerEvents(_this);
+    };
+
+    /**
      * Render view template:
      * view templates are placed inside <script type="text/template" id="viewName">
      *
@@ -84,21 +269,26 @@ module.exports.AppView = function () {
      * @param {Boolean} appendToCanvas Append view template to canvas or return it as a string. Default: true.
      */
     this.render = function (viewName, placeholderData, includeHTML, appendToCanvas) {
-        this.include = defined(includeHTML) ? includeHTML : this.include;
+        this.include = defined(includeHTML)
+            ? includeHTML
+            : this.include;
         const viewTemplateName = _resolveViewName(viewName); // viewName without section selectors
         const viewSectionSelector = _resolveViewNameSectionSelector(viewName);
-        appendToCanvas = defined(appendToCanvas) ? appendToCanvas : true;
+        appendToCanvas = defined(appendToCanvas)
+            ? appendToCanvas
+            : true;
 
         // View render logging
         if (AppMain.environment === AppMain.ENVIRONMENT_DEV) {
             AppMain.log("AppView.render() executed for viewName: " + viewName);
             AppMain.log("AppView.render() params: ");
-            AppMain.log({
+            const logObj = {
                 viewName: viewName,
                 placeholderData: placeholderData,
                 includeHTML: includeHTML,
                 appendToCanvas: appendToCanvas
-            }.toString());
+            };
+            AppMain.log(logObj.toString());
         }
 
         // Load view template (view file or section chunk from single HTML)
@@ -106,19 +296,23 @@ module.exports.AppView = function () {
         let viewContent = _loadViewTemplate(this, viewName);
 
         // Load template section if requested (viewName # part)
-        viewContent = (viewSectionSelector) ? $(viewContent).filter("#" + viewSectionSelector).prop("innerHTML") : viewContent;
+        viewContent = (viewSectionSelector)
+            ? $(viewContent).filter("#" + viewSectionSelector).prop("innerHTML")
+            : viewContent;
 
         // Append view content to template
-        if (typeof viewContent !== "undefined") {
+        if (viewContent !== undefined) {
             viewContent = _processTemplate(this, viewContent, placeholderData);
             // Cache processed view template
-            this._cache[viewName] = viewContent;
-        } else
+            this.cachePom[viewName] = viewContent;
+        } else {
             throw "View template not found: " + viewTemplateName;
+        }
 
         // Append template to canvas or return it as a string.
-        if (!appendToCanvas)
+        if (!appendToCanvas) {
             return viewContent;
+        }
 
         this.appendToCanvas(viewContent);
         _afterRender(this);
@@ -160,8 +354,9 @@ module.exports.AppView = function () {
      * @param {Boolean} includeHTML Optional.
      */
     this.renderSectionStatic = function (viewName, sectionName, placeholderData, includeHTML) {
-        if (!this.cached(viewName, undefined))
+        if (!this.cached(viewName, undefined)) {
             this.renderSection(viewName, sectionName, placeholderData, includeHTML);
+        }
     };
 
     /**
@@ -170,88 +365,12 @@ module.exports.AppView = function () {
      * @return {String}
      */
     this.renderFromCache = function (viewName) {
-        const viewContent = this.cached(viewName, undefined) ? this._cache[viewName] : null;
-        if (viewContent)
+        const viewContent = this.cached(viewName, undefined)
+            ? this.cachePom[viewName]
+            : null;
+        if (viewContent) {
             this.appendToCanvas(viewContent);
-    };
-
-    /**
-     * Load view template from HTML or include view file from server.
-     * If AppView.include=true view template will be loaded from the server.
-     *
-     * @param {AppView} _this Self instance.
-     * @param {String} viewName View name which can also include custom section selector. E.g.: dashboard#listNodes
-     * @return {String} View template ready for processing.
-     */
-    const _loadViewTemplate = function (_this, viewName) {
-        let html = "";
-        viewName = _resolveViewName(viewName);
-
-        AppMain.log("Load template file: " + AppMain.getUrl("app") + _this.includeUrl + viewName + ".html");
-
-        // Return view template from cache
-        if (_this.cached(viewName, false))
-            html = _this._cache["_" + viewName];
-        else {
-            if (_this.include === true) {
-                // Request credentials
-                // var credentials = sessionStorage.getItem("authDigest");
-                const requestData = {
-                    url: AppMain.getUrl("app") + _this.includeUrl + viewName + ".html",
-                    async: false
-                };
-
-                $.ajax(requestData).done(function (resp) {
-                    AppMain.log("Include view file " + viewName);
-                    html = resp;
-                }).fail(function (e) {
-                    dmp(e);
-                    throw "Error loading view file " + AppMain.getUrl("app") + _this.includeUrl + viewName + ".html";
-                })
-            } else {
-                html = $("#view" + viewName).html();
-            }
-            html = html.trim();
-            _this._cache["_" + viewName] = html;
         }
-        return html;
-    };
-
-    /**
-     * View template processor which replace variables with provided placeholder data.
-     * @param {AppView} _this Self reference.
-     * @param {String} viewContent View template.
-     * @param {Object} placeholderData
-     * @return {String} Processed view template.
-     */
-    const _processTemplate = function (_this, viewContent, placeholderData) {
-        //dmp("_processTemplate-BEFORE");
-        //dmp(viewContent);
-        for (let placeholder in placeholderData) {
-            // Process object with props
-            let replace = "";
-            if (typeof placeholderData[placeholder] === "object") {
-                for (let property in placeholderData[placeholder]) {
-                    if(placeholderData[placeholder].hasOwnProperty(property)){
-                        replace = "$" + placeholder + "." + property + "$";
-                        viewContent = viewContent.replace(replace, (_this.renderEmptyTemplate && replace.indexOf("$_") < 0) ?
-                            _this.emptyValuePlaceholder : placeholderData[placeholder][property]);
-                    }
-                }
-            } else {
-                replace = "$" + placeholder + "$";
-                viewContent = viewContent.replace(replace, (_this.renderEmptyTemplate && replace.indexOf("$_") < 0) ?
-                    _this.emptyValuePlaceholder : placeholderData[placeholder]);
-
-            }
-        }
-        if (_this.renderEmptyTemplate)
-            viewContent = viewContent.replace(/\$.+\$/g, _this.emptyValuePlaceholder);
-
-        if (_this.replaceEmptyVars)
-            viewContent = viewContent.replace(/\$.+\$/g, _this.emptyValuePlaceholder);
-
-        return viewContent;
     };
 
     /**
@@ -260,30 +379,14 @@ module.exports.AppView = function () {
      * @param {Boolean} processed Get processed or original template from cache. Original templates in cache are "_" prefixed.
      */
     this.cached = function (viewName, processed) {
-        processed = (typeof processed !== "undefined") ? processed : true;
-        if (processed)
-            return (typeof this._cache[viewName] !== "undefined");
-        else
-            return (typeof this._cache["_" + viewName] !== "undefined");
-    };
-
-    /**
-     * Append view content to AppView.canvas.
-     */
-    this.appendToCanvas = function (content) {
-        if (this.canvas === null)
-            throw "AppView: 'canvas' selector property not set.";
-        // View variables have been processed
-        // last chance to modify view before the output.
-        content = _beforeAppendToCanvas(content);
-        $(this.canvas).html(content);
-    };
-
-    /**
-     * Called after AppView.render()
-     */
-    const _afterRender = function (_this) {
-        _bindElementControllerEvents(_this);
+        processed = (processed !== undefined)
+            ? processed
+            : true;
+        if (processed) {
+            return (this.cachePom[viewName] !== undefined);
+        } else {
+            return (this.cachePom["_" + viewName] !== undefined);
+        }
     };
 
     /**
@@ -293,71 +396,22 @@ module.exports.AppView = function () {
         // Process view template with RBAC permissions
         const rbac = new modulerbac.AppRBAC();
         content = rbac.processViewTemplate(content);
-
         return content;
     };
 
     /**
-     * Bind controller actions and methods defined by view template elements elements.<br>
-     *
-     * Supported bindings:<br>
-     * - data-bind-action: executes AppController action <br>
-     * - data-bind-method: executes AppController method <br>
-     * - data-bind-event: DOM event on which binded method|action will be triggered.
+     * Append view content to AppView.canvas.
      */
-    const _bindElementControllerEvents = function (_this) {
-        AppMain.log("AppView._bindElementControllerEvents");
-
-        // Bind controller "action" & "method" from elements
-        $("[data-bind-action],[data-bind-method]").each(function (i, element) {
-            const actionName = element.getAttribute("data-bind-action");
-            const methodName = element.getAttribute("data-bind-method");
-
-            // Action callback to component controller
-            if (actionName && actionName.indexOf(".") > 0 && _this.controller.ctrlActionComp !== null) {
-                const comp = actionName.split(".");
-                if (comp[1] === "exec") {
-                    $(element).on(element.getAttribute("data-bind-event"), function (e) {
-                        e.stopImmediatePropagation();
-                        _this.controller.ctrlActionComp.exec(actionName, {event: e, target: element});
-                        return false;
-                    });
-                }
-            }
-
-            // Method callback to controller action component
-            if (methodName && methodName.indexOf(".") > 0) {
-                const comp = methodName.split(".");
-
-                if (defined(_this.controller.ctrlActionComp) && defined(_this.controller.ctrlActionComp[comp[1]])) {
-                    $(element).on(element.getAttribute("data-bind-event"), function (e) {
-                        e.preventDefault();
-                        e.stopImmediatePropagation();
-                        _this.controller.ctrlActionComp[comp[1]]({event: e, target: element});
-                        return false;
-                    });
-                }
-            }
-
-            // Bind default controller action
-            if (typeof _this.controller["exec" + actionName] !== "undefined") {
-                $(element).on(element.getAttribute("data-bind-event"), function (e) {
-                    e.stopImmediatePropagation();
-                    _this.controller["exec"](actionName, {event: e, target: element});
-                    return false;
-                });
-            }
-            // Bind default controller method
-            if (typeof _this.controller[methodName] !== "undefined") {
-                $(element).on(element.getAttribute("data-bind-event"), function (e) {
-                    e.stopImmediatePropagation();
-                    e.preventDefault();
-                    _this.controller[methodName]({event: e, target: element});
-                    return false;
-                });
-            }
-        });
+    this.appendToCanvas = function (content) {
+        if (this.canvas === null) {
+            throw "AppView: 'canvas' selector property not set.";
+        }
+        // View variables have been processed
+        // last chance to modify view before the output.
+        content = _beforeAppendToCanvas(content);
+        $(this.canvas).html(content);
     };
+
 
     /**
      * Rebind view binned elements. Useful when view elements are added dynamically
@@ -391,42 +445,12 @@ module.exports.AppView = function () {
      */
     this.loadingIndicator = function (display) {
         const selector = "div#xhrLoad";
-        if (typeof display === "undefined" && !$(selector).is(":visible")) {
+        if (display === undefined && !$(selector).is(":visible")) {
             $(selector).show();
-        } else
+        } else {
             $(selector).hide();
+        }
     };
-
-    /**
-     * Resolve template view name and strip any section selector.
-     * @param {String} viewName
-     * @return {String} Template view name without section selector.
-     */
-    function _resolveViewName(viewName) {
-        if (viewName.indexOf("#") > 0) {
-            const _viewName = viewName.split("#");
-            if (defined(_viewName[0]))
-                viewName = _viewName[0];
-            else
-                throw "Error reading view template name";
-
-            return viewName;
-        }
-        return viewName;
-    }
-
-    /**
-     * Resolve section name selector from view template name.
-     * @param {String} viewName
-     * @return {String} Selector name.
-     */
-    function _resolveViewNameSectionSelector(viewName) {
-        if (viewName.indexOf("#") > 0) {
-            const _viewName = viewName.split("#");
-            return defined(_viewName[1]) ? _viewName[1] : null;
-        }
-        return null;
-    }
 
     /**
      * Diplay dialog message inside template dialog message section.
@@ -436,18 +460,18 @@ module.exports.AppView = function () {
     this.showDialogMessage = function (message, type) {
         type = type || "default";
         const messageId = "msg_" + Math.round(Math.random() * (Math.pow(10, 10)));
-        if(type !== "error-discovery"){
-            $(this.canvasDialog).append("<div class='dialog-message " + type + " " + messageId + "'><a class='close'>&Cross;</a>" +
-                "<p>" + message + "</p>" + "<div style='clear:both'></div> </div>");
-        }else{
+        if (type !== "error-discovery") {
+            $(this.canvasDialog).append("<div class='dialog-message " + type + " " + messageId + "'><a class='close'>&Cross;</a>"
+                    + "<p>" + message + "</p>" + "<div style='clear:both'></div> </div>");
+        } else {
             let errDisc = $(".error-discovery");
-            if(errDisc.length){
+            if (errDisc.length) {
                 errDisc.hide(0, function () {
                     this.remove();
-                })
+                });
             }
-            $(this.canvasDialog).append("<div class='dialog-message error error-discovery" + " " + messageId + "'><a class='close'>&Cross;</a>" +
-                "<p>" + message + "</p>" + "<div style='clear:both'></div> </div>");
+            $(this.canvasDialog).append("<div class='dialog-message error error-discovery" + " " + messageId + "'><a class='close'>&Cross;</a>"
+                    + "<p>" + message + "</p>" + "<div style='clear:both'></div> </div>");
         }
 
 
@@ -462,5 +486,5 @@ module.exports.AppView = function () {
         $("." + messageId + " .close").on("click", function () {
             $("." + messageId).remove();
         });
-    }
+    };
 };
