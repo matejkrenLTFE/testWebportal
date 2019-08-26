@@ -198,17 +198,15 @@ module.exports.AppView = function () {
      */
     const _bindElementControllerEvents = function (_this) {
         AppMain.log("AppView._bindElementControllerEvents");
-        let comp;
+
         // Bind controller "action" & "method" from elements
-        const arr = $("[data-bind-action],[data-bind-method]");
-        arr.each(function (i) {
-            const element = arr[i];
+        $("[data-bind-action],[data-bind-method]").each(function (i, element) {
             const actionName = element.getAttribute("data-bind-action");
             const methodName = element.getAttribute("data-bind-method");
 
             // Action callback to component controller
             if (actionName && actionName.indexOf(".") > 0 && _this.controller.ctrlActionComp !== null) {
-                comp = actionName.split(".");
+                const comp = actionName.split(".");
                 if (comp[1] === "exec") {
                     $(element).on(element.getAttribute("data-bind-event"), function (e) {
                         e.stopImmediatePropagation();
@@ -220,13 +218,13 @@ module.exports.AppView = function () {
 
             // Method callback to controller action component
             if (methodName && methodName.indexOf(".") > 0) {
-                comp = methodName.split(".");
+                const comp2 = methodName.split(".");
 
-                if (defined(_this.controller.ctrlActionComp) && defined(_this.controller.ctrlActionComp[comp[1]])) {
+                if (defined(_this.controller.ctrlActionComp) && defined(_this.controller.ctrlActionComp[comp2[1]])) {
                     $(element).on(element.getAttribute("data-bind-event"), function (e) {
                         e.preventDefault();
                         e.stopImmediatePropagation();
-                        _this.controller.ctrlActionComp[comp[1]]({event: e, target: element});
+                        _this.controller.ctrlActionComp[comp2[1]]({event: e, target: element});
                         return false;
                     });
                 }

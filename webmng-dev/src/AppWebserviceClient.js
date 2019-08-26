@@ -223,9 +223,8 @@ module.exports.AppWebserviceClient = function () {
 
                 if (defined(_this.statusCodes[response.status])) {
                     return dfd.reject(response.status + " " + _this.statusCodes[response.status]);
-                } else {
-                    return dfd.reject("UNDEFINED_ERROR");
                 }
+                return dfd.reject("UNDEFINED_ERROR");
             });
         return dfd.promise();
     };

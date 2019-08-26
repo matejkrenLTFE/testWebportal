@@ -4,40 +4,46 @@
  * @module src/AppXMLelement
  */
 
+
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
 /**
  * @class AppXMLelement
  */
-module.exports.AppXMLelement = function() {
-	this.elements = [];
-	this.parameters = [];
+module.exports.AppXMLelement = function () {
+    "use strict";
 
-	// this.xmlSetElement = function(elementName) {
-	// 	this.elements[this.elements.length] = elementName;
-	// };
+    this.elements = [];
+    this.parameters = [];
 
-	this.xmlSetParam = function(paramName, paramValue) {
-		let obj = {};
-		obj.name = paramName;
-		obj.value = paramValue;
-		this.parameters[this.parameters.length] = obj;
-	};
+    this.xmlSetParam = function (paramName, paramValue) {
+        let obj = {};
+        obj.name = paramName;
+        obj.value = paramValue;
+        this.parameters[this.parameters.length] = obj;
+    };
 
-	this.xmlGetStructure = function() {			
-		let xml = "";
-		// Append elements open-tag
-		for(let i in this.elements)
-			xml += "<" + this.elements[i] + ">";
+    this.xmlGetStructure = function () {
+        let xml = "";
+        // Append elements open-tag
+        this.elements.forEach(function (elm) {
+            xml += "<" + elm + ">";
+        });
 
-		// Appending parameters
-		for (let i in this.parameters)
-			xml += "<" + this.parameters[i].name + ">" + this.parameters[i].value + "</" + this.parameters[i].name + ">";
+        // Appending parameters
+        this.parameters.forEach(function (elm) {
+            xml += "<" + elm.name + ">" + elm.value + "</" + elm.name + ">";
+        });
 
-		// Append elements close-tag
-		// Use slice() so we are working with copy of array (else reverse mutates order)
-		let elements = this.elements.slice();
-		elements = elements.reverse();
-		for(let i in elements)
-			xml += "</" + elements[i] + ">";
-		return xml;
-	};
+        // Append elements close-tag
+        // Use slice() so we are working with copy of array (else reverse mutates order)
+        let elements = this.elements.slice();
+        elements = elements.reverse();
+        this.elements.forEach(function (elm) {
+            xml += "</" + elm + ">";
+        });
+        return xml;
+    };
 };
