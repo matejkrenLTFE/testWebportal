@@ -6,10 +6,18 @@
  *
  * @author LTFE
  */
+
+/* global  AppMain, $, defined, window, Chart */
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
 const modulecomalarmsevents = require("./ComAlarmsEventsIndicator");
 const build = require("../build.info");
 
 module.exports.AppMainBootstrap = function () {
+    "use strict";
+
     /**
      * @var ComAlarmsEventsIndicator
      */
@@ -61,10 +69,10 @@ module.exports.AppMainBootstrap = function () {
 
                     //Get options from the center object in options
                     const centerConfig = chart.config.options.elements.center;
-                    const fontStyle = centerConfig.fontStyle || 'Arial';
+                    const fontStyle = centerConfig.fontStyle || "Arial";
                     const txt = centerConfig.text;
                     //const txt_under = centerConfig.text_under;
-                    const color = centerConfig.color || '#000';
+                    const color = centerConfig.color || "#000";
                     const sidePadding = centerConfig.sidePadding || 20;
                     const sidePaddingCalculated = (sidePadding / 100) * (chart.innerRadius * 2);
                     //Start with a base font of 30px
@@ -83,8 +91,8 @@ module.exports.AppMainBootstrap = function () {
                     const fontSizeToUse = Math.min(newFontSize, elementHeight);
 
                     //Set font settings to draw it correctly.
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
                     const centerX = ((chart.chartArea.left + chart.chartArea.right) / 2);
                     const centerY = ((chart.chartArea.top + chart.chartArea.bottom) / 2);
                     // const centerY_up = ((chart.chartArea.top + chart.chartArea.bottom)* (51/100.0));
@@ -102,33 +110,30 @@ module.exports.AppMainBootstrap = function () {
 
     };
 
-    /**
-     * Check for alarm events based on _checkAlarmsInterval setting.
-     */
-    const _checkAlarmEvents = function () {
-        // Initial checking
+    const _checkAlarmEventsPom = function () {
         let events = AppMain.ws().exec("EventAlarms", {"GetAlarmFlags": ""}).getResponse(false);
-        events = defined(events.EventAlarmsResponse) ? events.EventAlarmsResponse["alarm-flags"] : {};
+        events = (defined(events.EventAlarmsResponse) && defined(events.EventAlarmsResponse["alarm-flags"]))
+            ? events.EventAlarmsResponse["alarm-flags"]
+            : {};
 
         // Clear previous events list
         AppMain.getComponent("ComAlarmsEventsIndicator").clearEvents();
         // Append events
-        for (let i in events)
-            AppMain.getComponent("ComAlarmsEventsIndicator").addEvent({id: i, clear: true});
+        $.each(events, function (index) {
+            AppMain.getComponent("ComAlarmsEventsIndicator").addEvent({id: index, clear: true});
+        });
         AppMain.getComponent("ComAlarmsEventsIndicator").init();
+    };
+
+    /**
+     * Check for alarm events based on _checkAlarmsInterval setting.
+     */
+    const _checkAlarmEvents = function () {
+        _checkAlarmEventsPom();
 
         // Interval checking
         setInterval(function () {
-            let events = AppMain.ws().exec("EventAlarms", {"GetAlarmFlags": ""}).getResponse(false);
-            events = defined(events.EventAlarmsResponse) ? events.EventAlarmsResponse["alarm-flags"] : {};
-
-            // Clear previous events list
-            AppMain.getComponent("ComAlarmsEventsIndicator").clearEvents();
-            // Append events
-            for (let i in events)
-                AppMain.getComponent("ComAlarmsEventsIndicator").addEvent({id: i, clear: true});
-
-            AppMain.getComponent("ComAlarmsEventsIndicator").init();
+            _checkAlarmEventsPom();
         }, _checkAlarmsInterval);
         _checkAlarmsIntervalRunning = true;
     };
@@ -137,11 +142,11 @@ module.exports.AppMainBootstrap = function () {
         // Prepare lang menu list
         const langs = AppMain.locale.getLanguagesList();
         let langsMenu = "";
-        for (let lang in langs)
-            langsMenu += "<li class='mdl-menu__item'><a href='' data-bind-event='click' data-bind-method='setLanguage' " +
-                "data-language='" + (langs[lang]) + "'><div class='lang " + (langs[lang].substring(0, 2)) + "'></div>" +
-                (langs[lang].substring(0, 2)) + "</li>";
-
+        langs.forEach(function (lang) {
+            langsMenu += "<li class='mdl-menu__item'><a href='' data-bind-event='click' data-bind-method='setLanguage' "
+                    + "data-language='" + (lang) + "'><div class='lang " + (lang.substring(0, 2)) + "'></div>"
+                    + (lang.substring(0, 2)) + "</li>";
+        });
         // Render mainmenu & langbar only when logged-in
         if (AppMain.getAppComponent("controller").action !== "Login") {
             // Render main menu before any action executes
@@ -192,8 +197,9 @@ module.exports.AppMainBootstrap = function () {
             }, undefined);
 
             // Render alarms&events indicator component
-            if (!AppMain.getComponent("ComAlarmsEventsIndicator"))
+            if (!AppMain.getComponent("ComAlarmsEventsIndicator")) {
                 AppMain.setComponent("ComAlarmsEventsIndicator", modulecomalarmsevents.ComAlarmsEventsIndicator);
+            }
             AppMain.getComponent("ComAlarmsEventsIndicator").init();
             //if(!defined(_ComAlarmsEventsIndicator))
             //  _ComAlarmsEventsIndicator = modulecomalarmsevents.ComAlarmsEventsIndicator;
@@ -210,10 +216,11 @@ module.exports.AppMainBootstrap = function () {
     };
 
     this.controllerOnAfterExecute = function () {
-        // Init alarm events checking component        
+        // Init alarm events checking component
         // Only do alarm events checking when logged-in and alarm interval is not yet running
-        if (AppMain.getAppComponent("controller").action !== "Login" && !_checkAlarmsIntervalRunning)
+        if (AppMain.getAppComponent("controller").action !== "Login" && !_checkAlarmsIntervalRunning) {
             _checkAlarmEvents(this);
+        }
 
         AppMain.getLogger();
 
@@ -238,8 +245,9 @@ module.exports.AppMainBootstrap = function () {
         });
 
         // Hide logout button if authType=Certificate
-        if (AppMain.getConfigParams("authType") === AppMain.AUTH_TYPE_CERT)
+        if (AppMain.getConfigParams("authType") === AppMain.AUTH_TYPE_CERT) {
             $("#LogoutOption, ul.list-navigation li:last").hide();
+        }
 
         // Expand all
         const expMenu = $("#expandMenu");
@@ -256,5 +264,5 @@ module.exports.AppMainBootstrap = function () {
             $("#collapseMenu").hide();
             expMenu.show();
         });
-    }
+    };
 };
