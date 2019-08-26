@@ -2,67 +2,71 @@
  * WAM modem signal level graphic
  * @class ComWANModemSignal View component
  */
-var modulecomponent = require("./IComponent");
-var ComWANModemSignal = Object.create(new modulecomponent.IComponent);
+const modulecomponent = require("./IComponent");
+let ComWANModemSignal = Object.create(new modulecomponent.IComponent());
 
-ComWANModemSignal.signal=null;
-ComWANModemSignal.elementSelector="";
-ComWANModemSignal.init = function(config) 
-{  
-    if (!defined(config.elementSelector))
+ComWANModemSignal.signal = null;
+ComWANModemSignal.elementSelector = "";
+ComWANModemSignal.init = function (config) {
+    "use strict";
+
+    if (!defined(config.elementSelector)) {
         throw "ComWANModemSignal: no element selector defined!";
-    
-    this.signal = defined(config.signal) ? config.signal : 99;
+    }
+
+    this.signal = defined(config.signal)
+        ? config.signal
+        : 99;
     this.elementSelector = config.elementSelector;
 
-    var _this=this;
     this.render(config.params);
-}
+};
 /**
  * Main render method.
  */
-ComWANModemSignal.render = function(params) {
+ComWANModemSignal.render = function (params) {
+    "use strict";
 
     $(this.elementSelector).removeClass();
-    $(this.elementSelector).addClass("signalLevel_" + this.getSignalLevel(this.signal) );
+    $(this.elementSelector).addClass("signalLevel_" + this.getSignalLevel(this.signal));
 
     const statusInt = parseInt(params.GSM_Status);
     let statusByteString = statusInt.toString(2);
-    while (statusByteString.length < 32){
+    while (statusByteString.length < 32) {
         statusByteString = "0" + statusByteString;
     }
     statusByteString = statusByteString.split("").reverse().join(""); // reverse for easier reading
 
-    if(statusByteString[16] === "1"){ // roaming
+    if (statusByteString[16] === "1") { // roaming
         $(this.elementSelector).addClass("roaming");
     }
-    var tooltipText = this.rangesTooltip[this.getSignalLevel(this.signal)];
-    if(!tooltipText)
+    let tooltipText = this.rangesTooltip[this.getSignalLevel(this.signal)];
+    if (!tooltipText) {
         tooltipText = AppMain.t("RSSI_ERROR", "global");
+    }
     $(".SignalLevelTooltip").html(tooltipText);
-}
+};
 /**
  * Translate numeric RSSI signal into string.
  */
-ComWANModemSignal.getSignalLevel = function(signal) {
-
+ComWANModemSignal.getSignalLevel = function (signal) {
+    "use strict";
     let level = null;
     signal = parseInt(signal);
-    for (let i in ComWANModemSignal.ranges) {
-        if (defined(ComWANModemSignal.ranges[signal])) {
-            level = ComWANModemSignal.ranges[signal];
-            break;
-        }
-        else {
-            const range = i.split("-");
+    if (defined(ComWANModemSignal.ranges[signal])) {
+        level = ComWANModemSignal.ranges[signal];
+    } else {
+        $.each(ComWANModemSignal.ranges, function (index, item) {
+            const range = index.split("-");
             if (range.length > -1 && signal >= range[0] && signal <= range[1]) {
-                level = ComWANModemSignal.ranges[i];
-                break;
+                level = item;
             }
-        }
-    }    
-    if (level==null)
+        });
+    }
+
+    if (level === null) {
         level = "RSSI_NO_SIGNAL";
+    }
 
     return level;
 };
@@ -73,7 +77,7 @@ ComWANModemSignal.ranges = {
     "18-24": "RSSI_MEDIUM",
     "25-31": "RSSI_HIGH",
     "99": "RSSI_UNKNOWN",
-    "-1": "RSSI_ERROR"    
+    "-1": "RSSI_ERROR"
 };
 
 ComWANModemSignal.rangesTooltip = {
@@ -86,9 +90,11 @@ ComWANModemSignal.rangesTooltip = {
     "RSSI_NO_SIGNAL": AppMain.t("RSSI_ERROR", "global")
 };
 
-ComWANModemSignal.getBitStatus = function(statusCode) {
+ComWANModemSignal.getBitStatus = function (statusCode) {
+    "use strict";
+
     dmp("GET BIT STATUS");
-    var status = {
+    const status = {
         "0": "GSMRegistered",
         "1": "InstalationCallDone (not used)",
         "2": "GPRSRegistered",
@@ -121,16 +127,20 @@ ComWANModemSignal.getBitStatus = function(statusCode) {
         "29": "Reserved29",
         "30": "Reserved30",
         "31": "Reserved31"
-    };     
+    };
     dmp(statusCode);
-    return defined(status[statusCode]) ? status[statusCode] : "Unknown";
+    return defined(status[statusCode])
+        ? status[statusCode]
+        : "Unknown";
 };
 
 
-ComWANModemSignal.getConnectionStatus = function(params){
+ComWANModemSignal.getConnectionStatus = function (params) {
+    "use strict";
+
     const statusInt = parseInt(params.GSM_Status);
     let statusByteString = statusInt.toString(2);
-    while (statusByteString.length < 32){
+    while (statusByteString.length < 32) {
         statusByteString = "0" + statusByteString;
     }
     statusByteString = statusByteString.split("").reverse().join(""); // reverse for easier reading
@@ -144,7 +154,7 @@ ComWANModemSignal.getConnectionStatus = function(params){
     // statusByteString = "10000000100000000000000000001000";
     // 00000000100000000100001000000000
 
-    let status= {
+    let status = {
         txt: AppMain.t("NOT_REGISTERED", "global"),
         icon1: "",
         icon2: "",
@@ -153,49 +163,49 @@ ComWANModemSignal.getConnectionStatus = function(params){
         icon2Tooltip: "",
         icon2Style: "display:none;"
     };
-    if(statusByteString[0] === "0" && statusByteString[16] === "0"){ // Not registered
+    if (statusByteString[0] === "0" && statusByteString[16] === "0") { // Not registered
         status.txt = AppMain.t("NOT_REGISTERED", "global");
         //modem not registered, look for errors
-        if(statusByteString[8] === "1"){
+        if (statusByteString[8] === "1") {
             status.txt = AppMain.t("SIM_ERROR", "global");
-        }else{
-            if(statusByteString[9] === "1"){
+        } else {
+            if (statusByteString[9] === "1") {
                 status.txt = AppMain.t("PIN_REQ", "global");
-            }else{
-                if(statusByteString[27] === "1"){
+            } else {
+                if (statusByteString[27] === "1") {
                     status.txt = AppMain.t("PUK_REQ", "global");
                 }
             }
         }
-    }else{ //registered
+    } else { //registered
         status.txt = "";
         let green = "";
-        if(statusByteString[3] === "1"){
+        if (statusByteString[3] === "1") {
             green = " green";
-            status.icon1Style= "G3PLC-NODE-ACTIVE"
+            status.icon1Style = "G3PLC-NODE-ACTIVE";
         }
-        if(statusByteString[2] === "1"){ //2G
+        if (statusByteString[2] === "1") { //2G
             status.txt = AppMain.t("NETWORK2G", "global");
             status.icon1 = "N2G" + green;
             status.icon1Tooltip = AppMain.t("NETWORK2G", "global");
             // status.icon1Style= ""
         }
-        if(statusByteString[26] === "1"){ //3G
+        if (statusByteString[26] === "1") { //3G
             status.txt = AppMain.t("NETWORK3G", "global");
             status.icon1 = "N3G" + green;
             status.icon1Tooltip = AppMain.t("NETWORK3G", "global");
             // status.icon1Style= ""
         }
-        if(statusByteString[28] === "1"){ //4G
+        if (statusByteString[28] === "1") { //4G
             status.txt = AppMain.t("NETWORK4G", "global");
             status.icon1 = "N4G" + green;
             status.icon1Tooltip = AppMain.t("NETWORK4G", "global");
             // status.icon1Style= ""
         }
-        if(statusByteString[16] === "1"){
+        if (statusByteString[16] === "1") {
             status.icon2 = "roaming";
             status.icon2Tooltip = AppMain.t("ROAMING", "global");
-            status.icon2Style= "";
+            status.icon2Style = "";
         }
     }
     params.GSM_Status_txt = status.txt;
