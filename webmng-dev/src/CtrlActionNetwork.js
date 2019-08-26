@@ -95,7 +95,7 @@ CtrlActionNetwork.exec = function () {
         animationDuration: 3000,
         randomize: true,
         gravity: -1.5,
-        pull: 0.0001,
+        pull: 0.001,
         mass: function () {
             return 10;
         },
@@ -221,6 +221,9 @@ CtrlActionNetwork.buildNodeListHTML = function (nodes) {
 
 CtrlActionNetwork.buildNodesAndLinks = function (routing) {
     "use strict";
+    if (!routing || Object.prototype.toString.call(routing) !== "[object Object]") {
+        return;
+    }
     $.each(routing, function (index, route) {
         let destAdd = parseInt(route["destination-address"], 10).toString(16).toUpperCase();
         if (destAdd.length % 2 !== 0) {
@@ -268,17 +271,17 @@ CtrlActionNetwork.buildNodesAndLinks = function (routing) {
             }
         }
         // add pathRouting
-        if (parseInt(route["hop-count"]) === 1) {
+        if (parseInt(route["hop-count"], 10) === 1) {
             CtrlActionNetwork.nodes[destAddInd].data.pathRouting = [0, destAddInd];
         } else {
             CtrlActionNetwork.nodes[destAddInd].data.pathRouting = [0, nextHopAddInd, destAddInd];
         }
 
-        if (parseInt(route["hop-count"]) === 1) { //link from DC to destAdd
+        if (parseInt(route["hop-count"], 10) === 1) { //link from DC to destAdd
             CtrlActionNetwork.addEdge(0, destAddInd, 1, 2);
-        } else if (parseInt(route["hop-count"]) >= 2 || parseInt(route["hop-count"]) === 0) {
+        } else if (parseInt(route["hop-count"], 10) >= 2 || parseInt(route["hop-count"], 10) === 0) {
             CtrlActionNetwork.addEdge(0, nextHopAddInd, 1, 4);
-            if (parseInt(route["hop-count"]) === 2) { // in this case add regular link from nextHopAdd to destAdd
+            if (parseInt(route["hop-count"], 10) === 2) { // in this case add regular link from nextHopAdd to destAdd
                 CtrlActionNetwork.addEdge(nextHopAddInd, destAddInd, 1, 3);
             } else {
                 CtrlActionNetwork.addEdge(nextHopAddInd, destAddInd, 2, 3);
@@ -526,7 +529,7 @@ CtrlActionNetwork.runPLCforNode = function (node) {
         }
     })
         .fail(function (message) {
-            console.log("Error in PlcDiscoverInfoGet: " + message);
+            dmp("Error in PlcDiscoverInfoGet: " + message);
             AppMain.dialog(message, "error-discovery");
         });
 
@@ -800,13 +803,13 @@ CtrlActionNetwork.plcNodeDiscover = function (nodeIndex) {
         $("#discover_icon").removeClass("discovery-is-running");
         const tt = $("#discover_tooltip");
         tt.html(AppMain.t("DISCOVER_PLC", "NETWORK_TOPOLOGY"));
-        return;
+        return false;
     }
 
     CtrlActionNetwork.updatePLCtooltip(nodeIndex);
     let node = CtrlActionNetwork.cv.$("#" + nodeIndex);
 
-    console.log("PlcDiscoverInfoGet for node:" + node.data("nameDec"));
+    dmp("PlcDiscoverInfoGet for node:" + node.data("nameDec"));
 
     if (node.data("name") === "00") {
         return CtrlActionNetwork.plcNodeDiscover(nodeIndex + 1);
@@ -829,7 +832,7 @@ CtrlActionNetwork.plcNodeDiscover = function (nodeIndex) {
             }
         })
         .fail(function () {
-            console.log("Error in PlcDiscoverInfoGet for node:" + node.data("nameDec"));
+            dmp("Error in PlcDiscoverInfoGet for node:" + node.data("nameDec"));
             if (CtrlActionNetwork.pldDiscoveryRunning){ // move to next node
                 return CtrlActionNetwork.plcNodeDiscover(nodeIndex + 1);
             }
