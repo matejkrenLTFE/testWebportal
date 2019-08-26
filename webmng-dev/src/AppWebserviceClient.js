@@ -3,6 +3,11 @@
  * @author LTFE
  * @module src/AppWebserviceClient
  */
+/* global  AppMain, defined, dmp, vkbeautify */
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
 const X2JS = require("xml-json-parser");
 const Json2Xml = new X2JS();
 const Xml2Json = new X2JS();
@@ -11,6 +16,8 @@ const Xml2Json = new X2JS();
  * @class AppWebserviceClient
  */
 module.exports.AppWebserviceClient = function () {
+    "use strict";
+
     this.host = location.host;
     this.urlService = "/soap/GWtest";
     this.statusCodes = {
@@ -18,13 +25,12 @@ module.exports.AppWebserviceClient = function () {
         "400": AppMain.t("BAD_REQUEST", "global"),
         "403": AppMain.t("FORBIDDEN", "global")
     };
-    this._lastResponse = null;
+    this.lastResponsePom = null;
     /**
      * Last method call to webservice.
      */
     let _lastMethodExec = null;
     let _cache = {};
-    let _lastSoapMessage = null;
 
     /**
      * Element namespace.
@@ -50,24 +56,24 @@ module.exports.AppWebserviceClient = function () {
     this.createSoapMessage = function (messageBody) {
         // JSON object
         let soapBody;
-        if (messageBody instanceof Object)
+        if (Object.prototype.toString.call(messageBody) === "[object Object]") {
             soapBody = Json2Xml.json2xml_str(messageBody);
-        else
-            soapBody = messageBody;
-
-        let xml = '<?xml version="1.0" encoding="UTF-8"?> \n';
-        if (_xmlNamespace === "mes:") {
-            xml += '<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" ' +
-                'xmlns:cos="http://www.dlms.com/COSEMpdu" xmlns:mes="http://iec.ch/TC57/2011/schema/message" ' +
-                'xmlns:dev="http://iec.ch/TC13/2014/schema/DeviceAccess">';
         } else {
-            xml += '<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:gw="http://plc-gw.namespace/GW/">';
+            soapBody = messageBody;
+        }
+
+        let xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n";
+        if (_xmlNamespace === "mes:") {
+            xml += "<soap:Envelope xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\" " +
+                    "xmlns:cos=\"http://www.dlms.com/COSEMpdu\" xmlns:mes=\"http://iec.ch/TC57/2011/schema/message\" " +
+                    "xmlns:dev=\"http://iec.ch/TC13/2014/schema/DeviceAccess\">";
+        } else {
+            xml += "<soap:Envelope xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:gw=\"http://plc-gw.namespace/GW/\">";
         }
         xml += "<soap:Body>";
         xml += soapBody;
         xml += "</soap:Body>";
         xml += "</soap:Envelope>";
-        _lastSoapMessage = xml;
         // Cleanup XML structures
         _xmlSoapMessage.parameters = [];
         _xmlSoapMessage.elements = [];
@@ -78,61 +84,30 @@ module.exports.AppWebserviceClient = function () {
 
     this.createSoapMethodMessage = function (method, params) {
         let soapMessage = {};
-        if (params instanceof Object) {
+        if (Object.prototype.toString.call(params) === "[object Object]") {
             params = params || {};
             soapMessage[_xmlNamespace + method] = params;
-        } else
+        } else {
             soapMessage = "<" + _xmlNamespace + method + ">" + params + "</" + _xmlNamespace + method + ">";
-
+        }
         return this.createSoapMessage(soapMessage);
     };
 
     this.getHostURI = function () {
-        return (AppMain.httpsEnabled === true) ? "https://" + this.host : "http://" + this.host;
+        return (AppMain.httpsEnabled === true)
+            ? "https://" + this.host
+            : "http://" + this.host;
     };
 
-    /**
-     * Execute SOAP method call.
-     * @param {String} method SOAP method name.
-     * @param {Object} prm Additional method params.
-     * @return {Object} AppWS
-     */
-    this.exec = function (method, prm) {
-
-        const params = (!defined(prm)) ? {} : prm;
-
-        const soapMsg = this.createSoapMethodMessage(method, params);
-
-        _lastMethodExec = method;
-
-        return _executeRequest(this, soapMsg);
-    };
-
-    /**
-     * Async execute SOAP method call.
-     * @param {String} method SOAP method name.
-     * @param {Object} prm Additional method params.
-     * @return {Object} AppWS
-     */
-    this.execAsync = function (method, prm) {
-
-        const params = (!defined(prm)) ? {} : prm;
-
-        const soapMsg = this.createSoapMethodMessage(method, params);
-
-        _lastMethodExec = method;
-
-        return _executeAsyncRequest(this, soapMsg);
-    };
-    /**
-     * Execute SOAP method call.
-     * @param {String} method SOAP method name.
-     * @param {Object} prm Additional method params.
-     * @return {Object} AppWS
-     */
-    this.getXML = function (method, prm) {
-        const params = (!defined(prm)) ? {} : prm;
-        return vkbeautify.xml(Json2Xml.json2xml_str(params), 2);
+    const beforeSendFunction = function (req, soapMessage) {
+        // req.setRequestHeader("Access-Control-Request-Headers", "x-requested-with");
+        if (AppMain.authBasic === true) {
+            if (localStorage.getItem("authDigest") === null) {
+                dmp("authDigest: " + localStorage.getItem("authDigest") + "  " + soapMessage);
+            }
+            req.setRequestHeader("Authorization", "Basic " + localStorage.getItem("authDigest"));
+        }
+        AppMain.view.loadingIndicator();
     };
 
     /**
@@ -148,14 +123,7 @@ module.exports.AppWebserviceClient = function () {
             dataType: "xml",
             async: false,
             beforeSend: function (req) {
-                // req.setRequestHeader("Access-Control-Request-Headers", "x-requested-with");
-                if (AppMain.authBasic === true) {
-                    if (localStorage.getItem("authDigest") == null) {
-                        dmp("authDigest: " + localStorage.getItem("authDigest") + "  " + soapMessage);
-                    }
-                    req.setRequestHeader("Authorization", "Basic " + localStorage.getItem("authDigest"));
-                }
-                AppMain.view.loadingIndicator();
+                beforeSendFunction(req, soapMessage);
             }
         }).done(function (data) {
             lastResponse = data;
@@ -175,28 +143,50 @@ module.exports.AppWebserviceClient = function () {
                     message = AppMain.t(message, undefined);
                     return AppMain.dialog(message, "warning");
                 }
-                if (response.status !== 400 && response.status !== 500)
+                if (response.status !== 400 && response.status !== 500) {
                     lastResponse = response.responseXML;
+                }
             }
 
-            if (defined(_this.statusCodes[response.status]))
+            if (defined(_this.statusCodes[response.status])) {
                 AppMain.dialog(response.status + " " + _this.statusCodes[response.status], "error");
-            else
+            } else {
                 AppMain.dialog("UNDEFINED_ERROR", "error");
+            }
         });
         // Set last response
-        _this._lastResponse = lastResponse;
+        _this.lastResponsePom = lastResponse;
 
         return _this;
     };
 
     /**
+     * Execute SOAP method call.
+     * @param {String} method SOAP method name.
+     * @param {Object} prm Additional method params.
+     * @return {Object} AppWS
+     */
+    this.exec = function (method, prm) {
+
+        const params = (!defined(prm))
+            ? {}
+            : prm;
+
+        const soapMsg = this.createSoapMethodMessage(method, params);
+
+        _lastMethodExec = method;
+
+        return _executeRequest(this, soapMsg);
+    };
+
+
+    /**
      * method to execute async request to the webservice.
      */
     const _executeAsyncRequest = function (_this, soapMessage) {
-        let dfd = $.Deferred();
+        let dfd = new $.Deferred();
 
-         $.ajax({
+        $.ajax({
             url: _this.getHostURI() + _this.urlService,
             data: soapMessage, // xmlSerialize.serializeToString(xmlRequestMethod),
             method: "POST",
@@ -204,48 +194,71 @@ module.exports.AppWebserviceClient = function () {
             dataType: "xml",
             async: true,
             beforeSend: function (req) {
-                // req.setRequestHeader("Access-Control-Request-Headers", "x-requested-with");
-                if (AppMain.authBasic === true) {
-                    if (localStorage.getItem("authDigest") == null) {
-                        dmp("authDigest: " + localStorage.getItem("authDigest") + "  " + soapMessage);
-                    }
-                    req.setRequestHeader("Authorization", "Basic " + localStorage.getItem("authDigest"));
-                }
-                AppMain.view.loadingIndicator();
+                beforeSendFunction(req, soapMessage);
             }
         })
-        .done(function (data) {
-            AppMain.view.loadingIndicator(false);
+            .done(function (data) {
+                AppMain.view.loadingIndicator(false);
 
-            const jsonResponse = Xml2Json.xml2json(data);
-            if (typeof jsonResponse.Envelope.Body === "undefined")
-                throw "SOAP response error or SOAP envelope has no body.";
-
-            dfd.resolve(jsonResponse.Envelope.Body);
-
-        }).fail(function (response) {
-            AppMain.view.loadingIndicator(false);
-
-            const resp = Json2Xml.xml2json(response.responseXML);
-
-            // Handle SOAP message response: errors, warnings, etc ...
-            if (defined(resp.Envelope)) {
-                const messageId = resp.Envelope.Body.Fault.Reason.Text.toString();
-                let message = AppMain.getAppMessage(messageId);
-                if (message) {
-                    // Translate application message
-                    message = AppMain.t(message, undefined);
-                    return dfd.reject(message);
+                const jsonResponse = Xml2Json.xml2json(data);
+                if (jsonResponse.Envelope.Body === undefined) {
+                    throw "SOAP response error or SOAP envelope has no body.";
                 }
-            }
+                dfd.resolve(jsonResponse.Envelope.Body);
 
-            if (defined(_this.statusCodes[response.status]))
-                return dfd.reject(response.status + " " + _this.statusCodes[response.status]);
-            else
-                return dfd.reject("UNDEFINED_ERROR");
-        });
+            }).fail(function (response) {
+                AppMain.view.loadingIndicator(false);
+                const resp = Json2Xml.xml2json(response.responseXML);
 
-         return dfd.promise();
+                // Handle SOAP message response: errors, warnings, etc ...
+                if (defined(resp.Envelope)) {
+                    const messageId = resp.Envelope.Body.Fault.Reason.Text.toString();
+                    let message = AppMain.getAppMessage(messageId);
+                    if (message) {
+                        // Translate application message
+                        message = AppMain.t(message, undefined);
+                        return dfd.reject(message);
+                    }
+                }
+
+                if (defined(_this.statusCodes[response.status])) {
+                    return dfd.reject(response.status + " " + _this.statusCodes[response.status]);
+                } else {
+                    return dfd.reject("UNDEFINED_ERROR");
+                }
+            });
+        return dfd.promise();
+    };
+
+    /**
+     * Async execute SOAP method call.
+     * @param {String} method SOAP method name.
+     * @param {Object} prm Additional method params.
+     * @return {Object} AppWS
+     */
+    this.execAsync = function (method, prm) {
+
+        const params = (!defined(prm))
+            ? {}
+            : prm;
+
+        const soapMsg = this.createSoapMethodMessage(method, params);
+
+        _lastMethodExec = method;
+
+        return _executeAsyncRequest(this, soapMsg);
+    };
+    /**
+     * Execute SOAP method call.
+     * @param {String} method SOAP method name.
+     * @param {Object} prm Additional method params.
+     * @return {Object} AppWS
+     */
+    this.getXML = function (prm) {
+        const params = (!defined(prm))
+            ? {}
+            : prm;
+        return vkbeautify.xml(Json2Xml.json2xml_str(params), 2);
     };
 
     /**
@@ -255,37 +268,27 @@ module.exports.AppWebserviceClient = function () {
      */
     this.getResponse = function (rawResp) {
         // Create method response cache
-        if (!defined(_cache[_lastMethodExec]))
+        if (!defined(_cache[_lastMethodExec])) {
             _cache[_lastMethodExec] = null;
-
+        }
         dmp("Executed method: " + _lastMethodExec);
 
-        //if (typeof this._lastResponse.Body === "undefined")
-        //	throw "SOAP response error or SOAP envelope has no body.";
-        const rawResponse = (typeof rawResp !== "undefined" && rawResp === true);
+        const rawResponse = (rawResp !== undefined && rawResp === true);
         if (rawResponse) {
-            AppMain.log(this._lastResponse);
-            return this._lastResponse;
-        } else if (this._lastResponse !== null) {
-            const jsonResponse = Xml2Json.xml2json(this._lastResponse);
-            if (typeof jsonResponse.Envelope.Body === "undefined")
+            AppMain.log(this.lastResponsePom);
+            return this.lastResponsePom;
+        }
+        if (this.lastResponsePom !== null) {
+            const jsonResponse = Xml2Json.xml2json(this.lastResponsePom);
+            if (jsonResponse.Envelope.Body === undefined) {
                 throw "SOAP response error or SOAP envelope has no body.";
+            }
 
             AppMain.log(jsonResponse.Envelope.Body);
-
-            return _cache[_lastMethodExec] = jsonResponse.Envelope.Body;
+            _cache[_lastMethodExec] = jsonResponse.Envelope.Body;
+            return jsonResponse.Envelope.Body;
         }
     };
-
-    /**
-     * Helper method for processing response from WS (Array|Object problem, etc).
-     */
-    /*this.processElementList = function (elementsObject, nodeName) {
-        let elements = (elementsObject instanceof Array) ? elementsObject[nodeName] : elementsObject;
-        if (typeof elements["__prefix"] !== "undefined")
-            delete elements["__prefix"];
-        return elements;
-    };*/
 
     /**
      * Get WS method response from cache or execute new method request.
@@ -293,16 +296,10 @@ module.exports.AppWebserviceClient = function () {
      * @param {Object} params
      */
     this.getResponseCache = function (methodName, params) {
-        return defined(_cache[methodName]) ? _cache[methodName] : this.exec(methodName, params).getResponse(false);
+        return defined(_cache[methodName])
+            ? _cache[methodName]
+            : this.exec(methodName, params).getResponse(false);
     };
-
-    /**
-     * Return last executed SOAP message by AppWebserviceClient.
-     * @return string SOAP message.
-     */
-    /*this.getLastSoapMessage = function () {
-        return _lastSoapMessage;
-    };*/
 
     /**
      * This method always returns response element as array.
@@ -315,20 +312,25 @@ module.exports.AppWebserviceClient = function () {
         dmp("response-element");
         dmp(typeof responseElement);
 
-        if (!defined(responseElement))
+        if (!defined(responseElement)) {
             return [];
+        }
+        /*ignore jslint start*/
+        if (responseElement.__prefix !== undefined) {
+            delete responseElement.__prefix;
+        }
+        /*ignore jslint end*/
 
-        if (typeof responseElement["__prefix"] !== "undefined")
-            delete responseElement["__prefix"];
-
-        if (typeof responseElement === "string")
+        if (typeof responseElement === "string") {
             return [responseElement];
+        }
 
-        if ($.isArray(responseElement) || responseElement instanceof Array)
+        if (Object.prototype.toString.call(responseElement) === "[object Array]") {
             return responseElement;
-
-        if (responseElement instanceof Object)
-            return {0: responseElement};
+        }
+        if (Object.prototype.toString.call(responseElement) === "[object Object]") {
+            return {"0": responseElement};
+        }
 
         return [];
     };
@@ -347,20 +349,22 @@ module.exports.AppWebserviceClient = function () {
     this.xmlGetStructure = function () {
         let xml = "";
         // Append elements open-tag
-        for (let i in _xmlSoapMessage.elements)
-            xml += "<" + _xmlSoapMessage.elements[i] + ">";
+        _xmlSoapMessage.elements.forEach(function (elm) {
+            xml += "<" + elm + ">";
+        });
 
         // Appending parameters
-        for (let i in _xmlSoapMessage.parameters)
-            xml += "<" + _xmlSoapMessage.parameters[i].name + ">" + _xmlSoapMessage.parameters[i].value + "</" + _xmlSoapMessage.parameters[i].name + ">";
+        _xmlSoapMessage.parameters.forEach(function (elm) {
+            xml += "<" + elm.name + ">" + elm.value + "</" + elm.name + ">";
+        });
 
         // Append elements close-tag
         // Use slice() so we are working with copy of array (else reverse mutates order)
         let elements = _xmlSoapMessage.elements.slice();
         elements = elements.reverse();
-        for (let i in elements)
-            xml += "</" + elements[i] + ">";
-
+        elements.forEach(function (elm) {
+            xml += "</" + elm + ">";
+        });
         return xml;
     };
 

@@ -2533,7 +2533,7 @@ CtrlActionTaskManager.addResourceXML = function (resource) {
 
     const addJson = CtrlActionTaskManager.getResourceJson(resource, undefined);
 
-    let responseXML = AppMain.wsMes().getXML("RequestMessage", addJson);
+    let responseXML = AppMain.wsMes().getXML(addJson);
 
     download("data:text/xml;charset=utf-8;base64," + btoa(responseXML), build.device + "_Job_" + moment().format('YYYY-MM-DD-HH-mm-ss') + ".xml", "text/xml");
 };

@@ -646,7 +646,7 @@ CtrlActionGroupTable.addGroupRest = function (groupObj) {
 CtrlActionGroupTable.addGroupXML = function(groupObj){
     let obj = CtrlActionGroupTable.getRestJson(groupObj);
 
-    let responseXML = AppMain.wsMes().getXML("RequestMessage", obj);
+    let responseXML = AppMain.wsMes().getXML(obj);
 
     download("data:text/xml;charset=utf-8;base64," + btoa(responseXML), build.device + "_GROUP_" + groupObj.groupID + "_" +
         moment().format('YYYY-MM-DD-HH-mm-ss') + ".xml", "text/xml");

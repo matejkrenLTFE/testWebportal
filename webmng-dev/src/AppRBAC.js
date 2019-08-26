@@ -22,8 +22,8 @@ module.exports.AppRBAC = function () {
         const $content = $("<span>" + content + "</span>");
 
         const rbacWrapperSelectors = $content.find("[data-rbac]");
-        $.each(rbacWrapperSelectors, function (i) {
-            const $element = $(rbacWrapperSelectors[i]);
+        $.each(rbacWrapperSelectors, function (i, elm) {
+            const $element = $(elm);
             const rbacSelector = $element.attr("data-rbac").split(".");
             if (rbacSelector.length > 1) {
                 const rbacCategory = rbacSelector[0];
@@ -37,8 +37,8 @@ module.exports.AppRBAC = function () {
 
         // Hide/disable RBAC elements
         const rbacElementSelectors = $content.find("[data-rbac-element]");
-        $.each(rbacElementSelectors, function (i) {
-            const $element = $(rbacWrapperSelectors[i]);
+        $.each(rbacElementSelectors, function (i, elm) {
+            const $element = $(elm);
             const rbacSelector = $element.attr("data-rbac-element").split(".");
             if (rbacSelector.length > 1) {
                 const rbacCategory = rbacSelector[0];

@@ -4,7 +4,7 @@
  * @module src/AppView
  */
 
-/* global  AppMain, defined */
+/* global  AppMain, defined, dmp */
 /* jshint maxstatements: false */
 /* jslint browser:true, node:true*/
 /* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
@@ -384,9 +384,8 @@ module.exports.AppView = function () {
             : true;
         if (processed) {
             return (this.cachePom[viewName] !== undefined);
-        } else {
-            return (this.cachePom["_" + viewName] !== undefined);
         }
+        return (this.cachePom["_" + viewName] !== undefined);
     };
 
     /**
