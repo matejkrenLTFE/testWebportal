@@ -109,7 +109,7 @@ module.exports.AppController = function () {
     }
 
     /**
-     * After controller action exceute.
+     * After controller action execute.
      */
     function _afterExec(_this) {
         _this.executeEvent("onAfterExecute", _this);
