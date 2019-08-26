@@ -1,28 +1,36 @@
 /**
  * @class CtrlActionLANEthernet Controller action using IControllerAction interface.
  */
-var build = require("../build.info");
-var modulecontrolleraction = require("./IControllerAction");
-var CtrlActionLANEthernet = Object.create(new modulecontrolleraction.IControllerAction);
-var moment = require("moment");
+/* global AppMain, $, defined */
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
+const build = require("../build.info");
+const modulecontrolleraction = require("./IControllerAction");
+let CtrlActionLANEthernet = Object.create(new modulecontrolleraction.IControllerAction());
+const moment = require("moment");
+const download = require("./vendor/download.js");
 
 CtrlActionLANEthernet.formId = "LANEthernetForm";
-CtrlActionLANEthernet.exec = function(e) {
+CtrlActionLANEthernet.exec = function () {
+    "use strict";
     this.view.setTitle("LAN_LOCAL_ETHERNET");
 
-    var params = AppMain.ws().exec("GetParameters", {"iloc":""}).getResponse();
-    params = defined(params.GetParametersResponse.iloc) ? params.GetParametersResponse.iloc : {};
+    let params = AppMain.ws().exec("GetParameters", {"iloc": ""}).getResponse(false);
+    params = defined(params.GetParametersResponse.iloc)
+        ? params.GetParametersResponse.iloc
+        : {};
 
-    
     this.view.render(this.controller.action, {
-        _title: AppMain.t("LOCAL_ETH", "LAN_LOCAL_ETHERNET"),
+        title: AppMain.t("LOCAL_ETH", "LAN_LOCAL_ETHERNET"),
         elements: {
             enable: AppMain.html.formElementSwitch("enable", "true", {
                 checked: params.enable === "true",
                 labelClass: "switchEnable",
                 inputAttr: {
                     "data-bind-event": "click",
-                    "data-bind-method": "CtrlActionLANEthernet.__useInterface",
+                    "data-bind-method": "CtrlActionLANEthernet.useInterface",
                     "data-rbac-element": "lan.enable"
                 }
             }),
@@ -35,7 +43,7 @@ CtrlActionLANEthernet.exec = function(e) {
                 labelClass: "ipConfigClientDhcp",
                 inputAttr: {
                     "data-bind-event": "click",
-                    "data-bind-method": "CtrlActionLANEthernet.__useDHCP",
+                    "data-bind-method": "CtrlActionLANEthernet.useDHCP",
                     "data-rbac-element": "lan.dhcp"
                 }
             })
@@ -51,11 +59,11 @@ CtrlActionLANEthernet.exec = function(e) {
             "ipConfigClientDhcp": AppMain.t("DHCP", "LAN_LOCAL_ETHERNET"),
             "ipConfigNetMask": AppMain.t("SUBNET_MASK", "LAN_LOCAL_ETHERNET"),
             "btnExportParams": AppMain.t("EXP_PARAMS", "global")
-        }       
+        }
     });
     //AppMain.dialog("Section <b>" + this.controller.action + "</b> is not yet supported!", "error");
     // Show interface as: enabled/disabled
-    var enabled = params.enable === "true";
+    const enabled = params.enable === "true";
     CtrlActionLANEthernet.enableInterface(enabled);
     AppMain.html.updateElements([".mdl-textfield"]);
 };
@@ -63,55 +71,68 @@ CtrlActionLANEthernet.exec = function(e) {
 /**
  * Form element callback: enable/disable interface.
  */
-CtrlActionLANEthernet.__useInterface = function(e) {
+CtrlActionLANEthernet.useInterface = function () {
+    "use strict";
     // Show interface: enabled/disabled
-    var switchButton = document.querySelector('.mdl-js-switch').MaterialSwitch;
-    var enabled = $("[name='enable']").val() === "true";
+    let switchButton = document.querySelector(".mdl-js-switch").MaterialSwitch;
+    let enabled = $("[name='enable']").val() === "true";
 
-    if(!enabled === false){
+    if (enabled === true) {
         $.confirm({
             title: AppMain.t("LOCAL_ETH", "LAN_LOCAL_ETHERNET"),
             content: AppMain.t("CONFIRM_PROMPT", "global"),
             useBootstrap: false,
             theme: "material",
             buttons: {
-                confirm:{
+                confirm: {
                     text: AppMain.t("OK", "global"),
                     action: function () {
                         CtrlActionLANEthernet.enableInterface(!enabled);
-                        (enabled) ? switchButton.off() : switchButton.on();
+                        if (enabled) {
+                            switchButton.off();
+                        } else {
+                            switchButton.on();
+                        }
                         CtrlActionLANEthernet.setParams();
                         return true;
                     }
-                } ,
+                },
                 cancel: {
                     text: AppMain.t("CANCEL", "global"),
-                    action:
-                        function () {
-                            switchButton.on(); //IE fix
-                            return true;
-                        }
+                    action: function () {
+                        switchButton.on(); //IE fix
+                        return true;
+                    }
                 }
             }
         });
-    }else{
+    } else {
         CtrlActionLANEthernet.enableInterface(!enabled);
-        (enabled) ? switchButton.off() : switchButton.on();
+        if (enabled) {
+            switchButton.off();
+        } else {
+            switchButton.on();
+        }
         CtrlActionLANEthernet.setParams();
     }
 };
 /**
  * Form element callback: enable/disable dhcp.
  */
-CtrlActionLANEthernet.__useDHCP = function(e) {
+CtrlActionLANEthernet.useDHCP = function () {
+    "use strict";
     // Show interface: enabled/disabled
-    const switchButton = document.querySelector('.ipConfigClientDhcp').MaterialSwitch;
+    const switchButton = document.querySelector(".ipConfigClientDhcp").MaterialSwitch;
     const dhcp = $("[name='dhcp-server']");
     const enabled = dhcp.val() === "true";
-    if(enabled === true){
+    if (enabled === true) {
         switchButton.on(); //IE fix
     }
-    (enabled) ? switchButton.off() : switchButton.on();
+    if (enabled) {
+        switchButton.off();
+    } else {
+        switchButton.on();
+    }
     dhcp.val(!enabled);
     CtrlActionLANEthernet.setParams();
 };
@@ -120,32 +141,33 @@ CtrlActionLANEthernet.__useDHCP = function(e) {
  * Show interface as enabled/disabled (grayed out).
  * @param {Boolean} enabled
  */
-CtrlActionLANEthernet.enableInterface = function(enabled) {
+CtrlActionLANEthernet.enableInterface = function (enabled) {
+    "use strict";
     if (!enabled) {
         $("[name='enable']").val(false);
-        $( "#" + CtrlActionLANEthernet.formId ).css({"color": "#e5e5e5"});
-        $( "tr#FormActions > td").hide();
-        $( "input[type='text'], input[type='password']" ).attr("disabled", "disabled");
-        $("input[type='checkbox']").each(function(i, elm){
-            if (elm.id !== "enable")
-                $(elm).attr("disabled", "disabled");            
+        $("#" + CtrlActionLANEthernet.formId).css({"color": "#e5e5e5"});
+        $("tr#FormActions > td").hide();
+        $("input[type='text'], input[type='password']").attr("disabled", "disabled");
+        $("input[type='checkbox']").each(function (i, elm) {
+            if (elm.id !== "enable") {
+                $(elm).attr("disabled", "disabled");
+            }
         });
         $("label.mdl-switch").addClass("is-disabled");
         AppMain.html.updateElements([".mdl-js-switch"]);
-    }
-    else {                
+    } else {
         $("[name='enable']").val(true);
-        $( "#" + CtrlActionLANEthernet.formId ).css({"color": "#000"});
-        $( "tr#FormActions > td").show();
+        $("#" + CtrlActionLANEthernet.formId).css({"color": "#000"});
+        $("tr#FormActions > td").show();
         //tukaj še pride RBAC preverjanje
-        if(AppMain.user.getRBACpermissionElement("lan", "ip-config-ip")){
-            $( "input[type='text'][name='ip-config-ip']" ).removeAttr("disabled");
+        if (AppMain.user.getRBACpermissionElement("lan", "ip-config-ip")) {
+            $("input[type='text'][name='ip-config-ip']").removeAttr("disabled");
         }
-        if(AppMain.user.getRBACpermissionElement("lan", "ip-config-net-mask")){
-            $( "input[type='text'][name='ip-config-net-mask']" ).removeAttr("disabled");
+        if (AppMain.user.getRBACpermissionElement("lan", "ip-config-net-mask")) {
+            $("input[type='text'][name='ip-config-net-mask']").removeAttr("disabled");
         }
-        if(AppMain.user.getRBACpermissionElement("lan", "ip-config-gateway")){
-            $( "input[type='text'][name='ip-config-gateway']" ).removeAttr("disabled");
+        if (AppMain.user.getRBACpermissionElement("lan", "ip-config-gateway")) {
+            $("input[type='text'][name='ip-config-gateway']").removeAttr("disabled");
         }
         $("input[type='checkbox'][name='dhcp-server']").removeAttr("disabled");
         $("label.mdl-switch[for='dhcp-server']").removeClass("is-disabled");
@@ -154,46 +176,52 @@ CtrlActionLANEthernet.enableInterface = function(enabled) {
     }
 };
 
-CtrlActionLANEthernet.setParams = function(e) {
-    var ipStr = $("[name='ip-config-ip']").val();
-    var maskStr = $("[name='ip-config-net-mask']").val();
-    var gwStr = $("[name='ip-config-gateway']").val();
-    var re = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
-    if(ipStr.match(re) && maskStr.match(re) && gwStr.match(re)){
+CtrlActionLANEthernet.setParams = function () {
+    "use strict";
+    let ipStr = $("[name='ip-config-ip']").val();
+    let maskStr = $("[name='ip-config-net-mask']").val();
+    let gwStr = $("[name='ip-config-gateway']").val();
+    let re = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
+    if (ipStr.match(re) && maskStr.match(re) && gwStr.match(re)) {
         dmp("setParams");
-        var form = $("#" + CtrlActionLANEthernet.formId);
-        var data = form.serialize();
+        let form = $("#" + CtrlActionLANEthernet.formId);
+        let data = form.serialize();
         data = form.deserialize(data);
         dmp("FormData");
         dmp(data);
 
-        var response = AppMain.ws().exec("SetParameters", {"iloc": data }).getResponse();
-        if(defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK")
-            AppMain.dialog( "SUCC_UPDATED", "success" );
-        else
-            AppMain.dialog( "Error occurred: " + response.SetParametersResponse.toString(), "error" );
-    }else{
-        if(!ipStr.match(re))
-            AppMain.dialog("PLEASE_ENTER_CORR", "warning",[AppMain.t("IP_ADDRESS", "LAN_LOCAL_ETHERNET")]);
-        if(!maskStr.match(re))
-            AppMain.dialog("PLEASE_ENTER_CORR", "warning",[AppMain.t("SUBNET_MASK", "LAN_LOCAL_ETHERNET")]);
-        if(!gwStr.match(re))
-            AppMain.dialog("PLEASE_ENTER_CORR", "warning",[AppMain.t("DEFAULT_GATEWAY", "LAN_LOCAL_ETHERNET")]);
+        let response = AppMain.ws().exec("SetParameters", {"iloc": data}).getResponse(false);
+        if (defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK") {
+            AppMain.dialog("SUCC_UPDATED", "success");
+        } else {
+            AppMain.dialog("Error occurred: " + response.SetParametersResponse.toString(), "error");
+        }
+    } else {
+        if (!ipStr.match(re)) {
+            AppMain.dialog("PLEASE_ENTER_CORR", "warning", [AppMain.t("IP_ADDRESS", "LAN_LOCAL_ETHERNET")]);
+        }
+        if (!maskStr.match(re)) {
+            AppMain.dialog("PLEASE_ENTER_CORR", "warning", [AppMain.t("SUBNET_MASK", "LAN_LOCAL_ETHERNET")]);
+        }
+        if (!gwStr.match(re)) {
+            AppMain.dialog("PLEASE_ENTER_CORR", "warning", [AppMain.t("DEFAULT_GATEWAY", "LAN_LOCAL_ETHERNET")]);
+        }
     }
     AppMain.html.updateElements([".mdl-button"]);
 };
 
-CtrlActionLANEthernet.exportParams = function(e) {
-    var response = AppMain.ws().exec("GetParameters", {"iloc": "" }).getResponse();    
+CtrlActionLANEthernet.exportParams = function () {
+    "use strict";
+    let response = AppMain.ws().exec("GetParameters", {"iloc": ""}).getResponse(false);
     if (defined(response.GetParametersResponse.iloc)) {
-        var xml="<iloc>\n";
-        for (elm in response.GetParametersResponse.iloc)
-            xml += "<" + elm + ">" + response.GetParametersResponse.iloc[elm] + "</" + elm + ">\n";
+        let xml = "<iloc>\n";
+        $.each(response.GetParametersResponse.iloc, function (index, value) {
+            xml += "<" + index + ">" + value + "</" + index + ">\n";
+        });
         xml += "</iloc>";
 
-        var download = require("./vendor/download.js");
-        var dateStr = moment(new Date()).format( AppMain.localization("EXPORT_DATETIME_FORMAT") );
-        download("data:application/xml;charset=utf-8;base64," + btoa(xml), build.device + "_Parameters_LocalEthernet_"+ dateStr + ".xml", "application/xml");
+        const dateStr = moment(new Date()).format(AppMain.localization("EXPORT_DATETIME_FORMAT"));
+        download("data:application/xml;charset=utf-8;base64," + btoa(xml), build.device + "_Parameters_LocalEthernet_" + dateStr + ".xml", "application/xml");
     }
 };
 

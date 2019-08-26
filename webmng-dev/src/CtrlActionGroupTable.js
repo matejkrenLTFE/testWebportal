@@ -43,7 +43,7 @@ CtrlActionGroupTable.exec = function () {
     this.view.render("GroupTable#ViewGroups", {
         labels: {
             title: AppMain.t("TITLE", "GROUP_TABLE"),
-            title_set: AppMain.t("TITLE_SET", "GROUP_TABLE"),
+            titleSet: AppMain.t("TITLE_SET", "GROUP_TABLE"),
             apply: AppMain.t("APPLY", "global"),
             pushDest: AppMain.t("PUSH_DEST_URL", "GROUP_TABLE"),
             pushRetries: AppMain.t("PUSH_RETRIES", "GROUP_TABLE"),
