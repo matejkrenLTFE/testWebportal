@@ -2,6 +2,11 @@
  * WAM modem signal level graphic
  * @class ComWANModemSignal View component
  */
+/* global AppMain, $, defined, dmp */
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
 const modulecomponent = require("./IComponent");
 let ComWANModemSignal = Object.create(new modulecomponent.IComponent());
 

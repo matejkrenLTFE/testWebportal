@@ -1,27 +1,37 @@
 /**
  * @class CtrlActionEventsSettings Controller action using IControllerAction interface.
  */
+/* global AppMain, $, defined */
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
 const modulecontrolleraction = require("./IControllerAction");
-let CtrlActionEventsSettings = Object.create(new modulecontrolleraction.IControllerAction);
+let CtrlActionEventsSettings = Object.create(new modulecontrolleraction.IControllerAction());
 const includesevents = require("./includes/events.js");
 
-CtrlActionEventsSettings.exec = function (e) {
+CtrlActionEventsSettings.exec = function () {
+    "use strict";
     this.view.setTitle("ALARM_EVENTS");
 
-    const allEventList = defined(includesevents.events) ? includesevents.events : [];
-    let selectedEventList = AppMain.ws().exec("GetParameters", {"cntr": ""}).getResponse();
+    const allEventList = defined(includesevents.events)
+        ? includesevents.events
+        : [];
+    let selectedEventList = AppMain.ws().exec("GetParameters", {"cntr": ""}).getResponse(false);
 
-    const hesUrl = defined(selectedEventList.GetParametersResponse.cntr) ?
-        selectedEventList.GetParametersResponse.cntr["alrm-alarm-destination-url"] : "";
+    const hesUrl = defined(selectedEventList.GetParametersResponse.cntr)
+        ? selectedEventList.GetParametersResponse.cntr["alrm-alarm-destination-url"]
+        : "";
     selectedEventList = (defined(selectedEventList.GetParametersResponse) && defined(selectedEventList.GetParametersResponse.cntr)
-        && defined(selectedEventList.GetParametersResponse.cntr["forward-to-hes-list"]) &&
-        defined(selectedEventList.GetParametersResponse.cntr["forward-to-hes-list"]["event"])) ?
-        AppMain.ws().getResponseElementAsArray(selectedEventList["GetParametersResponse"]["cntr"]["forward-to-hes-list"]["event"]) : [];
+            && defined(selectedEventList.GetParametersResponse.cntr["forward-to-hes-list"]) &&
+            defined(selectedEventList.GetParametersResponse.cntr["forward-to-hes-list"].event))
+        ? AppMain.ws().getResponseElementAsArray(selectedEventList.GetParametersResponse.cntr["forward-to-hes-list"].event)
+        : [];
 
     this.view.render(this.controller.action, {
         title: AppMain.t("SETTINGS", "ALARM_EVENTS"),
         params: {
-            tbody: this._htmlTableBody(allEventList, selectedEventList, "event"),
+            tbody: this.htmlTableBody(allEventList, selectedEventList, "event"),
             hesUrl: hesUrl
         },
         labels: {
@@ -37,65 +47,71 @@ CtrlActionEventsSettings.exec = function (e) {
     });
 
     setTimeout(function () {
-        $(".alarm-settings-switch input").on("click",function () {
-            const elm = $(".alarm-settings-switch input[type='hidden'][name='" + $(this).attr("name") +"']");
-            if(elm.val() === "true"){
+        $(".alarm-settings-switch input").on("click", function () {
+            const elm = $(".alarm-settings-switch input[type='hidden'][name='" + $(this).attr("name") + "']");
+            if (elm.val() === "true") {
                 elm.val("false");
-            }else{
-                elm.val("true")
+            } else {
+                elm.val("true");
             }
-        })
-    },300);
+        });
+    }, 300);
     AppMain.html.updateAllElements();
 };
 
-CtrlActionEventsSettings._htmlTableBody = function (eventList, selectedEventList) {
+CtrlActionEventsSettings.htmlTableBody = function (eventList, selectedEventList) {
+    "use strict";
+
     let html = "";
-    for (let i in eventList) {
+    eventList.forEach(function (elm) {
         let checked = false;
 
         // Find checked events
-        for (let j in selectedEventList) {
-            if (eventList[i].enumeration === selectedEventList[j])
+        selectedEventList.forEach(function (checkedElm) {
+            if (elm.enumeration === checkedElm) {
                 checked = true;
-        }
+            }
+        });
 
         html += "<tr>";
-        html += "<td style='width:25%;text-align: left!important;'>" + AppMain.t(eventList[i].enumeration, "EVENTS") + "</td>";
-        html += "<td style='width:10%;text-align: left!important;'>" + eventList[i].id + "</td>";
-        html += "<td style=\"text-align: left!important;\">" + AppMain.t(eventList[i].enumeration + "_DESC", "EVENTS") + "</td>";
-        html += "<td>" + AppMain.html.formElementSwitch(eventList[i].enumeration, eventList[i].enumeration,
-            {checked: checked, labelClass: "alarm-settings-switch", inputAttr: {"data-rbac-element": "eventsSettings.settings-apply"}}) + "</td>";
+        html += "<td style='width:25%;text-align: left!important;'>" + AppMain.t(elm.enumeration, "EVENTS") + "</td>";
+        html += "<td style='width:10%;text-align: left!important;'>" + elm.id + "</td>";
+        html += "<td style=\"text-align: left!important;\">" + AppMain.t(elm.enumeration + "_DESC", "EVENTS") + "</td>";
+        html += "<td>" + AppMain.html.formElementSwitch(elm.enumeration, elm.enumeration,
+                {checked: checked, labelClass: "alarm-settings-switch", inputAttr: {"data-rbac-element": "eventsSettings.settings-apply"}}) + "</td>";
         html += "</tr>";
-    }
+    });
     return html;
 };
 
-CtrlActionEventsSettings.setParams = function (e) {
+CtrlActionEventsSettings.setParams = function () {
+    "use strict";
     const data = AppMain.html.getFormData("#EventsSettingsForm");
 
     let dataArr = [];
     let hesUrl = $("#hes-url").val();
-    for (let i in data) {
-        if (i !== "hes-url" && data[i] !== "false")
-            dataArr.push(i);
-    }
+    $.each(data, function (index, value) {
+        if (index !== "hes-url" && value !== "false") {
+            dataArr.push(index);
+        }
+    });
 
     const pJson = {
-        "cntr" : {
+        "cntr": {
             "alrm-alarm-destination-url": hesUrl,
             "forward-to-hes-list": {}
         }
     };
-    if(dataArr.length > 0){
-        pJson.cntr["forward-to-hes-list"]["event"] = dataArr;
+    if (dataArr.length > 0) {
+        pJson.cntr["forward-to-hes-list"].event = dataArr;
     }
-    const response = AppMain.ws().exec("SetParameters", pJson).getResponse();
+    const response = AppMain.ws().exec("SetParameters", pJson).getResponse(false);
 
     if (defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK") {
         AppMain.dialog("SUCC_UPDATED", "success");
-    } else
+    } else {
         AppMain.dialog("Error occurred: " + response.SetParametersResponse.toString(), "error");
+    }
     AppMain.html.updateElements([".mdl-button"]);
 };
 
