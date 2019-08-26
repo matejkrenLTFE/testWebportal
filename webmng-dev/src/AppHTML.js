@@ -2,9 +2,13 @@
  * Component for creating dynamic HTML elements.
  * @author LTFE
  */
+/* global $, defined, componentHandler */
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
 module.exports.AppHTML = function () {
-    this.table = function () {
-    };
+    "use strict";
 
     /**
      * Render switch button
@@ -21,7 +25,9 @@ module.exports.AppHTML = function () {
         const inputHiddenVal = defined(opt.checked) && opt.checked === true;
 
         let options = opt || {};
-        options.checked = (defined(options.checked) && options.checked === true) ? "checked" : "";
+        options.checked = (defined(options.checked) && options.checked === true)
+            ? "checked"
+            : "";
         options.labelClass = (defined(options.labelClass) && options.labelClass) || "";
         options.labelId = (defined(options.labelId) && options.labelId) || "";
         options.inputClass = (defined(options.inputClass) && options.inputClass) || "";
@@ -29,17 +35,21 @@ module.exports.AppHTML = function () {
         options.inputAttr = (defined(options.inputAttr) && options.inputAttr) || {};
 
         let html = "";
-        html += '<label style="width:0;" class="mdl-switch mdl-js-switch mdl-js-ripple-effect ' + options.labelClass + ' " for="' + name + '">';
-        html += '<input type="hidden" name="' + name + '" value="' + inputHiddenVal + '"  />';
+        html += "<label style=\"width:0;\" class=\"mdl-switch mdl-js-switch mdl-js-ripple-effect " + options.labelClass + " \" for=\"" + name + "\">";
+        html += "<input type=\"hidden\" name=\"" + name + "\" value=\"" + inputHiddenVal + "\"  />";
         // html += '<input type="hidden" name="' + name + '" value="false"  />';
-        let input = '<input type="checkbox" id="' + (defined(options.inputId) ? options.inputId : name) + '" class="mdl-switch__input ' + options.inputClass + ' " name="' + name + '" value="' + value + '" ' + options.checked + ' ';
-        for (let i in options.inputAttr)
-            if (options.inputAttr.hasOwnProperty(i))
-                input += ' ' + i + '="' + options.inputAttr[i] + '"';
+        let input = "<input type=\"checkbox\" id=\"" + (defined(options.inputId)
+            ? options.inputId
+            : name)
+                + "\" class=\"mdl-switch__input " + options.inputClass
+                + " \" name=\"" + name + "\" value=\"" + value + "\" " + options.checked + " ";
+        $.each(options.inputAttr, function (index, value) {
+            input += " " + index + "=\"" + value + "\"";
+        });
         input += "/>";
         html += input;
-        html += '<span class="mdl-switch__label"></span>';
-        return html + '</label>';
+        html += "<span class=\"mdl-switch__label\"></span>";
+        return html + "</label>";
     };
 
     /**
@@ -54,28 +64,34 @@ module.exports.AppHTML = function () {
         if (defined(width)) {
             widthHtml = " style='width:" + width + "'";
         }
-        if (!defined(additionalClass))
+        if (!defined(additionalClass)) {
             additionalClass = "";
+        }
         let html = "";
         if (defined(options.label) && options.label !== "") {
-            html = '<div class="mdl-select mdl-js-select mdl-select--floating-label mdl-textfield-less-padding ' + additionalClass + '" ' + widthHtml + '>';
+            html = "<div class=\"mdl-select mdl-js-select mdl-select--floating-label mdl-textfield-less-padding " + additionalClass + "\" " + widthHtml + ">";
         } else {
-            html = '<div class="mdl-select mdl-js-select mdl-textfield-no-padding ' + additionalClass + '"' + widthHtml + '>';
+            html = "<div class=\"mdl-select mdl-js-select mdl-textfield-no-padding " + additionalClass + "\"" + widthHtml + ">";
         }
 
-        options.elementAttr = defined(options.elementAttr) ? options.elementAttr : "";
+        options.elementAttr = defined(options.elementAttr)
+            ? options.elementAttr
+            : "";
 
-        html += '<select ' + options.elementAttr + ' class="mdl-select__input" id="' + name + '" name="' + name + '">';
+        html += "<select " + options.elementAttr + " class=\"mdl-select__input\" id=\"" + name + "\" name=\"" + name + "\">";
 
-        for (let i in values) {
-            if (values.hasOwnProperty(i)) {
-                const selected = (defined(options.elementSelected) && options.elementSelected === i) ? "selected" : "";
-                html += '<option ' + selected + ' value="' + i + '">' + values[i] + '</option>';
-            }
-        }
-        html += '</select>';
-        html += '<label class="mdl-select__label" for="' + name + '">' + (defined(options.label) ? options.label : name) + '</label>';
-        html += '</div>';
+        $.each(values, function (index, value) {
+            const selected = (defined(options.elementSelected) && options.elementSelected === index)
+                ? "selected"
+                : "";
+            html += "<option " + selected + " value=\"" + index + "\">" + value + "</option>";
+        });
+
+        html += "</select>";
+        html += "<label class=\"mdl-select__label\" for=\"" + name + "\">" + (defined(options.label)
+            ? options.label
+            : name) + "</label>";
+        html += "</div>";
 
         return html;
     };
@@ -88,11 +104,9 @@ module.exports.AppHTML = function () {
      * @param elements Array List of element selectors which will be updated.
      */
     this.updateElements = function (elements) {
-        for (let i in elements) {
-            if (elements.hasOwnProperty(i))
-                componentHandler.upgradeElements($(elements[i]));
-        }
-
+        elements.forEach(function (elm) {
+            componentHandler.upgradeElements($(elm));
+        });
     };
     this.updateAllElements = function () {
         componentHandler.upgradeAllRegistered();
@@ -130,15 +144,23 @@ module.exports.AppHTML = function () {
      */
     this.formTextInput = function (name, label, options) {
         options = options || {};
-        options.elementAttr = defined(options.elementAttr) ? options.elementAttr : "";
-        options.wrapperAttr = defined(options.wrapperAttr) ? options.wrapperAttr : "";
-        options.wrapperClass = defined(options.wrapperClass) ? options.wrapperClass : "";
-        const type = defined(options.inputType) ? options.inputType : "text";
+        options.elementAttr = defined(options.elementAttr)
+            ? options.elementAttr
+            : "";
+        options.wrapperAttr = defined(options.wrapperAttr)
+            ? options.wrapperAttr
+            : "";
+        options.wrapperClass = defined(options.wrapperClass)
+            ? options.wrapperClass
+            : "";
+        const type = defined(options.inputType)
+            ? options.inputType
+            : "text";
 
-        let html = '<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label ' + options.wrapperClass + '" ' + options.wrapperAttr + ' >';
-        html += '<input class="mdl-textfield__input" type="' + type + '" id="' + name + '" name="' + name + '" ' + options.elementAttr + ' >';
-        html += '<label class="mdl-textfield__label" for="' + name + '">' + label + '</label>';
-        return html + '</div>';
+        let html = "<div class=\"mdl-textfield mdl-js-textfield mdl-textfield--floating-label " + options.wrapperClass + "\" " + options.wrapperAttr + " >";
+        html += "<input class=\"mdl-textfield__input\" type=\"" + type + "\" id=\"" + name + "\" name=\"" + name + "\" " + options.elementAttr + " >";
+        html += "<label class=\"mdl-textfield__label\" for=\"" + name + "\">" + label + "</label>";
+        return html + "</div>";
     };
 
     /**
@@ -150,13 +172,8 @@ module.exports.AppHTML = function () {
      */
     this.formEmailInput = function (name, label, opt) {
         let options = opt || {};
-        options.elementAttr = defined(options.elementAttr) ? options.elementAttr : "";
-        options.wrapperAttr = defined(options.wrapperAttr) ? options.wrapperAttr : "";
-
-        let html = '<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" ' + options.wrapperAttr + ' >';
-        html += '<input class="mdl-textfield__input" type="email" id="' + name + '" name="' + name + '" ' + options.elementAttr + ' >';
-        html += '<label class="mdl-textfield__label" for="' + name + '">' + label + '</label>';
-        return html + '</div>';
+        options.inputType = "email";
+        return this.formTextInput(name, label, options);
     };
 
     /**
@@ -168,13 +185,8 @@ module.exports.AppHTML = function () {
      */
     this.formNumberInput = function (name, label, opt) {
         let options = opt || {};
-        options.elementAttr = defined(options.elementAttr) ? options.elementAttr : "";
-        options.wrapperAttr = defined(options.wrapperAttr) ? options.wrapperAttr : "";
-
-        let html = '<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" ' + options.wrapperAttr + ' >';
-        html += '<input class="mdl-textfield__input" type="number" id="' + name + '" name="' + name + '" ' + options.elementAttr + ' >';
-        html += '<label class="mdl-textfield__label" for="' + name + '">' + label + '</label>';
-        return html + '</div>';
+        options.inputType = "number";
+        return this.formTextInput(name, label, options);
     };
 
     /**
@@ -185,5 +197,5 @@ module.exports.AppHTML = function () {
         const form = $(formSelector);
         const formData = form.serialize();
         return form.deserialize(formData);
-    }
+    };
 };
