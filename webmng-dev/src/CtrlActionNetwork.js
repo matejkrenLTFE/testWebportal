@@ -1,42 +1,51 @@
 /**
  * @class CtrlActionNetwork Controller action using IControllerAction interface.
  */
+/* global AppMain, $, defined */
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
 let modulecontrolleraction = require("./IControllerAction");
-let CtrlActionNetwork = Object.create(new modulecontrolleraction.IControllerAction);
-let cytoscape = require('cytoscape');
-let popper = require('cytoscape-popper');
+let CtrlActionNetwork = Object.create(new modulecontrolleraction.IControllerAction());
+let cytoscape = require("cytoscape");
+let popper = require("cytoscape-popper");
 const download = require("./vendor/download.js");
 const cvStyle = require("./includes/CytoscapeStyle");
-const Tippy = require('tippy.js');
+const Tippy = require("tippy.js");
 const moment = require("moment");
-let euler = require('cytoscape-euler');
+let euler = require("cytoscape-euler");
 
 cytoscape.use(euler); // register extension
 
 cytoscape.use(popper); // register extension
 
 CtrlActionNetwork.exec = function () {
+    "use strict";
     this.view.setTitle("NETWORK_TOPOLOGY");
 
     let routing = [];
     try {
         routing = AppMain.ws().exec("PlcRoutingTableGet", undefined).getResponse(false);
     } catch (e) {
-        console.log("err: PlcRoutingTableGet")
+        console.log("err: PlcRoutingTableGet" + e.toString());
     }
 
     let nodes = AppMain.ws().exec("GetNodeList", {"with-data": true}).getResponse(false);
-    nodes = (nodes && nodes.GetNodeListResponse && nodes.GetNodeListResponse.node instanceof Array) ?
-        nodes.GetNodeListResponse.node : nodes.GetNodeListResponse;
-    if (typeof nodes["__prefix"] !== "undefined")
-        delete nodes["__prefix"];
+    nodes = (nodes && nodes.GetNodeListResponse && Object.prototype.toString.call(nodes.GetNodeListResponse.node) === "[object Array]")
+        ? nodes.GetNodeListResponse.node
+        : nodes.GetNodeListResponse;
+    if (nodes.__prefix !== undefined) {
+        delete nodes.__prefix;
+    }
 
     const nodesCosemStat = AppMain.wsMes().exec("CosemDeviceStatisticRequest", undefined).getResponse(false);
     if (nodesCosemStat && nodesCosemStat.GetCosemDeviceStatisticResponse &&
-        nodesCosemStat.GetCosemDeviceStatisticResponse["cosem-device-statistics"])
+            nodesCosemStat.GetCosemDeviceStatisticResponse["cosem-device-statistics"]) {
         nodes = this.arrangeNodes(nodes, nodesCosemStat.GetCosemDeviceStatisticResponse["cosem-device-statistics"]);
+    }
 
-    let htmlNodes = this._buildNodeListHTML(nodes);
+    let htmlNodes = this.buildNodeListHTML(nodes);
 
     this.view.render("Network#ViewNetwork", {
         htmlNodes: htmlNodes,
@@ -55,11 +64,11 @@ CtrlActionNetwork.exec = function () {
     }, true);
 
     CtrlActionNetwork.pldDiscoveryRunning = false;
-    if(CtrlActionNetwork.isExpanded === true){
+    if (CtrlActionNetwork.isExpanded === true) {
         $("main.mdl-layout__content").addClass("is-full-screen");
         $("#expand_icon").html("fullscreen_exit");
         $("#tooltipFullScreen").html(AppMain.t("EXIT_FULL_SCREEN", "global"));
-    }else{
+    } else {
         CtrlActionNetwork.isExpanded = false;
     }
 
@@ -68,7 +77,7 @@ CtrlActionNetwork.exec = function () {
     CtrlActionNetwork.nodesTmp = ["00"];
     CtrlActionNetwork.nodes = [
         {
-            group: 'nodes',
+            group: "nodes",
             data: {
                 id: 0,
                 nameDec: 0,
@@ -81,38 +90,37 @@ CtrlActionNetwork.exec = function () {
     CtrlActionNetwork.edges = [];
 
     CtrlActionNetwork.layoutOptions2 = {
-        name: 'euler',
-        animate: 'end',
+        name: "euler",
+        animate: "end",
         animationDuration: 3000,
         randomize: true,
         gravity: -1.5,
         pull: 0.0001,
-        mass: function (node) {
+        mass: function () {
             return 10;
         },
         springCoeff: function (e) {
             switch (e.data("edgeDistanceType")) {
-                case 1:
-                    return 0.001;
-                case 2:
-                    return 0.005;
-                case 3:
-                    return 0.001;
-                default:
-                    return 0.005;
+            case 1:
+                return 0.001;
+            case 2:
+                return 0.005;
+            case 3:
+                return 0.001;
+            default:
+                return 0.005;
             }
         },
         springLength: function (e) {
-            // return 300;
             switch (e.data("edgeDistanceType")) {
-                case 1:
-                    return 150;
-                case 2:
-                    return 500;
-                case 3:
-                    return 50;
-                default:
-                    return 600;
+            case 1:
+                return 150;
+            case 2:
+                return 500;
+            case 3:
+                return 50;
+            default:
+                return 600;
             }
         },
         ungrabifyWhileSimulating: false,
@@ -121,7 +129,7 @@ CtrlActionNetwork.exec = function () {
             $("#cv-spinner").show();
         },
         stop: function () {
-            CtrlActionNetwork.cv.centre(CtrlActionNetwork.cv.$('#0'));
+            CtrlActionNetwork.cv.centre(CtrlActionNetwork.cv.$("#0"));
             $("#cv-spinner").hide();
         }
     };
@@ -131,16 +139,16 @@ CtrlActionNetwork.exec = function () {
 
     let _this = this;
     setTimeout(function () {
-        _this._buildNetwork(this, routing);
+        _this.buildNetwork(routing);
         setTimeout(function () {
-            _this._checkForExistingData(nodes);
-            const trRows = $('#nodesList tr');
-            trRows.bind('contextmenu', function (e) {
+            _this.checkForExistingData(nodes);
+            const trRows = $("#nodesList tr");
+            trRows.bind("contextmenu", function (e) {
                 e.preventDefault();
                 CtrlActionNetwork.getNodeInfo(e);
             });
 
-            trRows.bind('mouseenter', function (e) {
+            trRows.bind("mouseenter", function (e) {
                 e.preventDefault();
                 let $this = $(e.target);
                 let node = $this.attr("data-node");
@@ -149,9 +157,9 @@ CtrlActionNetwork.exec = function () {
                     node = $this.parent().attr("data-node");
                     nodeInd = CtrlActionNetwork.nodesTmp.indexOf(node);
                 }
-                CtrlActionNetwork.showHoverTooltip(CtrlActionNetwork.cv.$('#' + nodeInd));
+                CtrlActionNetwork.showHoverTooltip(CtrlActionNetwork.cv.$("#" + nodeInd));
             });
-            trRows.bind('mouseout', function (e) {
+            trRows.bind("mouseout", function (e) {
                 e.preventDefault();
                 let $this = $(e.target);
                 let node = $this.attr("data-node");
@@ -160,7 +168,7 @@ CtrlActionNetwork.exec = function () {
                     node = $this.parent().attr("data-node");
                     nodeInd = CtrlActionNetwork.nodesTmp.indexOf(node);
                 }
-                CtrlActionNetwork.hideHoverTooltip(CtrlActionNetwork.cv.$('#' + nodeInd));
+                CtrlActionNetwork.hideHoverTooltip(CtrlActionNetwork.cv.$("#" + nodeInd));
             });
         }, 200);
     }, 200);
@@ -177,7 +185,8 @@ CtrlActionNetwork.exec = function () {
  * Build HTML nodes table.
  * @return {String} htmlNodes
  */
-CtrlActionNetwork._buildNodeListHTML = function (nodes) {
+CtrlActionNetwork.buildNodeListHTML = function (nodes) {
+    "use strict";
     let htmlNodes = "";
 
     $.each(nodes, function (index, node) {
@@ -186,7 +195,7 @@ CtrlActionNetwork._buildNodeListHTML = function (nodes) {
         if (node["ip-address"]) {
             const arr = node["ip-address"].split(":");
             shortAddress = arr[arr.length - 1].toUpperCase();
-            shortAddressPom = parseInt( arr[arr.length - 1].toUpperCase(), 16);
+            shortAddressPom = parseInt(arr[arr.length - 1].toUpperCase(), 16);
             if (shortAddress.length % 2 === 1) {
                 shortAddress = "0" + shortAddress;
             }
@@ -194,7 +203,9 @@ CtrlActionNetwork._buildNodeListHTML = function (nodes) {
 
         htmlNodes += "<tr class='node-" + shortAddress + "' data-bind-event='click' data-bind-method='CtrlActionNetwork.getNodeInfo' data-node='" + shortAddress + "'>";
         htmlNodes += "<td class='short-address' class='cursor-default' data-sort-value='" + shortAddressPom + "'>" + shortAddress + "</td>";
-        htmlNodes += "<td class='node-title' class='cursor-default'>" + (node["node-title"] !== undefined ? node["node-title"] : "---") + "</td>";
+        htmlNodes += "<td class='node-title' class='cursor-default'>" + (node["node-title"] !== undefined
+            ? node["node-title"]
+            : "---") + "</td>";
         htmlNodes += "</tr>";
 
     });
@@ -208,22 +219,23 @@ CtrlActionNetwork._buildNodeListHTML = function (nodes) {
  * @private
  */
 
-CtrlActionNetwork._buildNodesAndLinks = function (routing) {
+CtrlActionNetwork.buildNodesAndLinks = function (routing) {
+    "use strict";
     $.each(routing, function (index, route) {
-        let destAdd = parseInt(route["destination-address"]).toString(16).toUpperCase();
-        if (destAdd.length % 2) {
-            destAdd = '0' + destAdd;
+        let destAdd = parseInt(route["destination-address"], 10).toString(16).toUpperCase();
+        if (destAdd.length % 2 !== 0) {
+            destAdd = "0" + destAdd;
         }
         let nextHopAdd = parseInt(route["next-hop-address"]).toString(16).toUpperCase();
-        if (nextHopAdd.length % 2) {
-            nextHopAdd = '0' + nextHopAdd;
+        if (nextHopAdd.length % 2 !== 0) {
+            nextHopAdd = "0" + nextHopAdd;
         }
         let destAddInd = CtrlActionNetwork.nodesTmp.indexOf(destAdd);
         if (destAddInd === -1) {
             destAddInd = CtrlActionNetwork.nodes.length;
             CtrlActionNetwork.nodesTmp.push(destAdd);
             CtrlActionNetwork.nodes.push({
-                group: 'nodes',
+                group: "nodes",
                 data: {
                     id: destAddInd,
                     nameDec: route["destination-address"],
@@ -242,17 +254,18 @@ CtrlActionNetwork._buildNodesAndLinks = function (routing) {
             nextHopAddInd = CtrlActionNetwork.nodes.length;
             CtrlActionNetwork.nodesTmp.push(nextHopAdd);
             CtrlActionNetwork.nodes.push({
-                group: 'nodes',
+                group: "nodes",
                 data: {
                     id: nextHopAddInd,
                     nameDec: route["next-hop-address"],
                     name: nextHopAdd,
                     busyness: 1
                 }
-            })
-        }else{
-            if(destAddInd!== nextHopAddInd)
-                CtrlActionNetwork.nodes[nextHopAddInd].data.busyness++;
+            });
+        } else {
+            if (destAddInd !== nextHopAddInd) {
+                CtrlActionNetwork.nodes[nextHopAddInd].data.busyness += 1;
+            }
         }
         // add pathRouting
         if (parseInt(route["hop-count"]) === 1) {
@@ -278,66 +291,85 @@ CtrlActionNetwork._buildNodesAndLinks = function (routing) {
  * Build HTML nodes table.
  * @return {Object} {htmlNodes, totalNodes}
  */
-CtrlActionNetwork._buildNetwork = function (_this, routing) {
-    routing = (routing.PlcRoutingTableGetResponse["routing-table"] instanceof Array) ? routing.PlcRoutingTableGetResponse["routing-table"] :
-        [routing.PlcRoutingTableGetResponse["routing-table"]];
+CtrlActionNetwork.buildNetwork = function (routing) {
+    "use strict";
+    routing = (Object.prototype.toString.call(routing.PlcRoutingTableGetResponse["routing-table"]) === "[object Array]")
+        ? routing.PlcRoutingTableGetResponse["routing-table"]
+        : [routing.PlcRoutingTableGetResponse["routing-table"]];
     if (!routing.length || routing.length === 0) {
         return;
     }
 
-    CtrlActionNetwork._buildNodesAndLinks(routing);
+    CtrlActionNetwork.buildNodesAndLinks(routing);
 };
 
 CtrlActionNetwork.showHoverTooltip = function (node) {
-    if (node.data("name") === "00")
+    "use strict";
+    if (node.data("name") === "00") {
         return;
+    }
     let html = "<table style='text-align: left'>";
     let path = "---";
     let pathRouting = node.data("pathRouting");
-    if(pathRouting && pathRouting.length){
+    if (pathRouting && pathRouting.length) {
         path = "";
-        for(let i = 0; i < pathRouting.length; i++){
-            path += CtrlActionNetwork.nodesTmp[pathRouting[i]];
-            if(i !== pathRouting.length-1){
-                path += ", "
+        pathRouting.forEach(function (value, i) {
+            path += CtrlActionNetwork.nodesTmp[value];
+            if (i !== pathRouting.length - 1) {
+                path += ", ";
             }
-        }
+        });
     }
     if (CtrlActionNetwork.nodesInfo[node.data("name")]) {
         html += "<tbody>";
-        if(CtrlActionNetwork.nodesInfo[node.data("name")].title && CtrlActionNetwork.nodesInfo[node.data("name")].title.toString() !== "[object Object]"){
+        if (CtrlActionNetwork.nodesInfo[node.data("name")].title && CtrlActionNetwork.nodesInfo[node.data("name")].title.toString() !== "[object Object]") {
             html += "<tr><td>" + AppMain.t("DEVICE_TITLE", "NODES") + "</td><td>" + CtrlActionNetwork.nodesInfo[node.data("name")].title + "</td></tr>";
         }
-        html += "<tr><td>" + AppMain.t("HOP_COUNT", "NETWORK_TOPOLOGY") + "</td><td>" + (node.data("hopCount") ? node.data("hopCount") : "---") + "</td></tr>" +
-            "<tr><td>" + AppMain.t("ROUTE_COST", "NETWORK_TOPOLOGY") + "</td><td>" + (node.data("routeCost") ? node.data("routeCost") : "---") + "</td></tr>" +
-            "<tr><td>" + AppMain.t("BUSINESS", "NETWORK_TOPOLOGY") + "</td><td>" + (node.data("busyness")!== "" ? node.data("busyness") : "---") + "</td></tr>" +
-            "<tr><td>" + AppMain.t("PATH", "NETWORK_TOPOLOGY") + "</td><td>" + path + "</td></tr>" +
-            "<tr><td>" + AppMain.t("STATUS", "NETWORK_TOPOLOGY") + "</td><td>" +
-            AppMain.t(CtrlActionNetwork.nodesInfo[node.data("name")].nodeState, "NETWORK_TOPOLOGY") + "</td></tr>" +
-            "</tbody>";
+        html += "<tr><td>" + AppMain.t("HOP_COUNT", "NETWORK_TOPOLOGY") + "</td><td>" + (node.data("hopCount")
+            ? node.data("hopCount")
+            : "---") + "</td></tr>" +
+                "<tr><td>" + AppMain.t("ROUTE_COST", "NETWORK_TOPOLOGY") + "</td><td>" + (node.data("routeCost")
+            ? node.data("routeCost")
+            : "---") + "</td></tr>" +
+                "<tr><td>" + AppMain.t("BUSINESS", "NETWORK_TOPOLOGY") + "</td><td>" + (node.data("busyness") !== ""
+            ? node.data("busyness")
+            : "---") + "</td></tr>" +
+                "<tr><td>" + AppMain.t("PATH", "NETWORK_TOPOLOGY") + "</td><td>" + path + "</td></tr>" +
+                "<tr><td>" + AppMain.t("STATUS", "NETWORK_TOPOLOGY") + "</td><td>" +
+                AppMain.t(CtrlActionNetwork.nodesInfo[node.data("name")].nodeState, "NETWORK_TOPOLOGY") + "</td></tr>" +
+                "</tbody>";
     } else {
         html += "<tbody>" +
-            "<tr><td>" + AppMain.t("HOP_COUNT", "NETWORK_TOPOLOGY") + "</td><td>" + (node.data("hopCount") ? node.data("hopCount") : "---") + "</td></tr>" +
-            "<tr><td>" + AppMain.t("ROUTE_COST", "NETWORK_TOPOLOGY") + "</td><td>" + (node.data("routeCost") ? node.data("routeCost") : "---") + "</td></tr>" +
-            "<tr><td>" + AppMain.t("BUSINESS", "NETWORK_TOPOLOGY") + "</td><td>" + (node.data("busyness")!== "" ? node.data("busyness") : "---") + "</td></tr>" +
-            "<tr><td>" + AppMain.t("PATH", "NETWORK_TOPOLOGY") + "</td><td>" + path + "</td></tr>" +
-            "</tbody>";
+                "<tr><td>" + AppMain.t("HOP_COUNT", "NETWORK_TOPOLOGY") + "</td><td>" + (node.data("hopCount")
+            ? node.data("hopCount")
+            : "---") + "</td></tr>" +
+                "<tr><td>" + AppMain.t("ROUTE_COST", "NETWORK_TOPOLOGY") + "</td><td>" + (node.data("routeCost")
+            ? node.data("routeCost")
+            : "---") + "</td></tr>" +
+                "<tr><td>" + AppMain.t("BUSINESS", "NETWORK_TOPOLOGY") + "</td><td>" + (node.data("busyness") !== ""
+            ? node.data("busyness")
+            : "---") + "</td></tr>" +
+                "<tr><td>" + AppMain.t("PATH", "NETWORK_TOPOLOGY") + "</td><td>" + path + "</td></tr>" +
+                "</tbody>";
     }
 
     html += "</table>";
     html += AppMain.t("CLICK_TO_GET_PLC", "NETWORK_TOPOLOGY");
     CtrlActionNetwork.nodeTooltips[node.data("name")].setContent(html);
     CtrlActionNetwork.nodeTooltips[node.data("name")].show();
-    CtrlActionNetwork.cv.$('#' + node.data("id")).addClass("highlight-route");
+    CtrlActionNetwork.cv.$("#" + node.data("id")).addClass("highlight-route");
 };
 
 CtrlActionNetwork.hideHoverTooltip = function (node) {
+    "use strict";
     CtrlActionNetwork.nodeTooltips[node.data("name")].hide();
-    if (!CtrlActionNetwork.highlightedNode || CtrlActionNetwork.highlightedNode.data("name") !== node.data("name"))
-        CtrlActionNetwork.cv.$('#' + node.data("id")).removeClass("highlight-route");
+    if (!CtrlActionNetwork.highlightedNode || CtrlActionNetwork.highlightedNode.data("name") !== node.data("name")) {
+        CtrlActionNetwork.cv.$("#" + node.data("id")).removeClass("highlight-route");
+    }
 };
 
 CtrlActionNetwork.getNodeInfo = function (e) {
+    "use strict";
     let $this = $(e.target);
     let node = $this.attr("data-node");
     let nodeInd = CtrlActionNetwork.nodesTmp.indexOf(node);
@@ -351,15 +383,15 @@ CtrlActionNetwork.getNodeInfo = function (e) {
     }
     if (nodeInd !== -1) {
         switch (clickType) {
-            case 1:
-                CtrlActionNetwork.cv.center(CtrlActionNetwork.cv.$('#' + nodeInd));
-                CtrlActionNetwork.showHoverTooltip(CtrlActionNetwork.cv.$("#" + nodeInd));
-                CtrlActionNetwork.highlightNode(CtrlActionNetwork.cv.$("#" + nodeInd));
-                break;
-            case 2:
-            case 3:
-                CtrlActionNetwork.runPLCforNode(CtrlActionNetwork.cv.$("#" + nodeInd));
-                break;
+        case 1:
+            CtrlActionNetwork.cv.center(CtrlActionNetwork.cv.$("#" + nodeInd));
+            CtrlActionNetwork.showHoverTooltip(CtrlActionNetwork.cv.$("#" + nodeInd));
+            CtrlActionNetwork.highlightNode(CtrlActionNetwork.cv.$("#" + nodeInd));
+            break;
+        case 2:
+        case 3:
+            CtrlActionNetwork.runPLCforNode(CtrlActionNetwork.cv.$("#" + nodeInd));
+            break;
         }
     }
 };
@@ -369,31 +401,32 @@ CtrlActionNetwork.getNodeInfo = function (e) {
  * maybe latter we will add tooltips for links also
  */
 CtrlActionNetwork.buildTooltips = function () {
+    "use strict";
     $.each(CtrlActionNetwork.cv.nodes(), function (index, node) {
 
         let ref = node.popperRef();
 
         if (CtrlActionNetwork.nodesInfo[node.data("name")]) {
-            node.data("nodeState", CtrlActionNetwork.nodesInfo[node.data("name")].nodeState)
+            node.data("nodeState", CtrlActionNetwork.nodesInfo[node.data("name")].nodeState);
         }
 
         CtrlActionNetwork.nodeTooltips[node.data("name")] = Tippy.default(ref, { // tippy options:
             content: function () {
-                let content = document.createElement('div');
+                let content = document.createElement("div");
                 content.innerHTML = "";
                 return content;
             },
             arrow: true,
-            animation: 'scale',
-            theme: 'dark',
+            animation: "scale",
+            theme: "dark",
             sticky: true,
-            trigger: 'manual' // probably want manual mode
+            trigger: "manual" // probably want manual mode
         });
 
-        node.on('mouseover', function () {
+        node.on("mouseover", function () {
             CtrlActionNetwork.showHoverTooltip(node);
         });
-        node.on('mouseout', function () {
+        node.on("mouseout", function () {
             CtrlActionNetwork.hideHoverTooltip(node);
         });
     });
@@ -404,9 +437,10 @@ CtrlActionNetwork.buildTooltips = function () {
  * maybe latter we will add tooltips for links also
  */
 CtrlActionNetwork.buildClickEvents = function () {
+    "use strict";
     $.each(CtrlActionNetwork.cv.nodes(), function (index, node) {
 
-        node.on('click', function () {
+        node.on("click", function () {
             CtrlActionNetwork.highlightNode(node);
         });
     });
@@ -420,9 +454,11 @@ CtrlActionNetwork.buildClickEvents = function () {
 };
 
 CtrlActionNetwork.highlightNode = function (node) {
+    "use strict";
     CtrlActionNetwork.isNodeClick = true;
-    if (node.data("name") === "00")
+    if (node.data("name") === "00") {
         return;
+    }
     if (CtrlActionNetwork.highlightedNode) {
         CtrlActionNetwork.unhighlightNode(CtrlActionNetwork.highlightedNode);
     }
@@ -432,30 +468,32 @@ CtrlActionNetwork.highlightNode = function (node) {
     let pathRouting = node.data("pathRouting");
     if (pathRouting && pathRouting.length > 0) {
         let source = pathRouting[0];
-        CtrlActionNetwork.cv.$('#' + source).addClass("highlight-route");
-        for (let i = 1; i < pathRouting.length; i++) {
-            let target = pathRouting[i];
-            CtrlActionNetwork.cv.$('#' + source + "_" + +target).addClass("highlight-route");
-            CtrlActionNetwork.cv.$('#' + target).addClass("highlight-route");
+        CtrlActionNetwork.cv.$("#" + source).addClass("highlight-route");
+        pathRouting.forEach(function (value) {
+            let target = value;
+            CtrlActionNetwork.cv.$("#" + source + "_" + target).addClass("highlight-route");
+            CtrlActionNetwork.cv.$("#" + target).addClass("highlight-route");
             source = target;
-        }
+        });
     }
 };
 CtrlActionNetwork.unhighlightNode = function (node) {
-    if (node.data("name") === "00")
+    "use strict";
+    if (node.data("name") === "00") {
         return;
+    }
     node.removeClass("highlight-route");
     $("#nodesList tr.node-" + node.data("name")).removeClass("highlight-route");
     let pathRouting = node.data("pathRouting");
     if (pathRouting && pathRouting.length > 0) {
         let source = pathRouting[0];
-        CtrlActionNetwork.cv.$('#' + source).removeClass("highlight-route");
-        for (let i = 1; i < pathRouting.length; i++) {
-            let target = pathRouting[i];
-            CtrlActionNetwork.cv.$('#' + source + "_" + +target).removeClass("highlight-route");
-            CtrlActionNetwork.cv.$('#' + target).removeClass("highlight-route");
+        CtrlActionNetwork.cv.$("#" + source).removeClass("highlight-route");
+        pathRouting.forEach(function (value) {
+            let target = value;
+            CtrlActionNetwork.cv.$("#" + source + "_" + target).removeClass("highlight-route");
+            CtrlActionNetwork.cv.$("#" + target).removeClass("highlight-route");
             source = target;
-        }
+        });
     }
 };
 
@@ -463,23 +501,26 @@ CtrlActionNetwork.unhighlightNode = function (node) {
  * build click events for nodes
  */
 CtrlActionNetwork.buildRightClickEvents = function () {
+    "use strict";
     $.each(CtrlActionNetwork.cv.nodes(), function (index, node) {
 
-        node.on('cxttap', function () {
+        node.on("cxttap", function () {
             CtrlActionNetwork.runPLCforNode(node);
         });
     });
 };
 
 CtrlActionNetwork.runPLCforNode = function (node) {
-    if (node.data("name") === "00")
+    "use strict";
+    if (node.data("name") === "00") {
         return;
+    }
 
     AppMain.ws().execAsync("PlcDiscoverInfoGet", {
         address: node.data("nameDec")
     }).done(function (routingDiscover) {
         if (routingDiscover.PlcDiscoverInfoGetResponse && routingDiscover.PlcDiscoverInfoGetResponse["path-discover-data"]
-            && routingDiscover.PlcDiscoverInfoGetResponse["path-discover-data"]["node-data"]) {
+                && routingDiscover.PlcDiscoverInfoGetResponse["path-discover-data"]["node-data"]) {
 
             CtrlActionNetwork.nodeUpdatePath(node, routingDiscover);
         }
@@ -492,10 +533,11 @@ CtrlActionNetwork.runPLCforNode = function (node) {
 };
 
 CtrlActionNetwork.addEdge = function (source, target, type, edgeDistanceType) {
+    "use strict";
     let edgeInd = CtrlActionNetwork.edgesTmp.indexOf(source + "_" + target);
     if (edgeInd === -1) {
         CtrlActionNetwork.edges.push({
-            group: 'edges',
+            group: "edges",
             data: {
                 id: source + "_" + target,
                 source: source,
@@ -517,17 +559,17 @@ CtrlActionNetwork.addEdge = function (source, target, type, edgeDistanceType) {
     }
 };
 
-CtrlActionNetwork._checkForExistingData = function (nodes) {
-
+CtrlActionNetwork.checkForExistingData = function (nodes) {
+    "use strict";
     $.each(nodes, function (index, node) {
         if (node["ip-address"]) {
             let ip = node["ip-address"].split(":");
             let shortAddress = ip[ip.length - 1].toUpperCase();
-            if (shortAddress.length % 2) {
-                shortAddress = '0' + shortAddress;
+            if (shortAddress.length % 2 !== 0) {
+                shortAddress = "0" + shortAddress;
             }
             let nodeTitle = "";
-            if(CtrlActionNetwork.nodesData[node["mac-address"]] && CtrlActionNetwork.nodesData[node["mac-address"]]["meter-id"]){
+            if (CtrlActionNetwork.nodesData[node["mac-address"]] && CtrlActionNetwork.nodesData[node["mac-address"]]["meter-id"]) {
                 nodeTitle = CtrlActionNetwork.nodesData[node["mac-address"]]["meter-id"].toString();
             }
             CtrlActionNetwork.nodesInfo[shortAddress] = {
@@ -545,24 +587,24 @@ CtrlActionNetwork._checkForExistingData = function (nodes) {
                     const cvNode = CtrlActionNetwork.nodes[nodeInd];
 
                     //first remove existing path
-                    let pathRouting = cvNode.data["pathRouting"];
+                    let pathRouting = cvNode.data.pathRouting;
                     if (pathRouting && pathRouting.length > 1) {
                         let source = pathRouting[1];
-                        for (let i = 2; i < pathRouting.length; i++) {
-                            let target = pathRouting[i];
-                            const edgeInd = CtrlActionNetwork.edgesTmp.indexOf(source + "_" + +target);
+                        pathRouting.forEach(function (value) {
+                            let target = value;
+                            const edgeInd = CtrlActionNetwork.edgesTmp.indexOf(source + "_" + target);
                             CtrlActionNetwork.edgesTmp.splice(edgeInd, 1);
                             CtrlActionNetwork.edges.splice(edgeInd, 1);
                             source = target;
-                        }
+                        });
                     }
                     let pathArr = [0];
                     let startInd = 0;
                     let nodeData = node["path-discover-data"]["node-data"];
                     $.each(nodeData, function (index, n) {
                         let toAddress = parseInt(n.address).toString(16).toUpperCase();
-                        if (toAddress.length % 2) {
-                            toAddress = '0' + toAddress;
+                        if (toAddress.length % 2 !== 0) {
+                            toAddress = "0" + toAddress;
                         }
                         let toInd = CtrlActionNetwork.nodesTmp.indexOf(toAddress);
                         if (toInd !== -1) {
@@ -579,8 +621,8 @@ CtrlActionNetwork._checkForExistingData = function (nodes) {
                         }
                     });
 
-                    cvNode.data["pathRouting"] = pathArr;
-                    cvNode.data["pathDiscovered"] = true;
+                    cvNode.data.pathRouting = pathArr;
+                    cvNode.data.pathDiscovered = true;
                 }
             }
         }
@@ -591,14 +633,15 @@ CtrlActionNetwork._checkForExistingData = function (nodes) {
 
     CtrlActionNetwork.cv = cytoscape(
         {
-            container: $('#network-graph'),
+            container: $("#network-graph"),
             boxSelectionEnabled: false,
             autounselectify: true,
             wheelSensitivity: 0.4,
             layout: CtrlActionNetwork.layoutOptions2,
             style: cvStyle,
             elements: CtrlActionNetwork.nodes.concat(CtrlActionNetwork.edges)
-        });
+        }
+    );
 
     //add tooltips for nodes
     CtrlActionNetwork.buildTooltips();
@@ -611,23 +654,24 @@ CtrlActionNetwork._checkForExistingData = function (nodes) {
 };
 
 CtrlActionNetwork.export = function () {
+    "use strict";
     const blob = CtrlActionNetwork.cv.png();
     download(blob, "network.png");
 };
 
 CtrlActionNetwork.discoverPLC = function () {
-
+    "use strict";
     if (!CtrlActionNetwork.pldDiscoveryRunning) { //start PLC discovery
         let html = AppMain.t("DISCOVER_PLC_CONFIRM", "NETWORK_TOPOLOGY") + "<br/>" +
-            "<table style='width: 100%'>" +
-            "<tr>" +
-            "<td>" + AppMain.t("TIMEOUT", "NETWORK_TOPOLOGY") + "</td>" +
-            "<td>" +
-            "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield\">" +
-            "   <input  class=\"mdl-textfield__input\" id='timeout' type=\"text\" name=\"timeout\" value='60' maxlength=\"4\"/>" +
-            "</div></td>" +
-            "</tr>" +
-            "</table>";
+                "<table style='width: 100%'>" +
+                "<tr>" +
+                "<td>" + AppMain.t("TIMEOUT", "NETWORK_TOPOLOGY") + "</td>" +
+                "<td>" +
+                "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield\">" +
+                "   <input  class=\"mdl-textfield__input\" id='timeout' type=\"text\" name=\"timeout\" value='60' maxlength=\"4\"/>" +
+                "</div></td>" +
+                "</tr>" +
+                "</table>";
         $.confirm({
             title: AppMain.t("DISCOVER_PLC", "NETWORK_TOPOLOGY"),
             content: html,
@@ -654,10 +698,9 @@ CtrlActionNetwork.discoverPLC = function () {
                 },
                 cancel: {
                     text: AppMain.t("CANCEL", "global"),
-                    action:
-                        function () {
-                            return true;
-                        }
+                    action: function () {
+                        return true;
+                    }
                 }
             }
         });
@@ -665,16 +708,16 @@ CtrlActionNetwork.discoverPLC = function () {
         setTimeout(function () {
             $("#timeout").on("input", function () {
                 const nonNumReg = /[^0-9]/g;
-                $(this).val($(this).val().replace(nonNumReg, ''));
+                $(this).val($(this).val().replace(nonNumReg, ""));
                 let val = parseInt($(this).val());
-                if(val > 1440){
+                if (val > 1440) {
                     $(this).val(1440);
                 }
-                if(val <= 0){
+                if (val <= 0) {
                     $(this).val(1);
                 }
             });
-        },300);
+        }, 300);
 
     } else { // cancel PLC discovery
         $.confirm({
@@ -687,8 +730,9 @@ CtrlActionNetwork.discoverPLC = function () {
                     text: AppMain.t("OK", "global"),
                     action: function () {
                         CtrlActionNetwork.pldDiscoveryRunning = false;
-                        if(CtrlActionNetwork.timeoutForPLCDiscovey)
+                        if (CtrlActionNetwork.timeoutForPLCDiscovey) {
                             clearTimeout(CtrlActionNetwork.timeoutForPLCDiscovey);
+                        }
                         $("#discover_icon").removeClass("discovery-is-running");
                         const tt = $("#discover_tooltip");
                         tt.html(AppMain.t("DISCOVER_PLC", "NETWORK_TOPOLOGY"));
@@ -697,10 +741,9 @@ CtrlActionNetwork.discoverPLC = function () {
                 },
                 cancel: {
                     text: AppMain.t("CANCEL", "global"),
-                    action:
-                        function () {
-                            return true;
-                        }
+                    action: function () {
+                        return true;
+                    }
                 }
             }
         });
@@ -708,18 +751,19 @@ CtrlActionNetwork.discoverPLC = function () {
 };
 
 CtrlActionNetwork.nodeUpdatePath = function (node, routingDiscover) {
+    "use strict";
     //first remove existing path
     let pathRouting = node.data("pathRouting");
     if (pathRouting && pathRouting.length > 0) {
         let source = pathRouting[0];
-        for (let i = 1; i < pathRouting.length; i++) {
-            let target = pathRouting[i];
+        pathRouting.forEach(function (value) {
+            let target = value;
             CtrlActionNetwork.edgesTmp = CtrlActionNetwork.edgesTmp.filter(function (item) {
-                return item !== source + "_" + +target
+                return item !== source + "_" + target;
             });
-            CtrlActionNetwork.cv.remove('#' + source + "_" + +target);
+            CtrlActionNetwork.cv.remove("#" + source + "_" + target);
             source = target;
-        }
+        });
     }
 
     let pathArr = [0];
@@ -727,8 +771,8 @@ CtrlActionNetwork.nodeUpdatePath = function (node, routingDiscover) {
     let nodeData = routingDiscover.PlcDiscoverInfoGetResponse["path-discover-data"]["node-data"];
     $.each(nodeData, function (index, node) {
         let toAddress = parseInt(node.address).toString(16).toUpperCase();
-        if (toAddress.length % 2) {
-            toAddress = '0' + toAddress;
+        if (toAddress.length % 2 !== 0) {
+            toAddress = "0" + toAddress;
         }
         let toInd = CtrlActionNetwork.nodesTmp.indexOf(toAddress);
         if (toInd !== -1) {
@@ -738,18 +782,19 @@ CtrlActionNetwork.nodeUpdatePath = function (node, routingDiscover) {
                 CtrlActionNetwork.addEdge(startInd, toInd, 1, 1);
                 CtrlActionNetwork.cv.add(CtrlActionNetwork.edges[CtrlActionNetwork.edges.length - 1]);
             } else { // samo spremenimo tip povezave
-                CtrlActionNetwork.cv.$('#' + startInd + "_" + +toInd).data("type", 1);
+                CtrlActionNetwork.cv.$("#" + startInd + "_" + toInd).data("type", 1);
             }
             pathArr.push(toInd);
             startInd = toInd;
         }
     });
 
-    CtrlActionNetwork.cv.$('#' + node.data("id")).data("pathRouting", pathArr);
-    CtrlActionNetwork.cv.$('#' + node.data("id")).data("pathDiscovered", true);
+    CtrlActionNetwork.cv.$("#" + node.data("id")).data("pathRouting", pathArr);
+    CtrlActionNetwork.cv.$("#" + node.data("id")).data("pathDiscovered", true);
 };
 
 CtrlActionNetwork.plcNodeDiscover = function (nodeIndex) {
+    "use strict";
     if (nodeIndex >= CtrlActionNetwork.nodesTmp.length) {
         CtrlActionNetwork.pldDiscoveryRunning = false;
         $("#discover_icon").removeClass("discovery-is-running");
@@ -763,42 +808,48 @@ CtrlActionNetwork.plcNodeDiscover = function (nodeIndex) {
 
     console.log("PlcDiscoverInfoGet for node:" + node.data("nameDec"));
 
-    if (node.data("name") === "00")
+    if (node.data("name") === "00") {
         return CtrlActionNetwork.plcNodeDiscover(nodeIndex + 1);
+    }
 
-    if (node.data("pathDiscovered") === true)
+    if (node.data("pathDiscovered") === true) {
         return CtrlActionNetwork.plcNodeDiscover(nodeIndex + 1);
+    }
 
     AppMain.ws().execAsync("PlcDiscoverInfoGet", {
         address: node.data("nameDec")
     })
         .done(function (routingDiscover) {
             if (routingDiscover.PlcDiscoverInfoGetResponse && routingDiscover.PlcDiscoverInfoGetResponse["path-discover-data"]
-                && routingDiscover.PlcDiscoverInfoGetResponse["path-discover-data"]["node-data"]) {
+                    && routingDiscover.PlcDiscoverInfoGetResponse["path-discover-data"]["node-data"]) {
                 CtrlActionNetwork.nodeUpdatePath(node, routingDiscover);
             }
-            if (CtrlActionNetwork.pldDiscoveryRunning)
+            if (CtrlActionNetwork.pldDiscoveryRunning) {
                 return CtrlActionNetwork.plcNodeDiscover(nodeIndex + 1);
+            }
         })
         .fail(function () {
             console.log("Error in PlcDiscoverInfoGet for node:" + node.data("nameDec"));
-            if (CtrlActionNetwork.pldDiscoveryRunning) // move to next node
+            if (CtrlActionNetwork.pldDiscoveryRunning){ // move to next node
                 return CtrlActionNetwork.plcNodeDiscover(nodeIndex + 1);
+            }
         });
 };
 
 CtrlActionNetwork.updatePLCtooltip = function (nodeIndex) {
+    "use strict";
     CtrlActionNetwork.currentNodeInDiscovery = nodeIndex;
     let sliderHtml = "" +
-        "<span>" + AppMain.t("COMPLETED", "NETWORK_TOPOLOGY") + ": " +
-        (nodeIndex + 1) + "/" + CtrlActionNetwork.nodesTmp.length + "</span><br/>" +
-        AppMain.t("CLICK_TO_CANCEL", "NETWORK_TOPOLOGY") +
-        "</p>";
+            "<span>" + AppMain.t("COMPLETED", "NETWORK_TOPOLOGY") + ": " +
+            (nodeIndex + 1) + "/" + CtrlActionNetwork.nodesTmp.length + "</span><br/>" +
+            AppMain.t("CLICK_TO_CANCEL", "NETWORK_TOPOLOGY") +
+            "</p>";
     const tt = $("#discover_tooltip");
     tt.html(sliderHtml);
 };
 
 CtrlActionNetwork.arrangeNodes = function (nodes, nodesCosemStat) {
+    "use strict";
     let nodesObj = {};
     if (nodesCosemStat.length === undefined) {
         nodesCosemStat = [nodesCosemStat];
@@ -810,42 +861,56 @@ CtrlActionNetwork.arrangeNodes = function (nodes, nodesCosemStat) {
 
     $.each(nodes, function (index, node) {
         if (nodesObj[node["mac-address"]]) {
-            node["node-title"] = (nodesObj[node["mac-address"]]["meter-id"] && nodesObj[node["mac-address"]]["meter-id"].toString() !== "[object Object]") ?
-                nodesObj[node["mac-address"]]["meter-id"].toString() : "---";
-            node["node-commissioned"] = nodesObj[node["mac-address"]]["commissioned"] ? nodesObj[node["mac-address"]]["commissioned"].toString() : "";
-            node["node-last-comm"] = nodesObj[node["mac-address"]]["last-successful-communication"] ? nodesObj[node["mac-address"]]["last-successful-communication"].toString() : "";
-            node["dc-state"] = defined(nodesObj[node["mac-address"]]["meter-state"]) ? nodesObj[node["mac-address"]]["meter-state"].toString() : "";
-            const succ = parseInt(nodesObj[node["mac-address"]]["successful-communications"]);
-            const unsucc = parseInt(nodesObj[node["mac-address"]]["unsuccessful-communications"]);
-            node["success-rate"] = (!isNaN(succ) && !isNaN(unsucc) && succ + unsucc !== 0) ? parseInt((succ / (succ + unsucc)) * 100) : 100;
+            node["node-title"] = (nodesObj[node["mac-address"]]["meter-id"] && nodesObj[node["mac-address"]]["meter-id"].toString() !== "[object Object]")
+                ? nodesObj[node["mac-address"]]["meter-id"].toString()
+                : "---";
+            node["node-commissioned"] = nodesObj[node["mac-address"]].commissioned
+                ? nodesObj[node["mac-address"]].commissioned.toString()
+                : "";
+            node["node-last-comm"] = nodesObj[node["mac-address"]]["last-successful-communication"]
+                ? nodesObj[node["mac-address"]]["last-successful-communication"].toString()
+                : "";
+            node["dc-state"] = defined(nodesObj[node["mac-address"]]["meter-state"])
+                ? nodesObj[node["mac-address"]]["meter-state"].toString()
+                : "";
+            const succ = parseInt(nodesObj[node["mac-address"]]["successful-communications"], 10);
+            const unsucc = parseInt(nodesObj[node["mac-address"]]["unsuccessful-communications"], 10);
+            node["success-rate"] = (!Number.isNaN(succ) && !Number.isNaN(unsucc) && succ + unsucc !== 0)
+                ? parseInt((succ / (succ + unsucc)) * 100, 10)
+                : 100;
             node["successful-communications"] = nodesObj[node["mac-address"]]["successful-communications"];
-            if (nodesObj[node["mac-address"]]["last-successful-communication"] && nodesObj[node["mac-address"]]["last-successful-communication"].toString() !== "0")
+            if (nodesObj[node["mac-address"]]["last-successful-communication"] && nodesObj[node["mac-address"]]["last-successful-communication"].toString() !== "0") {
                 node["last-successful-communication"] = moment(nodesObj[node["mac-address"]]["last-successful-communication"].toString()).format(AppMain.localization("DATETIME_FORMAT"));
-            else
+            } else {
                 node["last-successful-communication"] = "";
+            }
             node["unsuccessful-communications"] = nodesObj[node["mac-address"]]["unsuccessful-communications"];
-            if (nodesObj[node["mac-address"]]["last-unsuccessful-communication"] && nodesObj[node["mac-address"]]["last-unsuccessful-communication"].toString() !== "0")
+            if (nodesObj[node["mac-address"]]["last-unsuccessful-communication"] && nodesObj[node["mac-address"]]["last-unsuccessful-communication"].toString() !== "0") {
                 node["last-unsuccessful-communication"] = moment(nodesObj[node["mac-address"]]["last-unsuccessful-communication"].toString()).format(AppMain.localization("DATETIME_FORMAT"));
-            else
+            } else {
                 node["last-unsuccessful-communication"] = "";
-            node["security-counter"] = defined(nodesObj[node["mac-address"]]["security-counter"]) ? nodesObj[node["mac-address"]]["security-counter"] : "---";
+            }
+            node["security-counter"] = defined(nodesObj[node["mac-address"]]["security-counter"])
+                ? nodesObj[node["mac-address"]]["security-counter"]
+                : "---";
         }
     });
     return nodes;
 };
 
-CtrlActionNetwork.expand = function(){
+CtrlActionNetwork.expand = function () {
+    "use strict";
     const main = $("main.mdl-layout__content");
     const expIcon = $("#expand_icon");
     const expTooltip = $("#tooltipFullScreen");
-    if(!this.isExpanded){ //go full screen
+    if (!this.isExpanded) { //go full screen
         main.addClass("is-full-screen");
         expIcon.html("fullscreen_exit");
-        expTooltip.html(AppMain.t("EXIT_FULL_SCREEN", "global"))
-    }else{ //exit full screen
+        expTooltip.html(AppMain.t("EXIT_FULL_SCREEN", "global"));
+    } else { //exit full screen
         main.removeClass("is-full-screen");
         expIcon.html("fullscreen");
-        expTooltip.html(AppMain.t("FULL_SCREEN", "global"))
+        expTooltip.html(AppMain.t("FULL_SCREEN", "global"));
     }
     CtrlActionNetwork.cv.resize();
     AppMain.html.updateAllElements();
@@ -854,11 +919,13 @@ CtrlActionNetwork.expand = function(){
 
 
 CtrlActionNetwork.init = function () {
+    "use strict";
     this.controller.attachEvent("onBeforeExecute", this.onBeforeExecute);
     this.controller.attachEvent("onAfterExecute", this.onAfterExecute);
 };
 
 CtrlActionNetwork.onBeforeExecute = function () {
+    "use strict";
     CtrlActionNetwork.pldDiscoveryRunning = false;
     $(".main-canvas").removeClass("main-canvas-attached-devices");
 };
