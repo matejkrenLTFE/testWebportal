@@ -1,13 +1,19 @@
 /**
  * @class CtrlActionDefault Controller action using IControllerAction interface.
  */
-var moment = require("moment");
-var modulecontrolleraction = require("./IControllerAction");
-var comsignal = require("./ComWANModemSignal");
-var CtrlActionDefault = Object.create(new modulecontrolleraction.IControllerAction);
-//var fs = require("fs");
 
-CtrlActionDefault.exec = function() {    
+/* global AppMain, $, defined, dmp, uptimeFormat */
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
+const moment = require("moment");
+const modulecontrolleraction = require("./IControllerAction");
+let CtrlActionDefault = Object.create(new modulecontrolleraction.IControllerAction());
+
+CtrlActionDefault.exec = function () {
+    "use strict";
+
     this.view.setTitle("DASHBOARD", "HEADER");
 
     let generalInfo = {
@@ -15,62 +21,59 @@ CtrlActionDefault.exec = function() {
         wan: {}
     };
 
-    this.view.renderEmpty("Default#ViewDashboard", {
-        _generalTitle: AppMain.t("GENERAL", "DASHBOARD"),
-        systemTitle: AppMain.t("SYSTEM", "DASHBOARD"),
-        generalInfo: generalInfo.system,
-        wanInfo: generalInfo.wan
-    }, true);
-
     // Get infos
-    const info = AppMain.ws().exec("GetInfos").getResponse();
+    const info = AppMain.ws().exec("GetInfos", undefined).getResponse(false);
 
     // Prepare params
-    $.each(info.GetInfosResponse.info, function(i, obj){	
-        if (typeof generalInfo[obj.category] !== "undefined")		
-            generalInfo[obj.category][obj.name] = (!obj.value) ? "---" : obj.value;
+    $.each(info.GetInfosResponse.info, function (i, obj) {
+        if (generalInfo[obj.category] !== undefined) {
+            generalInfo[obj.category][obj.name] = (!obj.value)
+                ? "---"
+                : obj.value;
+        }
     });
 
-    generalInfo.system.DateTime = moment(generalInfo.system.DateTime).format( AppMain.localization("DATETIME_FORMAT") );
+    generalInfo.system.DateTime = moment(generalInfo.system.DateTime).format(AppMain.localization("DATETIME_FORMAT"));
     if (defined(generalInfo.system.Uptime)) {
         generalInfo.system.Uptime = generalInfo.system.Uptime.split(",");
-        generalInfo.system.Uptime = defined(generalInfo.system.Uptime[0]) ? generalInfo.system.Uptime[0] : "";
+        generalInfo.system.Uptime = defined(generalInfo.system.Uptime[0])
+            ? generalInfo.system.Uptime[0]
+            : "";
     }
 
     // Battery level param translation
-    if(defined(generalInfo.system.Battery_level))
+    if (defined(generalInfo.system.Battery_level)) {
         generalInfo.system.Battery_level = CtrlActionDefault.batteryChargeLevelStr(generalInfo.system.Battery_level);
+    }
 
-    if(defined(generalInfo.system.FW_library_version))
+    if (defined(generalInfo.system.FW_library_version)) {
         generalInfo.system.FW_library_version = generalInfo.system.FW_library_version.split(" ")[0];
+    }
 
     // Prepate counters
-    const cnt = AppMain.ws().exec("GetCounters").getResponse();
+    const cnt = AppMain.ws().exec("GetCounters", undefined).getResponse(false);
     let counters = {};
     if (defined(cnt.GetCountersResponse.counter)) {
-        for (index in cnt.GetCountersResponse.counter["cnt-sys"]) {
-            var cntValue = cnt.GetCountersResponse.counter["cnt-sys"][index];
-
-            // Convert m celsius
-            if (index == "cpu-core-temperature" || index=="cpu-board-temperature")
-                cntValue = (cntValue/1000).toString().substring(0,4);
-
-            // Convert uptime to date
-            if (index == "uptime") {
+        $.each(cnt.GetCountersResponse.counter["cnt-sys"], function (index, cntValue) {
+            if (index === "cpu-core-temperature" || index === "cpu-board-temperature") {
+                const cntValuePom = (cntValue / 1000);
+                cntValue = cntValuePom.toString().substring(0, 4);
+            }
+            if (index === "uptime") {
                 //var uptimeTimestamp = (Date.now()/1000) - cntValue;
-                //cntValue = moment.unix( uptimeTimestamp ).format( "HH:mm:ss.SSS" );                
+                //cntValue = moment.unix( uptimeTimestamp ).format( "HH:mm:ss.SSS" );
                 cntValue = uptimeFormat(cntValue);
-            }            
-            counters[index]=cntValue
-        }
+            }
+            counters[index] = cntValue;
+        });
     }
 
     this.view.render("Default#ViewDashboard", {
-        _generalTitle: AppMain.t("GENERAL", "DASHBOARD"),
-        _systemInfoTitle: AppMain.t("SYSTEM_INFO",  "DASHBOARD"),
-        _connectionStatusTitle: AppMain.t("CONN_STAT",  "DASHBOARD"),
-        _timeTitle: AppMain.t("TIME", "DASHBOARD"),
-        _alarmsTitle: AppMain.t("ALARMS", "DASHBOARD"),
+        generalTitle: AppMain.t("GENERAL", "DASHBOARD"),
+        systemInfoTitle: AppMain.t("SYSTEM_INFO", "DASHBOARD"),
+        connectionStatusTitle: AppMain.t("CONN_STAT", "DASHBOARD"),
+        timeTitle: AppMain.t("TIME", "DASHBOARD"),
+        alarmsTitle: AppMain.t("ALARMS", "DASHBOARD"),
         generalInfo: generalInfo.system,
         wanInfo: generalInfo.wan,
         counters: counters,
@@ -110,61 +113,64 @@ CtrlActionDefault.exec = function() {
     AppMain.html.updateElements([".mdl-tooltip"]);
 };
 
-CtrlActionDefault.getAlarmOccurrenceInfo = function(alarmName){
+CtrlActionDefault.getAlarmOccurrenceInfo = function (alarmName) {
+    "use strict";
+
     let alarmInfo = {
-        lastOcc : "---",
+        lastOcc: "---",
         count: "0"
     };
 
     const cnt = AppMain.ws().exec("GetEventCounter", {
         eventName: alarmName
-    }).getResponse();
+    }).getResponse(false);
 
-    if(defined(cnt.GetEventCounterResponse.EventCount)){
+    if (defined(cnt.GetEventCounterResponse.EventCount)) {
         alarmInfo.count = cnt.GetEventCounterResponse.EventCount.count;
-        if(alarmInfo.count !== "0")
-            alarmInfo.lastOcc = moment(cnt.GetEventCounterResponse.EventCount["last-accur"]).format( AppMain.localization("DATETIME_FORMAT") );
+        if (alarmInfo.count !== "0") {
+            alarmInfo.lastOcc = moment(cnt.GetEventCounterResponse.EventCount["last-accur"]).format(AppMain.localization("DATETIME_FORMAT"));
+        }
     }
 
-    return alarmInfo
+    return alarmInfo;
 };
 
-CtrlActionDefault.onAfterExecute = function() {
+CtrlActionDefault.onAfterExecute = function () {
+    "use strict";
+
     dmp("CtrlActionDefault.onAfterExecute");
     AppMain.html.updateAllElements();
 };
 
-CtrlActionDefault.onBeforeExecute = function() {
+CtrlActionDefault.onBeforeExecute = function () {
+    "use strict";
     dmp("CtrlActionDefault.onBeforeExecute --> FROM default");
     // Clear show signal interval component
     clearInterval(AppMain.getComponent("ComWANSignalInterval"));
     AppMain.setComponent("ComWANSignalInterval", null);
 };
 
-CtrlActionDefault.init = function() {
+CtrlActionDefault.init = function () {
+    "use strict";
     this.controller.attachEvent("onBeforeExecute", this.onBeforeExecute);
-    this.controller.attachEvent("onAfterExecute", this.onAfterExecute);    
-};
-
-CtrlActionDefault._showSignalIndicator = function(signal) {
-    comsignal.ComWANModemSignal.init({
-        signal: signal,
-        elementSelector: "#SignalLevelIndicator"
-    });
+    this.controller.attachEvent("onAfterExecute", this.onAfterExecute);
 };
 
 /**
  * Get capacitor charge level.
  * @return {String}
  */
-CtrlActionDefault.batteryChargeLevelStr = function(level) {
-    var levelStr = {
+CtrlActionDefault.batteryChargeLevelStr = function (level) {
+    "use strict";
+    const levelStr = {
         "BATTERY_NOT_INSTALLED": AppMain.t("NO_BATTERY", "DASHBOARD"),
         "BATTERY_EMPTY": AppMain.t("DISCHARGED", "DASHBOARD"),
         "BATTERY_LOW": AppMain.t("LOW", "DASHBOARD"),
         "BATTERY_FULL": AppMain.t("FULL", "DASHBOARD")
     };
-    return defined(levelStr[level]) ? levelStr[level] : "";
+    return defined(levelStr[level])
+        ? levelStr[level]
+        : "";
 };
 
 module.exports.CtrlActionDefault = CtrlActionDefault;
