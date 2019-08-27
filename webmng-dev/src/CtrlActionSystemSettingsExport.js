@@ -2,7 +2,7 @@
  * @class CtrlActionSystemSettingsExport Controller action using IControllerAction interface.
  */
 
-/* global AppMain, $, vkbeautify, DOMParser, defined */
+/* global AppMain, $, vkbeautify, DOMParser, defined, dmp */
 /* jshint maxstatements: false */
 /* jslint browser:true, node:true*/
 /* eslint es6:0, no-undefined:0, control-has-associated-label:0  */

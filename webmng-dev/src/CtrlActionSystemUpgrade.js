@@ -123,7 +123,7 @@ CtrlActionSystemUpgrade.upgrade = function () {
                         const resp = AppMain.ws().exec("Upgrade", {
                             StartUpgrade: filename
                         }).getResponse(false);
-                        const respCode = parseInt(resp.UpgradeResponse.toString());
+                        const respCode = parseInt(resp.UpgradeResponse.toString(), 10);
 
                         if (Number.isNaN(respCode) || respCode >= 0) {
                             $(".warning .close").click();

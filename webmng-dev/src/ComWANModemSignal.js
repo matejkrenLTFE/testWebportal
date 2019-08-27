@@ -35,7 +35,7 @@ ComWANModemSignal.render = function (params) {
     $(this.elementSelector).removeClass();
     $(this.elementSelector).addClass("signalLevel_" + this.getSignalLevel(this.signal));
 
-    const statusInt = parseInt(params.GSM_Status);
+    const statusInt = parseInt(params.GSM_Status, 10);
     let statusByteString = statusInt.toString(2);
     while (statusByteString.length < 32) {
         statusByteString = "0" + statusByteString;
@@ -57,7 +57,7 @@ ComWANModemSignal.render = function (params) {
 ComWANModemSignal.getSignalLevel = function (signal) {
     "use strict";
     let level = null;
-    signal = parseInt(signal);
+    signal = parseInt(signal, 10);
     if (defined(ComWANModemSignal.ranges[signal])) {
         level = ComWANModemSignal.ranges[signal];
     } else {
@@ -143,7 +143,7 @@ ComWANModemSignal.getBitStatus = function (statusCode) {
 ComWANModemSignal.getConnectionStatus = function (params) {
     "use strict";
 
-    const statusInt = parseInt(params.GSM_Status);
+    const statusInt = parseInt(params.GSM_Status, 10);
     let statusByteString = statusInt.toString(2);
     while (statusByteString.length < 32) {
         statusByteString = "0" + statusByteString;

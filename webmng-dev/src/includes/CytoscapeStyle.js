@@ -30,7 +30,7 @@ const cyStyle = [
             "opacity": 0.7,
             "border-width": function (node) {
                 "use strict";
-                let busyness = parseInt(node.data("busyness"));
+                let busyness = parseInt(node.data("busyness"), 10);
                 if (Number.isNaN(busyness) || busyness === 0) {
                     return 0;
                 }
@@ -109,7 +109,7 @@ const cyStyle = [
             },
             "line-color": function (e) {
                 "use strict";
-                const linkCost = parseInt(e.data("linkCount"));
+                const linkCost = parseInt(e.data("linkCount"), 10);
                 if (Number.isNaN(linkCost) || linkCost <= 12) {
                     return "#009E00";
                 }
@@ -120,7 +120,7 @@ const cyStyle = [
             },
             "target-arrow-color": function (e) {
                 "use strict";
-                const linkCost = parseInt(e.data("linkCount"));
+                const linkCost = parseInt(e.data("linkCount"), 10);
                 if (Number.isNaN(linkCost) || linkCost <= 12) {
                     return "#009E00";
                 }

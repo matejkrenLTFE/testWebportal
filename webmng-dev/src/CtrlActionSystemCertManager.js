@@ -2,7 +2,7 @@
  * @class CtrlActionSystemCertManager Controller action using IControllerAction interface.
  */
 
-/* global AppMain, $, atob, defined, dmp */
+/* global AppMain, $, atob, defined, dmp, componentHandler */
 /* jshint maxstatements: false */
 /* jslint browser:true, node:true*/
 /* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
@@ -112,7 +112,7 @@ CtrlActionSystemCertManager.generateCert = function () {
     let email = $("input[name='cert-email']").val();
     let validity = $("input[name='cert-validity']").val();
     try {
-        validity = parseInt(validity);
+        validity = parseInt(validity, 10);
     } catch (event) {
         dmp(event.toString());
         validity = 0;
