@@ -1,24 +1,32 @@
 /**
  * @class CtrlActionSystemSettingsExport Controller action using IControllerAction interface.
  */
+
+/* global AppMain, $, vkbeautify, DOMParser, defined */
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
 const modulecontrolleraction = require("./IControllerAction");
-let CtrlActionSystemSettingsExport = Object.create(new modulecontrolleraction.IControllerAction);
+let CtrlActionSystemSettingsExport = Object.create(new modulecontrolleraction.IControllerAction());
 const moment = require("moment");
 const build = require("../build.info");
 const download = require("./vendor/download.js");
 const X2JS = require("xml-json-parser");
 const Json2Xml = new X2JS();
 
-CtrlActionSystemSettingsExport.exec = function() {
+CtrlActionSystemSettingsExport.exec = function () {
+    "use strict";
+
     this.view.setTitle("SYS_SETTINGS_EXP_IMP");
 
     const params = AppMain.ws().exec("GetParameters", undefined).getResponse(false);
     dmp(params);
     let inputs = "";
-    if(defined(params.GetParametersResponse)) {
-        for (let category in params.GetParametersResponse) {
+    if (defined(params.GetParametersResponse)) {
+        $.each(params.GetParametersResponse, function (category) {
             inputs += "-- " + category;
-        }
+        });
     }
     this.params = "";
 
@@ -46,15 +54,15 @@ CtrlActionSystemSettingsExport.exec = function() {
             csmd: AppMain.t("CSMD", "SYS_SETTINGS_EXP_IMP")
         }
     });
-    
+
     let inputElement = document.getElementById("file");
-    inputElement.addEventListener("change", function() {
-        if(!AppMain.user.getRBACpermissionElement("settings_import_export", "import")){
+    inputElement.addEventListener("change", function () {
+        if (!AppMain.user.getRBACpermissionElement("settings_import_export", "import")) {
             return;
         }
         let uploadElement = this;
         let reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             CtrlActionSystemSettingsExport.params = e.target.result;
         };
 
@@ -68,26 +76,32 @@ CtrlActionSystemSettingsExport.exec = function() {
     AppMain.html.formCheckboxSelectAll("SystemSettingsExport", "selectAllCheckbox");
 };
 
-CtrlActionSystemSettingsExport.importFile = function(){
-    if(!AppMain.user.getRBACpermissionElement("settings_import_export", "import")){
+CtrlActionSystemSettingsExport.importFile = function () {
+    "use strict";
+
+    if (!AppMain.user.getRBACpermissionElement("settings_import_export", "import")) {
         return;
     }
     const setFactoryDefaults = $("#create-factory-file").is(":checked");
     let paramPom = "";
-    if (setFactoryDefaults)
+    if (setFactoryDefaults) {
         paramPom += "<create-factory-file>true</create-factory-file>";
+    }
 
     let parser = new DOMParser();
-    let xmlDoc = parser.parseFromString(this.params,"text/xml");
+    let xmlDoc = parser.parseFromString(this.params, "text/xml");
     let childNodes = xmlDoc.childNodes;
-    if(childNodes.length === 1 && childNodes[0].nodeName === "parameters")
+    if (childNodes.length === 1 && childNodes[0].nodeName === "parameters") {
         paramPom += childNodes[0].innerHTML;
-    else
+    } else {
         paramPom += this.params;
+    }
     CtrlActionSystemSettingsExport.setParams(paramPom);
 };
 
-CtrlActionSystemSettingsExport.importCancel = function(){
+CtrlActionSystemSettingsExport.importCancel = function () {
+    "use strict";
+
     $(".select-file").show();
     $("#file-name").html("");
     $("#file").val("");
@@ -95,18 +109,21 @@ CtrlActionSystemSettingsExport.importCancel = function(){
     AppMain.html.updateElements([".mdl-button"]);
 };
 
-CtrlActionSystemSettingsExport.setParams = function(params) {      
-    const result = AppMain.ws().exec("SetParameters", params).getResponse(false);
-    if (defined(result.SetParametersResponse) && result.SetParametersResponse.toString() === "OK")
-        AppMain.dialog("SUCC_UPLOAD_PARAMS_SET", "success");
-    else
-        AppMain.dialog("ERR_UPLOAD_PARAMS_SET", "error");
+CtrlActionSystemSettingsExport.setParams = function (params) {
+    "use strict";
 
+    const result = AppMain.ws().exec("SetParameters", params).getResponse(false);
+    if (defined(result.SetParametersResponse) && result.SetParametersResponse.toString() === "OK") {
+        AppMain.dialog("SUCC_UPLOAD_PARAMS_SET", "success");
+    } else {
+        AppMain.dialog("ERR_UPLOAD_PARAMS_SET", "error");
+    }
     document.getElementById("SystemSettingsExport").reset();
     AppMain.html.updateAllElements();
 };
 
-CtrlActionSystemSettingsExport.exportParams = function() {
+CtrlActionSystemSettingsExport.exportParams = function () {
+    "use strict";
 
     const expNameMap = {
         "iloc": AppMain.t("LOCAL_ETHERNET", "SYS_SETTINGS_EXP_IMP"),
@@ -122,59 +139,59 @@ CtrlActionSystemSettingsExport.exportParams = function() {
     };
 
     const params = AppMain.ws().exec("GetParameters", {}).getResponse(false);
-    
+
     const form = $("#SystemSettingsExport");
     let formData = form.serialize();
     formData = form.deserialize(formData);
 
-    if(defined(params.GetParametersResponse) && Object.keys(formData).length > 0) {
-        let xml="";
+    if (defined(params.GetParametersResponse) && Object.keys(formData).length > 0) {
+        let xml = "";
         let exportCategories = [];
 
         // DCMNG & CTRDM are considered the same parameters group
         // if ether is selected enable both.
-        if (defined(formData["export_dcmng"]) || defined(formData["export_cntr"])) {
-            formData["export_dcmng"]="on";
-            formData["export_cntr"]="on";
+        if (defined(formData.export_dcmng) || defined(formData.export_cntr)) {
+            formData.export_dcmng = "on";
+            formData.export_cntr = "on";
         }
-
-        for (let cat in params.GetParametersResponse) {
-            if(params.GetParametersResponse.hasOwnProperty(cat)){
-                if (defined( formData["export_"+cat] )) {
-                    exportCategories[exportCategories.length] = defined(expNameMap[cat]) ? expNameMap[cat]: cat;
-                    xml += "<" + cat + ">\n";
-                    xml += Json2Xml.json2xml_str(params.GetParametersResponse[cat]).replace(new RegExp("&#x2F;",'g'), "/");
-                    xml += "</" + cat + ">\n";
-                }
+        $.each(params.GetParametersResponse, function (cat, value) {
+            if (defined(formData["export_" + cat])) {
+                exportCategories[exportCategories.length] = defined(expNameMap[cat])
+                    ? expNameMap[cat]
+                    : cat;
+                xml += "<" + cat + ">\n";
+                xml += Json2Xml.json2xml_str(value).replace(new RegExp("&#x2F;", "g"), "/");
+                xml += "</" + cat + ">\n";
             }
-        }             
+        });
+
         if (xml) {
             xml = "<parameters>\n" + xml + "</parameters>";
             const userRoleName = AppMain.user.getUserData("user-role-name");
-            if(userRoleName !== "Factory"){
+            if (userRoleName !== "Factory") {
                 //comment some lines
                 //factory-number
-                xml = xml.replace("<factory-number>","<!--factory-number>");
-                xml = xml.replace("</factory-number>","<factory-number-->");
+                xml = xml.replace("<factory-number>", "<!--factory-number>");
+                xml = xml.replace("</factory-number>", "<factory-number-->");
                 //device-type
-                xml = xml.replace("<device-type>","<!--device-type>");
-                xml = xml.replace("</device-type>","<device-type-->");
+                xml = xml.replace("<device-type>", "<!--device-type>");
+                xml = xml.replace("</device-type>", "<device-type-->");
                 //device-type
-                xml = xml.replace("<production-date>","<!--production-date>");
-                xml = xml.replace("</production-date>","<production-date-->");
+                xml = xml.replace("<production-date>", "<!--production-date>");
+                xml = xml.replace("</production-date>", "<production-date-->");
                 //mac-address
-                xml = xml.replace("<mac-address>","<!--mac-address>");
-                xml = xml.replace("</mac-address>","<mac-address-->");
+                xml = xml.replace("<mac-address>", "<!--mac-address>");
+                xml = xml.replace("</mac-address>", "<mac-address-->");
             }
             xml = vkbeautify.xml(xml, 2);
             //AC750_Parameters_iloc_YYYY-MM-DD-HH-MM-SS
-            const dateStr = moment(new Date()).format( AppMain.localization("EXPORT_DATETIME_FORMAT") );
-            const filename = build.device + "_Parameters_" + exportCategories.join("_").replace("_cntr","") + "_" + dateStr + ".xml";
+            const dateStr = moment(new Date()).format(AppMain.localization("EXPORT_DATETIME_FORMAT"));
+            const filename = build.device + "_Parameters_" + exportCategories.join("_").replace("_cntr", "") + "_" + dateStr + ".xml";
             download("data:application/xml;charset=utf-8;base64," + btoa(xml), filename, "application/xml");
         }
-    }
-    else
+    } else {
         AppMain.dialog("SELECT_PARAMETERS_TO_EXPORT", "warning");
+    }
 
 
     AppMain.html.updateElements([".mdl-button"]);
