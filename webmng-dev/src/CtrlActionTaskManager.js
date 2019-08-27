@@ -1,8 +1,14 @@
 /**
  * @class CtrlActionTaskManager Controller action using IControllerAction interface.
  */
+
+/* global AppMain, $, defined, dmp, vkbeautify, FileReader, XMLSerializer */
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
 const modulecontrolleraction = require("./IControllerAction");
-let CtrlActionTaskManager = Object.create(new modulecontrolleraction.IControllerAction);
+let CtrlActionTaskManager = Object.create(new modulecontrolleraction.IControllerAction());
 const moment = require("moment");
 const build = require("../build.info");
 const download = require("./vendor/download.js");
@@ -12,6 +18,8 @@ const objectList = require("./includes/jobObjects");
  * main controller execution function e.g. onLoad()
  */
 CtrlActionTaskManager.exec = function () {
+    "use strict";
+
     this.view.setTitle("TASK_MANAGER");
 
     let resourceList = AppMain.wsMes().exec("RequestMessage", {
@@ -20,21 +28,21 @@ CtrlActionTaskManager.exec = function () {
             "mes:Noun": "ResourceDirectory",
             "mes:Timestamp": moment().toISOString(),
             "mes:MessageID": "78465521",
-            "mes:CorrelationID": "78465521",
+            "mes:CorrelationID": "78465521"
         },
         "mes:Request": {
-            "mes:WithData": true,
+            "mes:WithData": true
         }
     }).getResponse(false);
 
     const nodesCosemStat = AppMain.wsMes().exec("CosemDeviceStatisticRequest", "").getResponse(false);
     if (nodesCosemStat && nodesCosemStat.GetCosemDeviceStatisticResponse &&
-        nodesCosemStat.GetCosemDeviceStatisticResponse["cosem-device-statistics"]) {
+            nodesCosemStat.GetCosemDeviceStatisticResponse["cosem-device-statistics"]) {
         this.arrangeNodeCosemStat(nodesCosemStat.GetCosemDeviceStatisticResponse["cosem-device-statistics"]);
     }
     this.groups = this.getGroups();
 
-    let listHtml = this._buildNodeListHTML(resourceList);
+    let listHtml = this.buildNodeListHTML(resourceList);
 
     this.view.render(this.controller.action, {
         title: AppMain.t("TITLE", "TASK_MANAGER"),
@@ -68,7 +76,7 @@ CtrlActionTaskManager.exec = function () {
 
     const tableOptions = {
         valueNames: ["ID", "Activates", "Type", "Expires", "RepeatingInterval", "NotOlderThan", "Priority", "ResourceStatus",
-            "LastActivation", "ReplyAddress", "DeviceReference", "Object", "Service"]
+                "LastActivation", "ReplyAddress", "DeviceReference", "Object", "Service"]
     };
     this.initTable("resourceList", "resourceList", tableOptions);
     this.initSelectAllForJob("selectAllNodes");
@@ -78,10 +86,13 @@ CtrlActionTaskManager.exec = function () {
  * helper function for checking if notification job exists
  */
 CtrlActionTaskManager.hasNotificationJob = function () {
+    "use strict";
+
     let hasNotify = false;
     $.each(this.resourceList, function (index, node) {
-        if (defined(node.ResourceType) && node.ResourceType.toString() === "DATA-NOTIFICATION")
+        if (defined(node.ResourceType) && node.ResourceType.toString() === "DATA-NOTIFICATION") {
             hasNotify = true;
+        }
     });
     return hasNotify;
 };
@@ -89,15 +100,18 @@ CtrlActionTaskManager.hasNotificationJob = function () {
 /**
  * helper function for building table html
  */
-CtrlActionTaskManager._buildNodeListHTML = function (resourceList) {
+CtrlActionTaskManager.buildNodeListHTML = function (resourceList) {
+    "use strict";
+
     let listHtml = "";
     this.htmlTooltips = "";
     if (resourceList && resourceList.ResponseMessage && resourceList.ResponseMessage.Reply && resourceList.ResponseMessage.Reply.Result
-        && resourceList.ResponseMessage.Reply.Result.toString() === "OK") {
+            && resourceList.ResponseMessage.Reply.Result.toString() === "OK") {
         if (defined(resourceList.ResponseMessage.Payload.ResourceDirectory)) {
             this.resourceList = resourceList.ResponseMessage.Payload.ResourceDirectory.Resource;
-            if (this.resourceList.length === undefined)
+            if (this.resourceList.length === undefined) {
                 this.resourceList = [this.resourceList];
+            }
         } else {
             this.resourceList = [];
         }
@@ -107,20 +121,26 @@ CtrlActionTaskManager._buildNodeListHTML = function (resourceList) {
         const isUpgrade = defined(node.ResourceType) && node.ResourceType.toString() === "UPGRADE";
         const isNotification = defined(node.ResourceType) && node.ResourceType.toString() === "DATA-NOTIFICATION";
         const isScheduled = !isUpgrade && !isNotification && ((defined(node.Activates) && node.Activates !== "") ||
-            (defined(node.RepeatingInterval) && node.RepeatingInterval !== "") || (defined(node.Duration) && node.Duration !== ""));
+                (defined(node.RepeatingInterval) && node.RepeatingInterval !== "") || (defined(node.Duration) && node.Duration !== ""));
 
         const isOndemand = !isScheduled && !isNotification && !isUpgrade;
 
         listHtml += "<tr>";
         let typeTxt = "";
-        if (isScheduled)
+        if (isScheduled) {
             typeTxt = AppMain.t("SCHEDULED", "TASK_MANAGER");
-        else if (isOndemand)
-            typeTxt = AppMain.t("ON_DEMAND", "TASK_MANAGER");
-        else if (isNotification)
-            typeTxt = AppMain.t("NOTIFICATION", "TASK_MANAGER");
-        else if (isUpgrade)
-            typeTxt = AppMain.t("UPGRADE_TXT", "TASK_MANAGER");
+        } else {
+            if (isOndemand) {
+                typeTxt = AppMain.t("ON_DEMAND", "TASK_MANAGER");
+            } else {
+                if (isNotification) {
+                    typeTxt = AppMain.t("NOTIFICATION", "TASK_MANAGER");
+                }
+                if (isUpgrade) {
+                    typeTxt = AppMain.t("UPGRADE_TXT", "TASK_MANAGER");
+                }
+            }
+        }
 
         let deviceTXT = "";
         let deviceTXTshort = "";
@@ -133,14 +153,16 @@ CtrlActionTaskManager._buildNodeListHTML = function (resourceList) {
                     deviceTXT = "";
                     $.each(node.DeviceReference, function (index, node) {
                         if (index !== 0) {
-                            deviceTXT += "; "
+                            deviceTXT += "; ";
                         }
                         deviceTXT += node._DeviceID;
                     });
                     deviceTXTshort = node.DeviceReference[0]._DeviceID + " ...";
                 }
             } else {
-                deviceTXT = defined(node.DeviceReference._DeviceID) ? node.DeviceReference._DeviceID : "---";
+                deviceTXT = defined(node.DeviceReference._DeviceID)
+                    ? node.DeviceReference._DeviceID
+                    : "---";
                 deviceTXTshort = deviceTXT;
             }
         } else {
@@ -153,14 +175,16 @@ CtrlActionTaskManager._buildNodeListHTML = function (resourceList) {
                         deviceTXT = "";
                         $.each(node.GroupReference, function (index, node) {
                             if (index !== 0) {
-                                deviceTXT += "; "
+                                deviceTXT += "; ";
                             }
                             deviceTXT += node._GroupID;
                         });
                         deviceTXTshort = node.GroupReference[0]._GroupID + " ...";
                     }
                 } else {
-                    deviceTXT = defined(node.GroupReference._GroupID) ? node.GroupReference._GroupID : "---";
+                    deviceTXT = defined(node.GroupReference._GroupID)
+                        ? node.GroupReference._GroupID
+                        : "---";
                     deviceTXTshort = deviceTXT;
                 }
             } else {
@@ -178,40 +202,47 @@ CtrlActionTaskManager._buildNodeListHTML = function (resourceList) {
                 node.CosemAttributeDescriptor = [node.CosemAttributeDescriptor];
             }
             cosemTXTshort = CtrlActionTaskManager.transformObject(node.CosemAttributeDescriptor[0]["class-id"],
-                node.CosemAttributeDescriptor[0]["instance-id"], node.CosemAttributeDescriptor[0]["attribute-id"]);
-            if (node.CosemAttributeDescriptor.length > 1)
+                    node.CosemAttributeDescriptor[0]["instance-id"], node.CosemAttributeDescriptor[0]["attribute-id"]);
+            if (node.CosemAttributeDescriptor.length > 1) {
                 cosemTXTshort += " ..."; // change
+            }
             $.each(node.CosemAttributeDescriptor, function (index, cosem) {
                 if (index !== 0) {
-                    cosemTXT += "; "
+                    cosemTXT += "; ";
                 }
                 cosemTXT += CtrlActionTaskManager.transformObject(cosem["class-id"], cosem["instance-id"], cosem["attribute-id"]);
             });
         } else {
             cosemTXT = "---";
-            cosemTXTshort = "---"
+            cosemTXTshort = "---";
         }
-        const serviceTXT = defined(node.ResourceType) ? AppMain.t(node.ResourceType, "TASK_MANAGER") : "";
-        const activatesTXT = defined(node.Activates) ? moment(node.Activates.toString()).format(AppMain.localization("DATETIME_FORMAT")) : "---";
-        const expiresTXT = defined(node.Expires) ? moment(node.Expires.toString()).format(AppMain.localization("DATETIME_FORMAT")) : "---";
+        const serviceTXT = defined(node.ResourceType)
+            ? AppMain.t(node.ResourceType, "TASK_MANAGER")
+            : "";
+        const activatesTXT = defined(node.Activates)
+            ? moment(node.Activates.toString()).format(AppMain.localization("DATETIME_FORMAT"))
+            : "---";
+        const expiresTXT = defined(node.Expires)
+            ? moment(node.Expires.toString()).format(AppMain.localization("DATETIME_FORMAT"))
+            : "---";
         let repeatTxt = "";
         if (defined(node.RepeatingInterval)) {
             switch (node.RepeatingInterval.toString()) {
-                case "P1D":
-                    repeatTxt = AppMain.t("DAILY", "TASK_MANAGER");
-                    break;
-                case "P7D":
-                    repeatTxt = AppMain.t("WEEKLY", "TASK_MANAGER");
-                    break;
-                case "P1M":
-                    repeatTxt = AppMain.t("MONTHLY", "TASK_MANAGER");
-                    break;
-                case "P1Y":
-                    repeatTxt = AppMain.t("YEARLY", "TASK_MANAGER");
-                    break;
-                case "PT1M":
-                    repeatTxt = AppMain.t("PT1M", "TASK_MANAGER");
-                    break;
+            case "P1D":
+                repeatTxt = AppMain.t("DAILY", "TASK_MANAGER");
+                break;
+            case "P7D":
+                repeatTxt = AppMain.t("WEEKLY", "TASK_MANAGER");
+                break;
+            case "P1M":
+                repeatTxt = AppMain.t("MONTHLY", "TASK_MANAGER");
+                break;
+            case "P1Y":
+                repeatTxt = AppMain.t("YEARLY", "TASK_MANAGER");
+                break;
+            case "PT1M":
+                repeatTxt = AppMain.t("PT1M", "TASK_MANAGER");
+                break;
             }
             if (repeatTxt === "") {
                 const repeat = moment.duration(node.RepeatingInterval);
@@ -220,35 +251,45 @@ CtrlActionTaskManager._buildNodeListHTML = function (resourceList) {
         } else {
             repeatTxt = "---";
         }
-        const olderTXT = defined(node.NotOlderThan) ? moment(node.NotOlderThan.toString()).format(AppMain.localization("DATETIME_FORMAT")) : "---";
-        const priorityTXT = defined(node.Priority) ? node.Priority.toString() : "---";
-        const statusTXT = defined(node.ResourceStatus) ? AppMain.t(node.ResourceStatus.toString().replace(/-/g, '_'), "TASK_MANAGER") : "---";
-        const activationTXT = defined(node.LastActivation) ? moment(node.LastActivation.toString()).format(AppMain.localization("DATETIME_FORMAT")) : "---";
-        const replyTXT = defined(node.ReplyAddress) ? node.ReplyAddress.toString() : "---";
+        const olderTXT = defined(node.NotOlderThan)
+            ? moment(node.NotOlderThan.toString()).format(AppMain.localization("DATETIME_FORMAT"))
+            : "---";
+        const priorityTXT = defined(node.Priority)
+            ? node.Priority.toString()
+            : "---";
+        const statusTXT = defined(node.ResourceStatus)
+            ? AppMain.t(node.ResourceStatus.toString().replace(/-/g, "_"), "TASK_MANAGER")
+            : "---";
+        const activationTXT = defined(node.LastActivation)
+            ? moment(node.LastActivation.toString()).format(AppMain.localization("DATETIME_FORMAT"))
+            : "---";
+        const replyTXT = defined(node.ReplyAddress)
+            ? node.ReplyAddress.toString()
+            : "---";
         let durTXT = "---";
         if (defined(node.Duration)) {
-            durTXT = moment.duration(node.Duration).asMinutes() + " " + AppMain.t("MINUTES", "global")
+            durTXT = moment.duration(node.Duration).asMinutes() + " " + AppMain.t("MINUTES", "global");
         }
         let notification = defined(node.AsyncReplyFlag);
 
         const clickHTML = " data-bind-event='click' data-node-id='" + node.ID.toString() + "' data-bind-method='CtrlActionTaskManager.getReferenceDevice' ";
 
         listHtml += "<td class='checkbox-col'><input type='checkbox' name='selectJob' class='selectJob' data-node-ID='" + node.ID.toString() + "' " +
-            "data-node-type='" + typeTxt + "' " +
-            "data-node-device='" + deviceTXT + "' " +
-            "data-node-service='" + serviceTXT + "' " +
-            "data-node-activates='" + activatesTXT + "' " +
-            "data-node-expires='" + expiresTXT + "' " +
-            "data-node-repeat='" + repeatTxt + "' " +
-            "data-node-older='" + olderTXT + "' " +
-            "data-node-priority='" + priorityTXT + "' " +
-            "data-node-status='" + statusTXT + "' " +
-            "data-node-activation='" + activationTXT + "' " +
-            "data-node-notification='" + (notification.toString()) + "' " +
-            "data-node-reply='" + replyTXT + "' " +
-            "data-node-cosem='" + cosemTXT + "' " +
-            "data-node-duration='" + durTXT + "' " +
-            "></td>";
+                "data-node-type='" + typeTxt + "' " +
+                "data-node-device='" + deviceTXT + "' " +
+                "data-node-service='" + serviceTXT + "' " +
+                "data-node-activates='" + activatesTXT + "' " +
+                "data-node-expires='" + expiresTXT + "' " +
+                "data-node-repeat='" + repeatTxt + "' " +
+                "data-node-older='" + olderTXT + "' " +
+                "data-node-priority='" + priorityTXT + "' " +
+                "data-node-status='" + statusTXT + "' " +
+                "data-node-activation='" + activationTXT + "' " +
+                "data-node-notification='" + (notification.toString()) + "' " +
+                "data-node-reply='" + replyTXT + "' " +
+                "data-node-cosem='" + cosemTXT + "' " +
+                "data-node-duration='" + durTXT + "' " +
+                "></td>";
         listHtml += "<td class='ID'" + clickHTML + ">" + node.ID.toString() + "</td>";
         listHtml += "<td class='Type'" + clickHTML + ">" + typeTxt + "</td>";
         listHtml += "<td class='DeviceReference'" + clickHTML + ">" + deviceTXTshort + "</td>";
@@ -259,35 +300,37 @@ CtrlActionTaskManager._buildNodeListHTML = function (resourceList) {
         listHtml += "<td class='RepeatingInterval'" + clickHTML + ">" + repeatTxt + "</td>";
         listHtml += "<td class='Priority'" + clickHTML + ">" + priorityTXT + "</td>";
         listHtml += "<td" + clickHTML + "><span class='mdl-chip " + node.ResourceStatus.toString() + "'><span class='mdl-chip__text ResourceStatus'>"
-            + statusTXT + "</span></span></td>";
+                + statusTXT + "</span></span></td>";
 
-        if (defined(node.AsyncReplyFlag) && node.AsyncReplyFlag.toString() === "true")
+        if (defined(node.AsyncReplyFlag) && node.AsyncReplyFlag.toString() === "true") {
             listHtml += "<td" + clickHTML + "><input type='checkbox' checked disabled/></td>";
-        else
+        } else {
             listHtml += "<td" + clickHTML + "><input type='checkbox' disabled/></td>";
+        }
 
         listHtml += "<td>";
-        if (node.ResourceStatus.toString() !== "FINISHED" && !isUpgrade)
+        if (node.ResourceStatus.toString() !== "FINISHED" && !isUpgrade) {
             listHtml += "<i id='edit_" + node.ID.toString() + "' data-rbac='taskManager.edit' class=\"material-icons cursor-pointer\"" +
-                " data-bind-event=\"click\" data-bind-method=\"CtrlActionTaskManager.editResource\" data-node-id='" + node.ID.toString() +
-                "'>edit</i>";
+                    " data-bind-event=\"click\" data-bind-method=\"CtrlActionTaskManager.editResource\" data-node-id='" + node.ID.toString() +
+                    "'>edit</i>";
+        }
 
         listHtml += "<span id='get_" + node.ID.toString() + "' data-rbac=\"nodes.kickoff\" class=\"get-data-icon cursor-pointer\" " +
-            "data-bind-event=\"click\" data-bind-method=\"CtrlActionTaskManager.getDataPopUp\" data-node-id='" + node.ID.toString() + "'></span>";
+                "data-bind-event=\"click\" data-bind-method=\"CtrlActionTaskManager.getDataPopUp\" data-node-id='" + node.ID.toString() + "'></span>";
 
         listHtml += "<i id='delete_" + node.ID.toString() + "' data-rbac=\"taskManager.delete\" class=\"material-icons cursor-pointer\" " +
-            "data-bind-event=\"click\" data-bind-method=\"CtrlActionTaskManager.deleteResource\" data-node-id='" + node.ID.toString() +
-            "'>clear</i>";
+                "data-bind-event=\"click\" data-bind-method=\"CtrlActionTaskManager.deleteResource\" data-node-id='" + node.ID.toString() +
+                "'>clear</i>";
 
         CtrlActionTaskManager.htmlTooltips += "<div class=\"mdl-tooltip\" data-mdl-for=\"get_" + node.ID.toString() + "\">" +
-                        AppMain.t("GET_JOB_DATA", "TASK_MANAGER") + "</div>";
+                AppMain.t("GET_JOB_DATA", "TASK_MANAGER") + "</div>";
 
         listHtml += "</td>";
 
         CtrlActionTaskManager.htmlTooltips += "<div class=\"mdl-tooltip\" data-mdl-for=\"delete_" + node.ID.toString() + "\">" +
-            AppMain.t("DELETE", "global") + "</div>";
+                AppMain.t("DELETE", "global") + "</div>";
         CtrlActionTaskManager.htmlTooltips += "<div class=\"mdl-tooltip\" data-mdl-for=\"edit_" + node.ID.toString() + "\">" +
-            AppMain.t("EDIT", "global") + "</div>";
+                AppMain.t("EDIT", "global") + "</div>";
 
         listHtml += "</tr>";
     });
@@ -298,14 +341,17 @@ CtrlActionTaskManager._buildNodeListHTML = function (resourceList) {
  * helper function to display instanceId
  */
 CtrlActionTaskManager.transformInstanceId = function (instance) {
+    "use strict";
+
     if (instance.length === 12) {
         let rez = "";
         while (instance.length) {
             const nmb = parseInt(instance.substr(0, 2), 16);
-            if (instance.length === 2)
+            if (instance.length === 2) {
                 rez += nmb;
-            else
+            } else {
                 rez += nmb + ".";
+            }
             instance = instance.substr(2);
         }
         return rez;
@@ -318,58 +364,62 @@ CtrlActionTaskManager.transformInstanceId = function (instance) {
  * helper function to display object
  */
 CtrlActionTaskManager.transformObject = function (classId, instance, attrId) {
+    "use strict";
+
     return "(" + classId.toString() + ") " +
-        CtrlActionTaskManager.transformInstanceId(instance.toString()) + " ("
-        + attrId.toString() + ")";
+            CtrlActionTaskManager.transformInstanceId(instance.toString()) + " ("
+            + attrId.toString() + ")";
 };
 
 /**
  * function to export jobs
  */
 CtrlActionTaskManager.export = function () {
+    "use strict";
+
     let csv = "";
     let isNotSelected = true;
     let inputC = $("input:checked");
 
     if (inputC.length > 0) {
         csv = "SEP=,\r\n";
-        csv += '"' + AppMain.t("ID", "TASK_MANAGER") + '",';
-        csv += '"' + AppMain.t("TYPE", "TASK_MANAGER") + '",';
-        csv += '"' + AppMain.t("DEVICE_REFERENCE", "TASK_MANAGER") + '",';
-        csv += '"' + AppMain.t("SERVICE", "TASK_MANAGER") + '",';
-        csv += '"' + AppMain.t("OBJECT", "TASK_MANAGER") + '",';
-        csv += '"' + AppMain.t("START_TIME", "TASK_MANAGER") + '",';
-        csv += '"' + AppMain.t("EXPIRES", "TASK_MANAGER") + '",';
-        csv += '"' + AppMain.t("REPEATING_INTERVAL", "TASK_MANAGER") + '",';
-        csv += '"' + AppMain.t("NOT_OLDER_THAN", "TASK_MANAGER") + '",';
-        csv += '"' + AppMain.t("PRIORITY", "TASK_MANAGER") + '",';
-        csv += '"' + AppMain.t("RESOURCE_STATUS", "TASK_MANAGER") + '",';
-        csv += '"' + AppMain.t("LAST_ACTIVATION", "TASK_MANAGER") + '",';
-        csv += '"' + AppMain.t("ACCEPT_DATA_NOTIFICATION_SHORT", "TASK_MANAGER") + '",';
-        csv += '"' + AppMain.t("REPLY_ADDRESS", "TASK_MANAGER") + '",';
-        csv += '"' + AppMain.t("DURATION", "TASK_MANAGER") + '"';
-        csv += '\r\n';
+        csv += "\"" + AppMain.t("ID", "TASK_MANAGER") + "\",";
+        csv += "\"" + AppMain.t("TYPE", "TASK_MANAGER") + "\",";
+        csv += "\"" + AppMain.t("DEVICE_REFERENCE", "TASK_MANAGER") + "\",";
+        csv += "\"" + AppMain.t("SERVICE", "TASK_MANAGER") + "\",";
+        csv += "\"" + AppMain.t("OBJECT", "TASK_MANAGER") + "\",";
+        csv += "\"" + AppMain.t("START_TIME", "TASK_MANAGER") + "\",";
+        csv += "\"" + AppMain.t("EXPIRES", "TASK_MANAGER") + "\",";
+        csv += "\"" + AppMain.t("REPEATING_INTERVAL", "TASK_MANAGER") + "\",";
+        csv += "\"" + AppMain.t("NOT_OLDER_THAN", "TASK_MANAGER") + "\",";
+        csv += "\"" + AppMain.t("PRIORITY", "TASK_MANAGER") + "\",";
+        csv += "\"" + AppMain.t("RESOURCE_STATUS", "TASK_MANAGER") + "\",";
+        csv += "\"" + AppMain.t("LAST_ACTIVATION", "TASK_MANAGER") + "\",";
+        csv += "\"" + AppMain.t("ACCEPT_DATA_NOTIFICATION_SHORT", "TASK_MANAGER") + "\",";
+        csv += "\"" + AppMain.t("REPLY_ADDRESS", "TASK_MANAGER") + "\",";
+        csv += "\"" + AppMain.t("DURATION", "TASK_MANAGER") + "\"";
+        csv += "\r\n";
 
         inputC.each(function (i, elm) {
             const element = $(elm);
             if (element.hasClass("selectJob")) {
                 isNotSelected = false;
-                csv += element.attr("data-node-ID") + ',';
-                csv += element.attr("data-node-type") + ',';
-                csv += element.attr("data-node-device") + ',';
-                csv += element.attr("data-node-service") + ',';
-                csv += element.attr("data-node-cosem") + ',';
-                csv += element.attr("data-node-activates") + ',';
-                csv += element.attr("data-node-expires") + ',';
-                csv += element.attr("data-node-repeat") + ',';
-                csv += element.attr("data-node-older") + ',';
-                csv += element.attr("data-node-priority") + ',';
-                csv += element.attr("data-node-status") + ',';
-                csv += element.attr("data-node-activation") + ',';
-                csv += element.attr("data-node-notification") + ',';
-                csv += element.attr("data-node-reply") + ',';
-                csv += element.attr("data-node-duration") + '';
-                csv += '\r\n';
+                csv += element.attr("data-node-ID") + ",";
+                csv += element.attr("data-node-type") + ",";
+                csv += element.attr("data-node-device") + ",";
+                csv += element.attr("data-node-service") + ",";
+                csv += element.attr("data-node-cosem") + ",";
+                csv += element.attr("data-node-activates") + ",";
+                csv += element.attr("data-node-expires") + ",";
+                csv += element.attr("data-node-repeat") + ",";
+                csv += element.attr("data-node-older") + ",";
+                csv += element.attr("data-node-priority") + ",";
+                csv += element.attr("data-node-status") + ",";
+                csv += element.attr("data-node-activation") + ",";
+                csv += element.attr("data-node-notification") + ",";
+                csv += element.attr("data-node-reply") + ",";
+                csv += element.attr("data-node-duration") + "";
+                csv += "\r\n";
             }
         });
     }
@@ -380,13 +430,15 @@ CtrlActionTaskManager.export = function () {
     }
     AppMain.dialog("CSV_CREATED_JOS", "success");
 
-    download("data:text/csv;charset=utf-8;base64," + btoa(csv), build.device + "_JobsTable_" + moment().format('YYYY-MM-DD-HH-mm-ss') + ".csv", "text/csv");
+    download("data:text/csv;charset=utf-8;base64," + btoa(csv), build.device + "_JobsTable_" + moment().format("YYYY-MM-DD-HH-mm-ss") + ".csv", "text/csv");
 };
 
 /**
  * function to display job details
  */
 CtrlActionTaskManager.getReferenceDevice = function (e) {
+    "use strict";
+
     let $this = $(e.target);
     let $thisParent = $(e.target).parent();
     const nLsD = $("table tr.nodeListShowDetails");
@@ -405,19 +457,25 @@ CtrlActionTaskManager.getReferenceDevice = function (e) {
             $thisParent.attr("data-opened", 1);
             let html = "<tr class='nodeListShowDetails'>";
             html += "<td colspan='3'>" + AppMain.t("NOT_OLDER_THAN", "TASK_MANAGER") + "</td>";
-            html += "<td colspan='2' style='text-align: left'>" + (defined(node.NotOlderThan) ? moment(node.NotOlderThan.toString()).format(AppMain.localization("DATETIME_FORMAT")) : "---") + "</td>";
+            html += "<td colspan='2' style='text-align: left'>" + (defined(node.NotOlderThan)
+                ? moment(node.NotOlderThan.toString()).format(AppMain.localization("DATETIME_FORMAT"))
+                : "---") + "</td>";
             html += "<td colspan='2'>" + AppMain.t("LAST_ACTIVATION", "TASK_MANAGER") + "</td>";
-            html += "<td colspan='6' style='text-align: left'>" + (defined(node.LastActivation) ? moment(node.LastActivation.toString()).format(AppMain.localization("DATETIME_FORMAT")) : "---") + "</td>";
+            html += "<td colspan='6' style='text-align: left'>" + (defined(node.LastActivation)
+                ? moment(node.LastActivation.toString()).format(AppMain.localization("DATETIME_FORMAT"))
+                : "---") + "</td>";
             html += "</tr>";
             html += "<tr class='nodeListShowDetails'>";
             html += "<td colspan='3'>" + AppMain.t("DURATION", "TASK_MANAGER") + "</td>";
             let dur = "---";
             if (defined(node.Duration)) {
-                dur = moment.duration(node.Duration).asMinutes() + AppMain.t("MINUTES", "global")
+                dur = moment.duration(node.Duration).asMinutes() + AppMain.t("MINUTES", "global");
             }
             html += "<td colspan='2' style='text-align: left'>" + dur + "</td>";
             html += "<td colspan='2'>" + AppMain.t("REPLY_ADDRESS", "TASK_MANAGER") + "</td>";
-            html += "<td colspan='6' style='text-align: left'>" + (defined(node.ReplyAddress) ? node.ReplyAddress.toString() : "---") + "</td>";
+            html += "<td colspan='6' style='text-align: left'>" + (defined(node.ReplyAddress)
+                ? node.ReplyAddress.toString()
+                : "---") + "</td>";
             html += "<tr class='nodeListShowDetails'>";
             html += "<td colspan='3'>" + AppMain.t("DEVICE_REFERENCE", "TASK_MANAGER") + "</td>";
             let devTXT = "";
@@ -453,7 +511,7 @@ CtrlActionTaskManager.getReferenceDevice = function (e) {
             }
             if (isMore) {
                 html += "<td colspan='2' data-node-id='" + nodeID + "' data-bind-method='CtrlActionTaskManager.cosemAttributeDescriptor' " +
-                    "data-bind-event='click' data-more-type='" + dType + "' class='cursor-pointer' style='text-align: left'>" + devTXT;
+                        "data-bind-event='click' data-more-type='" + dType + "' class='cursor-pointer' style='text-align: left'>" + devTXT;
                 html += "</td>";
             } else {
                 html += "<td colspan='2' style='text-align: left'>" + devTXT;
@@ -466,16 +524,16 @@ CtrlActionTaskManager.getReferenceDevice = function (e) {
                     node.CosemAttributeDescriptor = [node.CosemAttributeDescriptor];
                 }
                 cosemTXT += CtrlActionTaskManager.transformObject(node.CosemAttributeDescriptor[0]["class-id"], node.CosemAttributeDescriptor[0]["instance-id"],
-                    node.CosemAttributeDescriptor[0]["attribute-id"]);
+                        node.CosemAttributeDescriptor[0]["attribute-id"]);
                 if (node.CosemAttributeDescriptor.length > 1) {
-                    cosemTXT += " <i class=\"material-icons more-icon\">photo_size_select_small</i>"
+                    cosemTXT += " <i class=\"material-icons more-icon\">photo_size_select_small</i>";
                 }
             } else {
                 cosemTXT = "---";
             }
             if (node.CosemAttributeDescriptor && node.CosemAttributeDescriptor.length > 1) {
                 html += "<td class='cursor-pointer' data-node-id='" + nodeID + "' data-bind-method='CtrlActionTaskManager.cosemAttributeDescriptor' " +
-                    "data-bind-event='click' data-more-type='cosem' colspan='7' style='text-align: left;' >" + cosemTXT + "</td> </tr>";
+                        "data-bind-event='click' data-more-type='cosem' colspan='7' style='text-align: left;' >" + cosemTXT + "</td> </tr>";
             } else {
                 html += "<td colspan='6' style='text-align: left;' >" + cosemTXT + "</td> </tr>";
             }
@@ -491,6 +549,8 @@ CtrlActionTaskManager.getReferenceDevice = function (e) {
  * function to display job cosem/device/group details
  */
 CtrlActionTaskManager.cosemAttributeDescriptor = function (e) {
+    "use strict";
+
     let $this = $(e.target);
     const nodeID = $this.attr("data-node-id");
     const type = $this.attr("data-more-type");
@@ -500,73 +560,69 @@ CtrlActionTaskManager.cosemAttributeDescriptor = function (e) {
     $.each(this.resourceList, function (index, node) {
         if (node.ID.toString() === nodeID) {
             switch (type) {
-                case "cosem":
-                    title = AppMain.t("JOB_OBJECTS", "TASK_MANAGER").toString();
-                    $.each(node.CosemAttributeDescriptor, function (index, cosem) {
-                        if (index === 0) {
-                            tableHTML += "<tr>";
-                        } else {
-                            if (index % 3 === 0) {
-                                tableHTML += "</tr><tr>";
-                            }
+            case "cosem":
+                title = AppMain.t("JOB_OBJECTS", "TASK_MANAGER").toString();
+                $.each(node.CosemAttributeDescriptor, function (index, cosem) {
+                    if (index === 0) {
+                        tableHTML += "<tr>";
+                    } else {
+                        if (index % 3 === 0) {
+                            tableHTML += "</tr><tr>";
                         }
-                        tableHTML += "<td>" + CtrlActionTaskManager.transformObject(cosem["class-id"], cosem["instance-id"], cosem["attribute-id"]) + "</td>";
-                    });
-                    if (node.CosemAttributeDescriptor && node.CosemAttributeDescriptor.length % 3 === 1) {
-                        tableHTML += "<td></td><td></td></tr>";
                     }
-                    if (node.CosemAttributeDescriptor && node.CosemAttributeDescriptor.length % 3 === 2) {
-                        tableHTML += "<td></td></tr>";
-                    }
-                    break;
-                case "devices":
-                    title = AppMain.t("JOB_DEVICE_REFERENCES", "TASK_MANAGER").toString();
-                    $.each(node.DeviceReference, function (index, node) {
-                        if (index === 0) {
-                            tableHTML += "<tr>";
-                        } else {
-                            if (index % 3 === 0) {
-                                tableHTML += "</tr><tr>";
-                            }
+                    tableHTML += "<td>" + CtrlActionTaskManager.transformObject(cosem["class-id"], cosem["instance-id"], cosem["attribute-id"]) + "</td>";
+                });
+                if (node.CosemAttributeDescriptor && node.CosemAttributeDescriptor.length % 3 === 1) {
+                    tableHTML += "<td></td><td></td></tr>";
+                }
+                if (node.CosemAttributeDescriptor && node.CosemAttributeDescriptor.length % 3 === 2) {
+                    tableHTML += "<td></td></tr>";
+                }
+                break;
+            case "devices":
+                title = AppMain.t("JOB_DEVICE_REFERENCES", "TASK_MANAGER").toString();
+                $.each(node.DeviceReference, function (index, node) {
+                    if (index === 0) {
+                        tableHTML += "<tr>";
+                    } else {
+                        if (index % 3 === 0) {
+                            tableHTML += "</tr><tr>";
                         }
-                        tableHTML += "<td>" +
-                            node._DeviceID +
-                            "</td>";
-                    });
-                    if (node.DeviceReference.length % 3 === 1) {
-                        tableHTML += "<td></td><td></td></tr>";
                     }
-                    if (node.DeviceReference.length % 3 === 2) {
-                        tableHTML += "<td></td></tr>";
-                    }
-                    break;
-                case "group":
-                    title = AppMain.t("JOB_GROUP_REFERENCES", "TASK_MANAGER").toString();
-                    $.each(node.GroupReference, function (index, node) {
-                        if (index === 0) {
-                            tableHTML += "<tr>";
-                        } else {
-                            if (index % 3 === 0) {
-                                tableHTML += "</tr><tr>";
-                            }
+                    tableHTML += "<td>" + node._DeviceID + "</td>";
+                });
+                if (node.DeviceReference.length % 3 === 1) {
+                    tableHTML += "<td></td><td></td></tr>";
+                }
+                if (node.DeviceReference.length % 3 === 2) {
+                    tableHTML += "<td></td></tr>";
+                }
+                break;
+            case "group":
+                title = AppMain.t("JOB_GROUP_REFERENCES", "TASK_MANAGER").toString();
+                $.each(node.GroupReference, function (index, node) {
+                    if (index === 0) {
+                        tableHTML += "<tr>";
+                    } else {
+                        if (index % 3 === 0) {
+                            tableHTML += "</tr><tr>";
                         }
-                        tableHTML += "<td>" +
-                            node._GroupID +
-                            "</td>";
-                    });
-                    if (node.GroupReference.length % 3 === 1) {
-                        tableHTML += "<td></td><td></td></tr>";
                     }
-                    if (node.GroupReference.length % 3 === 2) {
-                        tableHTML += "<td></td></tr>";
-                    }
-                    break;
+                    tableHTML += "<td>" + node._GroupID + "</td>";
+                });
+                if (node.GroupReference.length % 3 === 1) {
+                    tableHTML += "<td></td><td></td></tr>";
+                }
+                if (node.GroupReference.length % 3 === 2) {
+                    tableHTML += "<td></td></tr>";
+                }
+                break;
             }
         }
     });
 
     let allHtml = "<table id='devices-table' class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">" +
-        "<thead class=\"th-color-grey text-align-left\"><tbody>";
+            "<thead class=\"th-color-grey text-align-left\"><tbody>";
     allHtml += tableHTML;
     allHtml += "</tbody></table>";
 
@@ -581,10 +637,9 @@ CtrlActionTaskManager.cosemAttributeDescriptor = function (e) {
         buttons: {
             cancel: {
                 text: AppMain.t("CANCEL", "global"),
-                action:
-                    function () {
-                        return true;
-                    }
+                action: function () {
+                    return true;
+                }
             }
         }
     });
@@ -594,6 +649,8 @@ CtrlActionTaskManager.cosemAttributeDescriptor = function (e) {
  * function to delete job
  */
 CtrlActionTaskManager.deleteResource = function (e) {
+    "use strict";
+
     const $this = $(e.target);
     let nodeID = $this.attr("data-node-id");
 
@@ -613,10 +670,9 @@ CtrlActionTaskManager.deleteResource = function (e) {
                     },
                     cancel: {
                         text: AppMain.t("CANCEL", "global"),
-                        action:
-                            function () {
-                                return true;
-                            }
+                        action: function () {
+                            return true;
+                        }
                     }
                 }
             });
@@ -629,6 +685,8 @@ CtrlActionTaskManager.deleteResource = function (e) {
  * function to edit job
  */
 CtrlActionTaskManager.editResource = function (e) {
+    "use strict";
+
     const $this = $(e.target);
     let nodeID = $this.attr("data-node-id");
 
@@ -644,13 +702,15 @@ CtrlActionTaskManager.editResource = function (e) {
  * function for delete job request
  */
 CtrlActionTaskManager.deleteResourceRest = function (resourceID) {
+    "use strict";
+
     let response = AppMain.wsMes().exec("RequestMessage", {
         "mes:Header": {
             "mes:Verb": "delete",
             "mes:Noun": "DeviceAccess",
             "mes:Timestamp": moment().toISOString(),
             "mes:MessageID": "78465521",
-            "mes:CorrelationID": "78465521",
+            "mes:CorrelationID": "78465521"
         },
         "mes:Request": {
             "mes:ID": resourceID
@@ -658,103 +718,96 @@ CtrlActionTaskManager.deleteResourceRest = function (resourceID) {
     }).getResponse(false);
 
     if (response && response.ResponseMessage && response.ResponseMessage.Reply && response.ResponseMessage.Reply.Result
-        && response.ResponseMessage.Reply.Result.toString() === "OK") {
+            && response.ResponseMessage.Reply.Result.toString() === "OK") {
         setTimeout(function () {
             CtrlActionTaskManager.exec();
         }, 500);
         AppMain.dialog("JOB_REMOVED", "success");
         return true;
-    } else {
-        AppMain.dialog("JOB_REMOVED_ERROR", "success");
     }
-    return false
+    AppMain.dialog("JOB_REMOVED_ERROR", "success");
+    return false;
 };
 
 /**
  * helper function getting top html in add job wizard
  */
 CtrlActionTaskManager.addJobStepsHtml = function (position, jobType) {
-    let pos = position * 2;
-    switch (position) {
-        case 1:
-            pos = 1;
-            break;
-        case 7:
-            pos = 4;
-            break;
-        case 4:
-            pos = 9;
-            break;
-        case 5:
-            pos = 11;
-            break;
-    }
+    "use strict";
+
     let html =
-        "<div class='mdl-slider-wizard'>" +
-        "<hr class='wizard-line'/>" +
-        "</div>" +
-        "<div class='mdl-grid wizard-chips'>" +
-        "<div class='mdl-card mdl-cell--1-col'></div>";
+            "<div class='mdl-slider-wizard'>" +
+            "<hr class='wizard-line'/>" +
+            "</div>" +
+            "<div class='mdl-grid wizard-chips'>" +
+            "<div class='mdl-card mdl-cell--1-col'></div>";
 
     if (jobType === "notification") {
-        if (position === 1)
+        if (position === 1) {
             html += "<div class='mdl-card mdl-cell--5-col active'>";
-        else
+        } else {
             html += "<div class='mdl-card mdl-cell--5-col'>";
+        }
         html += "<span class=\"mdl-chip\">" +
-            "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_TYPE", "TASK_MANAGER") + "</span>" +
-            "</span></div>";
-        if (position === 2)
+                "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_TYPE", "TASK_MANAGER") + "</span>" +
+                "</span></div>";
+        if (position === 2) {
             html += "<div class='mdl-card mdl-cell--5-col active'>";
-        else
+        } else {
             html += "<div class='mdl-card mdl-cell--5-col'>";
+        }
         html += "<span class=\"mdl-chip\">" +
-            "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_PARAMETERS", "TASK_MANAGER") + "</span>" +
-            "</span></div>";
+                "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_PARAMETERS", "TASK_MANAGER") + "</span>" +
+                "</span></div>";
         return html;
     }
-    if (position === 1)
+    if (position === 1) {
         html += "<div class='mdl-card mdl-cell--2-col active'>";
-    else
+    } else {
         html += "<div class='mdl-card mdl-cell--2-col'>";
+    }
 
     html += "<span class=\"mdl-chip\">" +
-        "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_TYPE", "TASK_MANAGER") + "</span>" +
-        "</span></div>";
-    if (position === 2)
+            "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_TYPE", "TASK_MANAGER") + "</span>" +
+            "</span></div>";
+    if (position === 2) {
         html += "<div class='mdl-card mdl-cell--3-col active'>";
-    else
+    } else {
         html += "<div class='mdl-card mdl-cell--3-col'>";
+    }
 
     html += "<span class=\"mdl-chip\">" +
-        "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_PARAMETERS", "TASK_MANAGER") + "</span>" +
-        "</span></div>";
+            "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_PARAMETERS", "TASK_MANAGER") + "</span>" +
+            "</span></div>";
 
-    if (position === 3)
+    if (position === 3) {
         html += "<div class='mdl-card mdl-cell--3-col active'>";
-    else
+    } else {
         html += "<div class='mdl-card mdl-cell--3-col'>";
+    }
 
     html += "<span class=\"mdl-chip\">" +
-        "<span class=\"mdl-chip__text\">" + AppMain.t("REFERENCE_TYPE", "TASK_MANAGER") + "</span>" +
-        "</span></div>";
-    if (position === 4)
+            "<span class=\"mdl-chip__text\">" + AppMain.t("REFERENCE_TYPE", "TASK_MANAGER") + "</span>" +
+            "</span></div>";
+    if (position === 4) {
         html += "<div class='mdl-card mdl-cell--2-col active'>";
-    else
+    } else {
         html += "<div class='mdl-card mdl-cell--2-col'>";
+    }
 
     html += "<span class=\"mdl-chip\">" +
-        "<span class=\"mdl-chip__text\">" + AppMain.t("REFERENCE", "TASK_MANAGER") + "</span>" +
-        "</span></div>";
+            "<span class=\"mdl-chip__text\">" + AppMain.t("REFERENCE", "TASK_MANAGER") + "</span>" +
+            "</span></div>";
 
-    if (position === 5)
+    if (position === 5) {
         html += "<div class='mdl-card mdl-cell--2-col cosem active'>";
-    else
+    } else {
         html += "<div class='mdl-card mdl-cell--2-col cosem'>";
+    }
 
     html += "<span class=\"mdl-chip cosem-chip\">" +
-        "<span class=\"mdl-chip__text\">" + AppMain.t("COSEM", "TASK_MANAGER") + "</span>" +
-        "</span></div>";
+            "<span class=\"mdl-chip__text\">" + AppMain.t("COSEM", "TASK_MANAGER") + "</span>" +
+            "</span></div>";
 
     html += "" + "</div>";
 
@@ -765,59 +818,60 @@ CtrlActionTaskManager.addJobStepsHtml = function (position, jobType) {
  * function for pop up add job: first step
  */
 CtrlActionTaskManager.addJobFirstStep = function () {
+    "use strict";
 
     const onDemand = "<tr>\n    " +
-        "<td class=\"mdl-data-table__cell--non-numeric\" style='width: 30px'>\n        " +
-        "<label class=\"mdl-radio mdl-js-radio\" for=\"input-type\">\n            " +
-        "<input type=\"radio\" value='on-demand' id=\"on-demand\" name=\"job-type\" class=\"mdl-radio__button\" checked>\n        " +
-        "</label>\n    " +
-        "</td>\n    " +
-        "<td>\n    " +
-        AppMain.t("ON_DEMAND_JOB", "TASK_MANAGER") +
-        "</td>" +
-        // "<td rowspan='3' style='background-color: #fff!important;'><span id='service-txt'>" + serviceSelector + "</span></td>" +
-        "</tr>";
+            "<td class=\"mdl-data-table__cell--non-numeric\" style='width: 30px'>\n        " +
+            "<label class=\"mdl-radio mdl-js-radio\" for=\"input-type\">\n            " +
+            "<input type=\"radio\" value='on-demand' id=\"on-demand\" name=\"job-type\" class=\"mdl-radio__button\" checked>\n        " +
+            "</label>\n    " +
+            "</td>\n    " +
+            "<td>\n    " +
+            AppMain.t("ON_DEMAND_JOB", "TASK_MANAGER") +
+            "</td>" +
+            // "<td rowspan='3' style='background-color: #fff!important;'><span id='service-txt'>" + serviceSelector + "</span></td>" +
+            "</tr>";
     const scheduled = "<tr>\n    " +
-        "<td class=\"mdl-data-table__cell--non-numeric\" style='width: 30px'>\n        " +
-        "<label class=\"mdl-radio mdl-js-radio\" for=\"input-type\">\n            " +
-        "<input type=\"radio\" value='scheduled' id=\"scheduled\" name=\"job-type\" class=\"mdl-radio__button\">\n        " +
-        "</label>\n    " +
-        "</td>\n    " +
-        "<td>\n    " +
-        AppMain.t("SCHEDULED_JOB", "TASK_MANAGER") +
-        "</td>" +
-        "</tr>";
+            "<td class=\"mdl-data-table__cell--non-numeric\" style='width: 30px'>\n        " +
+            "<label class=\"mdl-radio mdl-js-radio\" for=\"input-type\">\n            " +
+            "<input type=\"radio\" value='scheduled' id=\"scheduled\" name=\"job-type\" class=\"mdl-radio__button\">\n        " +
+            "</label>\n    " +
+            "</td>\n    " +
+            "<td>\n    " +
+            AppMain.t("SCHEDULED_JOB", "TASK_MANAGER") +
+            "</td>" +
+            "</tr>";
 
     const notification = "<tr>\n    " +
-        "<td class=\"mdl-data-table__cell--non-numeric\" style='width: 30px'>\n        " +
-        "<label class=\"mdl-radio mdl-js-radio\" for=\"input-type\">\n            " +
-        "<input type=\"radio\" value='notification' id=\"notification\" name=\"job-type\" class=\"mdl-radio__button\">\n        " +
-        "</label>\n    " +
-        "</td>\n    " +
-        "<td>\n    " +
-        AppMain.t("NOTIFICATION_JOB", "TASK_MANAGER") +
-        "</td>" +
-        "</tr>";
+            "<td class=\"mdl-data-table__cell--non-numeric\" style='width: 30px'>\n        " +
+            "<label class=\"mdl-radio mdl-js-radio\" for=\"input-type\">\n            " +
+            "<input type=\"radio\" value='notification' id=\"notification\" name=\"job-type\" class=\"mdl-radio__button\">\n        " +
+            "</label>\n    " +
+            "</td>\n    " +
+            "<td>\n    " +
+            AppMain.t("NOTIFICATION_JOB", "TASK_MANAGER") +
+            "</td>" +
+            "</tr>";
 
     const upgrade = "<tr>\n    " +
-        "<td class=\"mdl-data-table__cell--non-numeric\" style='width: 30px'>\n        " +
-        "<label class=\"mdl-radio mdl-js-radio\" for=\"input-type\">\n            " +
-        "<input type=\"radio\" value='upgrade' id=\"upgrade\" name=\"job-type\" class=\"mdl-radio__button\">\n        " +
-        "</label>\n    " +
-        "</td>\n    " +
-        "<td>\n    " +
-        AppMain.t("FIRMWARE_UPGRADE", "TASK_MANAGER") +
-        "</td>" +
-        "</tr>";
+            "<td class=\"mdl-data-table__cell--non-numeric\" style='width: 30px'>\n        " +
+            "<label class=\"mdl-radio mdl-js-radio\" for=\"input-type\">\n            " +
+            "<input type=\"radio\" value='upgrade' id=\"upgrade\" name=\"job-type\" class=\"mdl-radio__button\">\n        " +
+            "</label>\n    " +
+            "</td>\n    " +
+            "<td>\n    " +
+            AppMain.t("FIRMWARE_UPGRADE", "TASK_MANAGER") +
+            "</td>" +
+            "</tr>";
 
     let allHtml = "<span id='headerWizRow'>" + this.addJobStepsHtml(1, undefined) + "</span>" +
-        AppMain.t("SELECT_JOB_TYPE", "TASK_MANAGER") + "</br>" +
-        "<table id='job-type-table' class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">" +
-        onDemand +
-        scheduled +
-        notification +
-        upgrade +
-        "</table>";
+            AppMain.t("SELECT_JOB_TYPE", "TASK_MANAGER") + "</br>" +
+            "<table id='job-type-table' class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">" +
+            onDemand +
+            scheduled +
+            notification +
+            upgrade +
+            "</table>";
 
     $.confirm({
         title: AppMain.t("ADD_JOB", "TASK_MANAGER"),
@@ -831,19 +885,19 @@ CtrlActionTaskManager.addJobFirstStep = function () {
                 btnClass: "btn-default nextBtn",
                 action: function () {
                     const jobType = $("input[type='radio']:checked").val();
-                    if (jobType === "upgrade")
+                    if (jobType === "upgrade") {
                         CtrlActionTaskManager.addJobFileUpload(jobType);
-                    else
+                    } else {
                         CtrlActionTaskManager.addJobSecond(jobType);
+                    }
                     return true;
                 }
             },
             cancel: {
                 text: AppMain.t("CANCEL", "global"),
-                action:
-                    function () {
-                        return true;
-                    }
+                action: function () {
+                    return true;
+                }
             }
         }
     });
@@ -861,13 +915,13 @@ CtrlActionTaskManager.addJobFirstStep = function () {
             const value = $("input[type='radio']:checked").val();
             $("#headerWizRow").html(CtrlActionTaskManager.addJobStepsHtml(1, value));
             if (value === "notification" && CtrlActionTaskManager.hasNotificationJob() && !CtrlActionTaskManager.hasNotify) {
-                $('.nextBtn').addClass('is-disabled');
+                $(".nextBtn").addClass("is-disabled");
                 CtrlActionTaskManager.hasNotify = true;
                 CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_NOTIFICATION_ERR_TITLE", "TASK_MANAGER"),
-                    AppMain.t("NOTIFICATION_EXISTS_ERR", "TASK_MANAGER"));
+                        AppMain.t("NOTIFICATION_EXISTS_ERR", "TASK_MANAGER"));
             } else {
                 CtrlActionTaskManager.hasNotify = false;
-                $('.nextBtn').removeClass('is-disabled');
+                $(".nextBtn").removeClass("is-disabled");
             }
         });
 
@@ -878,34 +932,36 @@ CtrlActionTaskManager.addJobFirstStep = function () {
  * function for pop up add job: upload file
  */
 CtrlActionTaskManager.addJobFileUpload = function (jobType, node) {
+    "use strict";
+
     let jobObj = {};
 
     const startHtml = "<tr> <td>" + AppMain.t("START_TIME", "TASK_MANAGER") + "</td>" +
-        "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-js-textfield-datepicker textfield-short-175\">" +
-        "<input class=\"mdl-textfield__input\" type=\"text\" id=\"dateStart\"></div>" +
-        "</td></tr>";
+            "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-js-textfield-datepicker textfield-short-175\">" +
+            "<input class=\"mdl-textfield__input\" type=\"text\" id=\"dateStart\"></div>" +
+            "</td></tr>";
 
     const imgHtml = "<tr> <td>" + AppMain.t("IMAGE_IDENTIFIER", "TASK_MANAGER") + " *</td>" +
-        "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield\" style='width: 400px;'>" +
-        "<input class=\"mdl-textfield__input\" type=\"text\" id=\"imgIdent\"></div>" +
-        "</td></tr>";
+            "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield\" style='width: 400px;'>" +
+            "<input class=\"mdl-textfield__input\" type=\"text\" id=\"imgIdent\"></div>" +
+            "</td></tr>";
 
 
     let allHtml = this.addJobStepsHtml(2, jobType) + AppMain.t("FILE_FOR_UPGRADE", "TASK_MANAGER");
     allHtml += "<table class='mdl-data-table table-no-borders' style=\"width: 100%\"><tbody>" +
-        "<tr>" +
-        "<td>" + AppMain.t("FILE", "TASK_MANAGER") + " *<div id=\"fileUploadProgressSpinner\" class=\"mdl-spinner mdl-spinner--single-color mdl-js-spinner hidden\"></div></td>" +
-        "<td style='text-align: left;'><div class=\"select-file\" style='padding-top: 5px;'><input id=\"sel-file\" type=\"file\" name=\"upload\" /></div>" +
-        "<div style=\"display: none;\" class=\"file-selected\">" +
-        "<span id='file-name-span'></span>" +
-        "<i class='material-icons cursor-pointer' id='clear-icon' style='position:relative;top: 7px;'>clear</i>" +
-        "</div>" +
-        "</td></tr>" +
-        imgHtml + startHtml +
-        "</tbody>" +
-        "<tfoot><tr><td></td>" +
-        "<td></td>" +
-        "</tr></tfoot></table>";
+            "<tr>" +
+            "<td>" + AppMain.t("FILE", "TASK_MANAGER") + " *<div id=\"fileUploadProgressSpinner\" class=\"mdl-spinner mdl-spinner--single-color mdl-js-spinner hidden\"></div></td>" +
+            "<td style='text-align: left;'><div class=\"select-file\" style='padding-top: 5px;'><input id=\"sel-file\" type=\"file\" name=\"upload\" /></div>" +
+            "<div style=\"display: none;\" class=\"file-selected\">" +
+            "<span id='file-name-span'></span>" +
+            "<i class='material-icons cursor-pointer' id='clear-icon' style='position:relative;top: 7px;'>clear</i>" +
+            "</div>" +
+            "</td></tr>" +
+            imgHtml + startHtml +
+            "</tbody>" +
+            "<tfoot><tr><td></td>" +
+            "<td></td>" +
+            "</tr></tfoot></table>";
 
     $.confirm({
         title: AppMain.t("ADD_JOB", "TASK_MANAGER"),
@@ -916,11 +972,10 @@ CtrlActionTaskManager.addJobFileUpload = function (jobType, node) {
         buttons: {
             back: {
                 text: AppMain.t("BACK", "global"),
-                action:
-                    function () {
-                        CtrlActionTaskManager.addJobFirstStep();
-                        return true;
-                    }
+                action: function () {
+                    CtrlActionTaskManager.addJobFirstStep();
+                    return true;
+                }
             },
             confirm: {
                 text: AppMain.t("NEXT", "global"),
@@ -929,18 +984,20 @@ CtrlActionTaskManager.addJobFileUpload = function (jobType, node) {
                     jobObj.jobService = "upgrade";
                     const startTime = $("#dateStart").val();
                     jobObj.imageIdentifier = $("#imgIdent").val();
-                    jobObj.Activates = startTime !== "" ? moment(startTime).toISOString() : "";
+                    jobObj.Activates = startTime !== ""
+                        ? moment(startTime).toISOString()
+                        : "";
                     if (jobObj.imageIdentifier === "") {
                         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                            AppMain.t("IMAGE_IDENTIFIER_ERROR_TXT", "TASK_MANAGER"));
+                                AppMain.t("IMAGE_IDENTIFIER_ERROR_TXT", "TASK_MANAGER"));
                         return false;
                     }
 
                     if (jobObj.fileName && jobObj.fileName !== "") {
-                        CtrlActionTaskManager.addJobThirdStep(jobObj)
+                        CtrlActionTaskManager.addJobThirdStep(jobObj);
                     } else {
                         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                            AppMain.t("ADD_JOB_UPLOAD_FILE_ERR_TXT", "TASK_MANAGER"));
+                                AppMain.t("ADD_JOB_UPLOAD_FILE_ERR_TXT", "TASK_MANAGER"));
                         return false;
                     }
                     return true;
@@ -948,10 +1005,9 @@ CtrlActionTaskManager.addJobFileUpload = function (jobType, node) {
             },
             cancel: {
                 text: AppMain.t("CANCEL", "global"),
-                action:
-                    function () {
-                        return true;
-                    }
+                action: function () {
+                    return true;
+                }
             }
         }
     });
@@ -961,7 +1017,7 @@ CtrlActionTaskManager.addJobFileUpload = function (jobType, node) {
         const dateStart = $("#dateStart");
         dateStart.datetimepicker({
             dayOfWeekStart: 1,
-            lang: 'sl',
+            lang: "sl",
             startDate: moment().add(1, "day").format(AppMain.localization("DATETIME_FORMAT")),
             format: AppMain.localization("DATETIME_FORMAT_DATETIMEPICKER")
         });
@@ -987,7 +1043,7 @@ CtrlActionTaskManager.addJobFileUpload = function (jobType, node) {
             $(".file-selected").hide();
         });
         const inputElement = document.getElementById("sel-file");
-        const spinner = $('#fileUploadProgressSpinner');
+        const spinner = $("#fileUploadProgressSpinner");
         inputElement.addEventListener("change", function () {
 
             let transferBytes = 0;
@@ -996,14 +1052,16 @@ CtrlActionTaskManager.addJobFileUpload = function (jobType, node) {
             let transferChunkCounter = 0;
 
             let reader = new FileReader();
-            reader.onload = function (e) {
+            reader.onload = function () {
+                //    file upload completed
+                dmp("File upload complete");
             };
 
             CtrlActionTaskManager.readFileChunks(inputElement.files[0], function (dataChunk, file) {
                 transferBegin = transferBytes === 0;
                 transferBytes += 256 * 1024;
                 transferEnd = (transferBytes >= file.size);
-                transferChunkCounter++;
+                transferChunkCounter += 1;
 
                 // Show progress bar
                 if (transferBegin) {
@@ -1042,37 +1100,38 @@ CtrlActionTaskManager.addJobFileUpload = function (jobType, node) {
  * @param node-> if node then it is edit
  */
 CtrlActionTaskManager.addJobSecond = function (jobType, node) {
+    "use strict";
 
     const priorityHtml = "<tr> <td>" + AppMain.t("PRIORITY", "TASK_MANAGER") + "</td>" +
-        "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-145\">" +
-        "<input class=\"mdl-textfield__input\" type=\"number\" name=\"priority\"/></div></td>" +
-        "</tr>";
+            "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-145\">" +
+            "<input class=\"mdl-textfield__input\" type=\"number\" name=\"priority\"/></div></td>" +
+            "</tr>";
 
     const expiresHtml = "<tr> <td>" + AppMain.t("EXPIRES", "TASK_MANAGER") + "</td>" +
-        "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-js-textfield-datepicker textfield-short-175\">" +
-        "<input class=\"mdl-textfield__input\" type=\"text\" id=\"dateExpires\"></div>" +
-        "</td></tr>";
+            "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-js-textfield-datepicker textfield-short-175\">" +
+            "<input class=\"mdl-textfield__input\" type=\"text\" id=\"dateExpires\"></div>" +
+            "</td></tr>";
 
     const notOlderThanHtml = "<tr> <td>" + AppMain.t("NOT_OLDER_THAN", "TASK_MANAGER") + "</td>" +
-        "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-js-textfield-datepicker textfield-short-175\">" +
-        "<input class=\"mdl-textfield__input\" type=\"text\" id=\"dateNotOlderThan\"></div>" +
-        "</td></tr>";
+            "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-js-textfield-datepicker textfield-short-175\">" +
+            "<input class=\"mdl-textfield__input\" type=\"text\" id=\"dateNotOlderThan\"></div>" +
+            "</td></tr>";
 
     const asyncDataPush = "<tr> <td>" + AppMain.t("ASYNC_DATA_PUSH", "TASK_MANAGER") + "</td>" +
-        "<td style='text-align: left'><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-145\">" +
-        "<input class=\"mdl-textfield__input\" type=\"checkbox\" name=\"async-data-push\"/></div></td>" +
-        "</tr>";
+            "<td style='text-align: left'><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-145\">" +
+            "<input class=\"mdl-textfield__input\" type=\"checkbox\" name=\"async-data-push\"/></div></td>" +
+            "</tr>";
 
     const replyHtml = "<tr> <td>" + AppMain.t("REPLY_ADDRESS_INPUT", "TASK_MANAGER") + "</td>" +
-        "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-175\">" +
-        "<input class=\"mdl-textfield__input\" placeholder=\"http://...\" type=\"text\" name=\"reply-address\"" +
-        " pattern=\"^[a-zA-Z\\d\\-:\/_.]+$\"/></div></td>" +
-        "</tr>";
+            "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-175\">" +
+            "<input class=\"mdl-textfield__input\" placeholder=\"http://...\" type=\"text\" name=\"reply-address\"" +
+            " pattern=\"^[a-zA-Z\\d\\-:\/_.]+$\"/></div></td>" +
+            "</tr>";
 
     const startHtml = "<tr> <td>" + AppMain.t("START_TIME", "TASK_MANAGER") + " *</td>" +
-        "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-js-textfield-datepicker textfield-short-175\">" +
-        "<input class=\"mdl-textfield__input\" type=\"text\" id=\"dateStart\"></div>" +
-        "</td></tr>";
+            "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-js-textfield-datepicker textfield-short-175\">" +
+            "<input class=\"mdl-textfield__input\" type=\"text\" id=\"dateStart\"></div>" +
+            "</td></tr>";
 
     let repeatValues = {
         "": AppMain.t("NONE", "TASK_MANAGER"),
@@ -1090,31 +1149,35 @@ CtrlActionTaskManager.addJobSecond = function (jobType, node) {
         "PT3H": AppMain.t("PT3H", "TASK_MANAGER"),
         "PT5H": AppMain.t("PT5H", "TASK_MANAGER"),
         "PT6H": AppMain.t("PT6H", "TASK_MANAGER"),
-        "PT12H": AppMain.t("PT12H", "TASK_MANAGER"),
+        "PT12H": AppMain.t("PT12H", "TASK_MANAGER")
     };
     if (node && node.RepeatingInterval) {
-        if (!defined(repeatValues[node.RepeatingInterval.toString()]))
+        if (!defined(repeatValues[node.RepeatingInterval.toString()])) {
             repeatValues[node.RepeatingInterval.toString()] = moment.duration(node.RepeatingInterval).asMinutes() + " " + AppMain.t("MINUTES", "global");
+        }
     }
     const repeatingSelector = AppMain.html.formElementSelect("repeating", repeatValues, {
         label: "",
-        elementSelected: (node && node.RepeatingInterval) ? node.RepeatingInterval.toString() : ""
+        elementSelected: (node && node.RepeatingInterval)
+            ? node.RepeatingInterval.toString()
+            : ""
     }, undefined, "textfield-short-175");
 
     const repeatingHtml = "<tr> <td>" + AppMain.t("REPEATING_INTERVAL", "TASK_MANAGER") + "</td>" +
-        "<td>" + repeatingSelector + "</td></tr>";
+            "<td>" + repeatingSelector + "</td></tr>";
 
     const duration = "<tr> <td>" + AppMain.t("DURATION", "TASK_MANAGER") + "</td>" +
-        "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-175\">" +
-        "<input class=\"mdl-textfield__input input-short\" style='width: 138px !important;' type=\"number\" maxlength='2' id=\"d-minutes\"> " +
-        AppMain.t("MINUTES", "global") + "</div>" + "</td></tr>";
+            "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-175\">" +
+            "<input class=\"mdl-textfield__input input-short\" style='width: 138px !important;' type=\"number\" maxlength='2' id=\"d-minutes\"> " +
+            AppMain.t("MINUTES", "global") + "</div>" + "</td></tr>";
 
     let allHtml = "";
-    if (!(node && node.back !== true))
+    if (!(node && node.back !== true)) {
         allHtml += this.addJobStepsHtml(2, jobType);
+    }
 
     allHtml += AppMain.t("INSERT_JOB_PARAMS", "TASK_MANAGER") + "</br>" +
-        "<table class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">";
+            "<table class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">";
 
     let isNodeScheduled = false;
     let isNodeNotification = false;
@@ -1122,12 +1185,15 @@ CtrlActionTaskManager.addJobSecond = function (jobType, node) {
         isNodeNotification = defined(node.ResourceType) && node.ResourceType.toString() === "DATA-NOTIFICATION";
     }
     if (!isNodeNotification && node !== undefined) {
-        if (node.Activates && node.Activates !== "")
+        if (node.Activates && node.Activates !== "") {
             isNodeScheduled = true;
-        if (node.RepeatingInterval && node.RepeatingInterval !== "")
+        }
+        if (node.RepeatingInterval && node.RepeatingInterval !== "") {
             isNodeScheduled = true;
-        if (node.Duration && node.Duration !== "")
+        }
+        if (node.Duration && node.Duration !== "") {
             isNodeScheduled = true;
+        }
     }
     if (jobType === "notification") {
         isNodeNotification = true;
@@ -1155,8 +1221,9 @@ CtrlActionTaskManager.addJobSecond = function (jobType, node) {
     allHtml = allHtml + "</table><br/><br/>";
 
     $.confirm({
-        title: node && node.back !== true ? AppMain.t("EDIT_JOB", "TASK_MANAGER") :
-            AppMain.t("ADD_JOB", "TASK_MANAGER"),
+        title: (node && node.back !== true)
+            ? AppMain.t("EDIT_JOB", "TASK_MANAGER")
+            : AppMain.t("ADD_JOB", "TASK_MANAGER"),
         content: allHtml,
         useBootstrap: false,
         draggable: false,
@@ -1165,49 +1232,63 @@ CtrlActionTaskManager.addJobSecond = function (jobType, node) {
             back: {
                 isHidden: node && node.back === undefined,
                 text: AppMain.t("BACK", "global"),
-                action:
-                    function () {
-                        CtrlActionTaskManager.addJobFirstStep();
-                        return true;
-                    }
+                action: function () {
+                    CtrlActionTaskManager.addJobFirstStep();
+                    return true;
+                }
             },
             confirm: {
-                text: node && node.back === undefined ? AppMain.t("SAVE", "global") :
-                    jobType === "notification" ? AppMain.t("CREATE", "global") : AppMain.t("NEXT", "global"),
+                text: (node && node.back === undefined)
+                    ? AppMain.t("SAVE", "global")
+                    : jobType === "notification"
+                        ? AppMain.t("CREATE", "global")
+                        : AppMain.t("NEXT", "global"),
                 action: function () {
                     let jobObj = {};
                     jobObj.jobType = jobType;
                     jobObj.ReplyAddress = $("input[name='reply-address']").val();
                     if (jobType === "notification" || isNodeNotification) {
                         jobObj.AcceptDataNotification = true;
-                        jobObj.AsyncReplyFlag = $('input[name="async-data-push"]:checked').length > 0;
+                        jobObj.AsyncReplyFlag = $("input[name=\"async-data-push\"]:checked").length > 0;
                     } else {
                         const priority = $("input[name='priority']").val();
-                        jobObj.Priority = priority !== "" ? (isNaN(parseInt(priority)) ? 255 : parseInt(priority)) : 255;
+                        jobObj.Priority = priority !== ""
+                            ? (Number.isNaN(parseInt(priority, 10))
+                                ? 255
+                                : parseInt(priority, 10))
+                            : 255;
                         if (jobObj.Priority > 255 || jobObj.Priority < 0) {
                             jobObj.Priority = 255;
                             CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                                AppMain.t("PRIORITY_ERROR_TXT", "TASK_MANAGER"));
+                                    AppMain.t("PRIORITY_ERROR_TXT", "TASK_MANAGER"));
                             return false;
                         }
                         const expires = $("#dateExpires").val();
-                        jobObj.Expires = (expires && expires !== "") ? moment(expires).toISOString() : "";
+                        jobObj.Expires = (expires && expires !== "")
+                            ? moment(expires).toISOString()
+                            : "";
 
                         const dateNotOlderThan = $("#dateNotOlderThan").val();
-                        jobObj.NotOlderThan = dateNotOlderThan !== "" ? moment(dateNotOlderThan).toISOString() : "";
+                        jobObj.NotOlderThan = dateNotOlderThan !== ""
+                            ? moment(dateNotOlderThan).toISOString()
+                            : "";
 
-                        jobObj.AsyncReplyFlag = $('input[name="async-data-push"]:checked').length > 0;
+                        jobObj.AsyncReplyFlag = $("input[name=\"async-data-push\"]:checked").length > 0;
 
                         if (jobType === "scheduled" || isNodeScheduled) {
                             const startTime = $("#dateStart").val();
-                            jobObj.Activates = startTime !== "" ? moment(startTime).toISOString() : "";
+                            jobObj.Activates = startTime !== ""
+                                ? moment(startTime).toISOString()
+                                : "";
 
                             jobObj.RepeatingInterval = $("#repeating").val();
 
                             const dMinutes = parseInt($("#d-minutes").val());
                             jobObj.Duration = moment.duration({
                                 seconds: 0,
-                                minutes: isNaN(dMinutes) || dMinutes < 0 ? 0 : dMinutes,
+                                minutes: (Number.isNaN(dMinutes) || dMinutes < 0)
+                                    ? 0
+                                    : dMinutes,
                                 hours: 0,
                                 days: 0,
                                 months: 0,
@@ -1223,44 +1304,44 @@ CtrlActionTaskManager.addJobSecond = function (jobType, node) {
                     if (jobObj.NotOlderThan && jobObj.NotOlderThan !== "" && moment(jobObj.NotOlderThan).diff(moment()) <= 0) {
                         // Data Valid until  > current
                         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                            AppMain.t("DATA_VALID_ERROR_TXT", "TASK_MANAGER"));
+                                AppMain.t("DATA_VALID_ERROR_TXT", "TASK_MANAGER"));
                         return false;
                     }
-                    if(jobObj.ReplyAddress){
+                    if (jobObj.ReplyAddress) {
                         let re = new RegExp("^[a-zA-Z\\d\\-:\/_.]+$");
-                        if(!re.test(jobObj.ReplyAddress)){
+                        if (!re.test(jobObj.ReplyAddress)) {
                             CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                                AppMain.t("PUSH_DEST_ERROR_TXT", "TASK_MANAGER"));
+                                    AppMain.t("PUSH_DEST_ERROR_TXT", "TASK_MANAGER"));
                             return false;
                         }
                     }
                     if (jobType === "scheduled") {
                         if (jobObj.Activates === "") {
                             CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                                AppMain.t("START_TIME_ERROR_TXT", "TASK_MANAGER"));
+                                    AppMain.t("START_TIME_ERROR_TXT", "TASK_MANAGER"));
                             return false;
                         }
                         if (jobObj.Expires && jobObj.Expires !== "") {
                             if (moment(jobObj.Expires).diff(moment(jobObj.Activates)) <= 0) { //expires > start_time
                                 CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                                    AppMain.t("EXPIRES_START_TIME_GREATER_ERROR_TXT", "TASK_MANAGER"));
+                                        AppMain.t("EXPIRES_START_TIME_GREATER_ERROR_TXT", "TASK_MANAGER"));
                                 return false;
                             }
                             if (jobObj.NotOlderThan && jobObj.NotOlderThan !== "" && moment(jobObj.NotOlderThan)
                                 .diff(moment(jobObj.Expires)) <= 0) { //Data Valid until > expires
                                 CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                                    AppMain.t("EXPIRES_DATA_VALID_GREATER_ERROR_TXT", "TASK_MANAGER"));
+                                        AppMain.t("EXPIRES_DATA_VALID_GREATER_ERROR_TXT", "TASK_MANAGER"));
                                 return false;
                             }
                         }
                         if (jobObj.Duration && moment.duration(jobObj.Duration).asSeconds() < 60) {
                             CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                                AppMain.t("DURATION_ERROR_TXT", "TASK_MANAGER"));
+                                    AppMain.t("DURATION_ERROR_TXT", "TASK_MANAGER"));
                             return false;
                         }
                         if (jobObj.RepeatingInterval && moment.duration(jobObj.RepeatingInterval).asSeconds() < 60) {
                             CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                                AppMain.t("REPEATING_ERROR_TXT", "TASK_MANAGER"));
+                                    AppMain.t("REPEATING_ERROR_TXT", "TASK_MANAGER"));
                             return false;
                         }
                     }
@@ -1269,20 +1350,20 @@ CtrlActionTaskManager.addJobSecond = function (jobType, node) {
                         jobObj.ID = node.ID;
                         CtrlActionTaskManager.addResourceRest(jobObj, true);
                     } else {
-                        if (jobType === "notification")
+                        if (jobType === "notification") {
                             CtrlActionTaskManager.addResourceRest(jobObj);
-                        else
+                        } else {
                             CtrlActionTaskManager.addJobThirdStep(jobObj);
+                        }
                     }
                     return true;
                 }
             },
             cancel: {
                 text: AppMain.t("CANCEL", "global"),
-                action:
-                    function () {
-                        return true;
-                    }
+                action: function () {
+                    return true;
+                }
             }
         }
     });
@@ -1298,34 +1379,35 @@ CtrlActionTaskManager.addJobSecond = function (jobType, node) {
  * @param jobObj
  */
 CtrlActionTaskManager.addJobThirdStep = function (jobObj) {
+    "use strict";
 
     const deviceRef = "<tr>\n    " +
-        "<td class=\"mdl-data-table__cell--non-numeric\" style='width: 30px'>\n        " +
-        "<label class=\"mdl-radio mdl-js-radio\" for=\"input-type\">\n            " +
-        "<input type=\"radio\" value='device' name=\"ref-type\" class=\"mdl-radio__button\" checked>\n        " +
-        "</label>" +
-        "</td>" +
-        "<td>" +
-        AppMain.t("DEVICE_REFERENCE", "TASK_MANAGER") +
-        "</td>" +
-        "</tr>";
+            "<td class=\"mdl-data-table__cell--non-numeric\" style='width: 30px'>\n        " +
+            "<label class=\"mdl-radio mdl-js-radio\" for=\"input-type\">\n            " +
+            "<input type=\"radio\" value='device' name=\"ref-type\" class=\"mdl-radio__button\" checked>\n        " +
+            "</label>" +
+            "</td>" +
+            "<td>" +
+            AppMain.t("DEVICE_REFERENCE", "TASK_MANAGER") +
+            "</td>" +
+            "</tr>";
     const groupRef = "<tr>" +
-        "<td class=\"mdl-data-table__cell--non-numeric\" style='width: 30px'>\n        " +
-        "<label class=\"mdl-radio mdl-js-radio\" for=\"input-type\">\n            " +
-        "<input type=\"radio\" value='group' name=\"ref-type\" class=\"mdl-radio__button\">\n        " +
-        "</label>\n    " +
-        "</td>\n    " +
-        "<td>\n    " +
-        AppMain.t("GROUP_REFERENCE", "TASK_MANAGER") +
-        "</td>" +
-        "</tr>";
+            "<td class=\"mdl-data-table__cell--non-numeric\" style='width: 30px'>\n        " +
+            "<label class=\"mdl-radio mdl-js-radio\" for=\"input-type\">\n            " +
+            "<input type=\"radio\" value='group' name=\"ref-type\" class=\"mdl-radio__button\">\n        " +
+            "</label>\n    " +
+            "</td>\n    " +
+            "<td>\n    " +
+            AppMain.t("GROUP_REFERENCE", "TASK_MANAGER") +
+            "</td>" +
+            "</tr>";
 
     let allHtml = this.addJobStepsHtml(3, jobObj.jobType) +
-        AppMain.t("SELECT_REFERENCE", "TASK_MANAGER") + "</br></br>" +
-        "<table id='reference-type' class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">" +
-        deviceRef +
-        groupRef +
-        "</table>";
+            AppMain.t("SELECT_REFERENCE", "TASK_MANAGER") + "</br></br>" +
+            "<table id='reference-type' class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">" +
+            deviceRef +
+            groupRef +
+            "</table>";
 
     $.confirm({
         title: AppMain.t("ADD_JOB", "TASK_MANAGER"),
@@ -1336,37 +1418,36 @@ CtrlActionTaskManager.addJobThirdStep = function (jobObj) {
         buttons: {
             back: {
                 text: AppMain.t("BACK", "global"),
-                action:
-                    function () {
-                        jobObj.back = true;
-                        if (jobObj.jobService && jobObj.jobService === "upgrade")
-                            CtrlActionTaskManager.addJobFileUpload(jobObj.jobType, jobObj);
-                        else
-                            CtrlActionTaskManager.addJobSecond(jobObj.jobType, jobObj);
-                        return true;
+                action: function () {
+                    jobObj.back = true;
+                    if (jobObj.jobService && jobObj.jobService === "upgrade") {
+                        CtrlActionTaskManager.addJobFileUpload(jobObj.jobType, jobObj);
+                    } else {
+                        CtrlActionTaskManager.addJobSecond(jobObj.jobType, jobObj);
                     }
+                    return true;
+                }
             },
             confirm: {
                 text: AppMain.t("NEXT", "global"),
                 action: function () {
                     const refType = $("input[type='radio']:checked").val();
-                    if (refType === "device")
+                    if (refType === "device") {
                         CtrlActionTaskManager.addJobDevice(jobObj);
-                    else
+                    } else {
                         CtrlActionTaskManager.addJobGroup(jobObj);
+                    }
                     return true;
                 }
             },
             cancel: {
                 text: AppMain.t("CANCEL", "global"),
-                action:
-                    function () {
-                        return true;
-                    }
+                action: function () {
+                    return true;
+                }
             }
         }
     });
-
 
     setTimeout(function () {
         $("#reference-type tr").on("click", function () {
@@ -1383,12 +1464,14 @@ CtrlActionTaskManager.addJobThirdStep = function (jobObj) {
  * helper function for add node to devices
  */
 CtrlActionTaskManager.addTitlePress = function () {
+    "use strict";
+
     const devTitle = $("#add-title").val();
     if (devTitle !== "") {
         CtrlActionTaskManager.addTitle(devTitle);
     } else {
         CtrlActionTaskManager.importAlert(AppMain.t("DEVICES_ERR_TITLE_TXT", "TASK_MANAGER"),
-            AppMain.t("DEVICE_INSERT_ERROR", "TASK_MANAGER"));
+                AppMain.t("DEVICE_INSERT_ERROR", "TASK_MANAGER"));
     }
 };
 
@@ -1396,14 +1479,15 @@ CtrlActionTaskManager.addTitlePress = function () {
  * helper function for add node to devices
  */
 CtrlActionTaskManager.addTitle = function (deviceTitle) {
+    "use strict";
     //add to table
     let r = Math.random().toString(36).substring(7);
     let devHtml = "<tr id='add-" + r + "'>" +
-        "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + deviceTitle + "' checked/></td>" +
-        "<td>" + deviceTitle + "</td>" +
-        "</tr>";
+            "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + deviceTitle + "' checked/></td>" +
+            "<td>" + deviceTitle + "</td>" +
+            "</tr>";
 
-    $('table#devices-table > tbody > tr:first').before(devHtml);
+    $("table#devices-table > tbody > tr:first").before(devHtml);
     setTimeout(function () {
         $("#add-" + r).fadeIn(200).fadeOut(200).fadeIn(200).fadeOut(200).fadeIn(200);
     }, 200);
@@ -1414,42 +1498,43 @@ CtrlActionTaskManager.addTitle = function (deviceTitle) {
  * @param jobObj
  */
 CtrlActionTaskManager.addJobDevice = function (jobObj) {
+    "use strict";
 
     const addHtml = "<div>" + AppMain.t("DEVICE_TITLE", "TASK_MANAGER") + ": " +
-        "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-145\">" +
-        "<input class=\"mdl-textfield__input\" type=\"text\" id='add-title' name=\"add-title\"/></div>" +
-        "<button id='add-icon' class='mdl-button mdl-js-button mdl-button--raised mdl-button-small ' style='margin-left: 5px;'>" +
-        AppMain.t("ADD", "global") + "</button>" +
-        "</div><br/>";
+            "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-145\">" +
+            "<input class=\"mdl-textfield__input\" type=\"text\" id='add-title' name=\"add-title\"/></div>" +
+            "<button id='add-icon' class='mdl-button mdl-js-button mdl-button--raised mdl-button-small ' style='margin-left: 5px;'>" +
+            AppMain.t("ADD", "global") + "</button>" +
+            "</div><br/>";
 
     const importHtml = "<div>" + AppMain.t("DEVICE_IMPORT", "TASK_MANAGER") + ": " +
-        "<span class=\"select-file\"> <input id=\"file\" type=\"file\" name=\"upload\" /></span>" +
-        "<div id='file-selected' style=\"display: none;float: right;\" class=\"file-selected\">" +
-        "   <i class='material-icons cursor-pointer' id='remove-' onclick='$(\"#file\").val(\"\");$(\".select-file\")" +
-        ".show();$(\"#file-name\").html(\"\");$(\".file-selected\").hide();'>clear</i>" +
-        "</div>" +
-        "<div style=\"display: none;float:right; margin-right: 15px;margin-top: 3px;\" class=\"file-selected\" id=\"file-name\"></div>" +
-        "</div><br/>";
+            "<span class=\"select-file\"> <input id=\"file\" type=\"file\" name=\"upload\" /></span>" +
+            "<div id='file-selected' style=\"display: none;float: right;\" class=\"file-selected\">" +
+            "   <i class='material-icons cursor-pointer' id='remove-' onclick='$(\"#file\").val(\"\");$(\".select-file\")" +
+            ".show();$(\"#file-name\").html(\"\");$(\".file-selected\").hide();'>clear</i>" +
+            "</div>" +
+            "<div style=\"display: none;float:right; margin-right: 15px;margin-top: 3px;\" class=\"file-selected\" id=\"file-name\"></div>" +
+            "</div><br/>";
 
     let allHtml = this.addJobStepsHtml(4, jobObj.jobType) +
-        AppMain.t("SELECT_DEVICE_REFERENCE", "TASK_MANAGER") + "</br></br>" +
-        addHtml +
-        importHtml +
-        "<table id='devices-table' class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">" +
-        "<thead class=\"th-color-grey text-align-left\">" +
-        "<tr>" +
-        "<th style='width: 30px;padding-left: 18px'><input class=\"selectAllNodes\" name=\"selectAllNodes\" type=\"checkbox\"/></th>" +
-        "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("DEVICE_TITLE", "TASK_MANAGER") + "</th>" +
-        "</tr>" +
-        "</thead><tbody>";
+            AppMain.t("SELECT_DEVICE_REFERENCE", "TASK_MANAGER") + "</br></br>" +
+            addHtml +
+            importHtml +
+            "<table id='devices-table' class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">" +
+            "<thead class=\"th-color-grey text-align-left\">" +
+            "<tr>" +
+            "<th style='width: 30px;padding-left: 18px'><input class=\"selectAllNodes\" name=\"selectAllNodes\" type=\"checkbox\"/></th>" +
+            "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("DEVICE_TITLE", "TASK_MANAGER") + "</th>" +
+            "</tr>" +
+            "</thead><tbody>";
 
     if (this.nodesTitle.length > 0) {
         $.each(this.nodesTitle, function (index, title) {
-            if(title.toString() !== "[object Object]"){
+            if (title.toString() !== "[object Object]") {
                 allHtml += "<tr>" +
-                    "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + title + "'/></td>" +
-                    "<td>" + title + "</td>" +
-                    "</tr>";
+                        "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + title + "'/></td>" +
+                        "<td>" + title + "</td>" +
+                        "</tr>";
             }
         });
     }
@@ -1464,15 +1549,16 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
         buttons: {
             back: {
                 text: AppMain.t("BACK", "global"),
-                action:
-                    function () {
-                        jobObj.back = true;
-                        CtrlActionTaskManager.addJobThirdStep(jobObj);
-                        return true;
-                    }
+                action: function () {
+                    jobObj.back = true;
+                    CtrlActionTaskManager.addJobThirdStep(jobObj);
+                    return true;
+                }
             },
             confirm: {
-                text: jobObj.jobType === "notification" ? AppMain.t("CREATE", "global") : AppMain.t("NEXT", "global"),
+                text: jobObj.jobType === "notification"
+                    ? AppMain.t("CREATE", "global")
+                    : AppMain.t("NEXT", "global"),
                 action: function () {
                     jobObj.devices = [];
                     let inputC = $("input[name='selectNode']:checked");
@@ -1482,7 +1568,7 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
                     });
                     if (jobObj.devices.length === 0) {
                         CtrlActionTaskManager.importAlert(AppMain.t("DEVICES_ERR_TITLE_TXT", "TASK_MANAGER"),
-                            AppMain.t("DEVICES_SELECT_ERROR", "TASK_MANAGER"));
+                                AppMain.t("DEVICES_SELECT_ERROR", "TASK_MANAGER"));
                         return false;
                     } else {
                         jobObj.groups = [];
@@ -1497,10 +1583,9 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
             },
             cancel: {
                 text: AppMain.t("CANCEL", "global"),
-                action:
-                    function () {
-                        return true;
-                    }
+                action: function () {
+                    return true;
+                }
             }
         }
     });
@@ -1551,7 +1636,7 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
                 const csv = e.target.result;
                 if (!csv.includes("\r\n") && !csv.includes("\n")) {
                     CtrlActionTaskManager.importAlert(AppMain.t("IMPORT_ERR_TITLE_TXT", "TASK_MANAGER"),
-                        AppMain.t("IMPORT_CSV_ERROR", "TASK_MANAGER"));
+                            AppMain.t("IMPORT_CSV_ERROR", "TASK_MANAGER"));
                     return;
                 }
                 const allTextLines = csv.split(/\r\n|\n/);
@@ -1564,26 +1649,25 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
                 }
                 if (!header.includes(",")) {
                     CtrlActionTaskManager.importAlert(AppMain.t("IMPORT_ERR_TITLE_TXT", "TASK_MANAGER"),
-                        AppMain.t("IMPORT_CSV_ERROR", "TASK_MANAGER"));
+                            AppMain.t("IMPORT_CSV_ERROR", "TASK_MANAGER"));
                     return;
                 }
-                header = header.split(',');
+                header = header.split(",");
 
-                const ind = header.indexOf('"' + AppMain.t("DEVICE_TITLE", "NODES") + '"');
+                const ind = header.indexOf("\"" + AppMain.t("DEVICE_TITLE", "NODES") + "\"");
                 if (ind === -1) {
                     CtrlActionTaskManager.importAlert(AppMain.t("IMPORT_ERR_TITLE_TXT", "TASK_MANAGER"),
-                        AppMain.t("IMPORT_ERROR", "TASK_MANAGER"));
+                            AppMain.t("IMPORT_ERROR", "TASK_MANAGER"));
                 }
-                for (let index in allTextLines) {
-                    if (allTextLines.hasOwnProperty(index)) {
-                        if (parseInt(index) < startInd)
-                            continue;
-                        const line = allTextLines[index];
-                        if (line !== "")
-                            CtrlActionTaskManager.addTitle(line.split(',')[ind]
-                                .replace("\"", "").replace("\"", ""));
+                allTextLines.forEach(function (line, index) {
+                    if (index < startInd) {
+                        return;
                     }
-                }
+                    if (line !== "") {
+                        CtrlActionTaskManager.addTitle(line.split(",")[ind]
+                            .replace("\"", "").replace("\"", ""));
+                    }
+                });
             };
             reader.readAsText(uploadElement.files[0]);
             $("#file").val("");
@@ -1601,6 +1685,8 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
  * @param content
  */
 CtrlActionTaskManager.importAlert = function (title, content) {
+    "use strict";
+
     $.alert({
         useBootstrap: false,
         theme: "material",
@@ -1608,7 +1694,7 @@ CtrlActionTaskManager.importAlert = function (title, content) {
         content: content,
         buttons: {
             confirm: {
-                text: AppMain.t("OK", "global"),
+                text: AppMain.t("OK", "global")
             }
         }
     });
@@ -1623,23 +1709,24 @@ CtrlActionTaskManager.importAlert = function (title, content) {
  * @param jobObj
  */
 CtrlActionTaskManager.addJobGroup = function (jobObj) {
+    "use strict";
 
     let allHtml = this.addJobStepsHtml(4, jobObj.jobType) +
-        AppMain.t("SELECT_GROUP_REFERENCE", "TASK_MANAGER") + "</br></br>" +
-        "<table id='groups-table' class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">" +
-        "<thead class=\"th-color-grey text-align-left\">" +
-        "<tr>" +
-        "<th style='width: 30px;padding-left: 18px'><input class=\"selectAllNodes\" name=\"selectAllNodes\" type=\"checkbox\"/></th>" +
-        "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("GROUP_ID", "TASK_MANAGER") + "</th>" +
-        "</tr>" +
-        "</thead><tbody>";
+            AppMain.t("SELECT_GROUP_REFERENCE", "TASK_MANAGER") + "</br></br>" +
+            "<table id='groups-table' class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">" +
+            "<thead class=\"th-color-grey text-align-left\">" +
+            "<tr>" +
+            "<th style='width: 30px;padding-left: 18px'><input class=\"selectAllNodes\" name=\"selectAllNodes\" type=\"checkbox\"/></th>" +
+            "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("GROUP_ID", "TASK_MANAGER") + "</th>" +
+            "</tr>" +
+            "</thead><tbody>";
 
     if (this.groups.length > 0) {
         $.each(this.groups, function (index, group) {
             allHtml += "<tr>" +
-                "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + group + "'/></td>" +
-                "<td>" + group + "</td>" +
-                "</tr>";
+                    "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + group + "'/></td>" +
+                    "<td>" + group + "</td>" +
+                    "</tr>";
         });
     }
     allHtml += "</tbody></table>";
@@ -1653,15 +1740,16 @@ CtrlActionTaskManager.addJobGroup = function (jobObj) {
         buttons: {
             back: {
                 text: AppMain.t("BACK", "global"),
-                action:
-                    function () {
-                        jobObj.back = true;
-                        CtrlActionTaskManager.addJobThirdStep(jobObj);
-                        return true;
-                    }
+                action: function () {
+                    jobObj.back = true;
+                    CtrlActionTaskManager.addJobThirdStep(jobObj);
+                    return true;
+                }
             },
             confirm: {
-                text: jobObj.jobType === "notification" ? AppMain.t("CREATE", "global") : AppMain.t("NEXT", "global"),
+                text: jobObj.jobType === "notification"
+                    ? AppMain.t("CREATE", "global")
+                    : AppMain.t("NEXT", "global"),
                 action: function () {
                     jobObj.groups = [];
                     let inputC = $("input[name='selectNode']:checked");
@@ -1671,7 +1759,7 @@ CtrlActionTaskManager.addJobGroup = function (jobObj) {
                     });
                     if (jobObj.groups.length === 0) {
                         CtrlActionTaskManager.importAlert(AppMain.t("GROUPS_ERR_TITLE_TXT", "TASK_MANAGER"),
-                            AppMain.t("GROUPS_SELECT_ERROR", "TASK_MANAGER"));
+                                AppMain.t("GROUPS_SELECT_ERROR", "TASK_MANAGER"));
                         return false;
                     } else {
                         jobObj.devices = [];
@@ -1686,10 +1774,9 @@ CtrlActionTaskManager.addJobGroup = function (jobObj) {
             },
             cancel: {
                 text: AppMain.t("CANCEL", "global"),
-                action:
-                    function () {
-                        return true;
-                    }
+                action: function () {
+                    return true;
+                }
             }
         }
     });
@@ -1757,21 +1844,22 @@ CtrlActionTaskManager.typeSelector = {
  * @returns {string}
  */
 CtrlActionTaskManager.getAddCosemHTML = function (jobType, jobService) {
+    "use strict";
 
     const accessSelRowHtml = "<div class=\"mdl-textfield mdl-textfield-less-padding mdl-textfield--floating-label mdl-js-textfield-datepicker textfield-short-160 is-dirty\" style='margin-right: 20px;'>" +
-        "<input class=\"mdl-textfield__input\" type=\"text\" id=\"add-access-from\" name=\"add-access-from\">" +
-        "<label class=\"mdl-textfield__label\">" + AppMain.t("ACCESS_SELECTION_FROM", "TASK_MANAGER") + "</label>" +
-        "</div>" +
-        "<div class=\"mdl-textfield mdl-textfield-less-padding mdl-textfield--floating-label mdl-js-textfield-datepicker textfield-short-160 is-dirty\">" +
-        "<input class=\"mdl-textfield__input\" type=\"text\" id=\"add-access-to\" name=\"add-access-to\">" +
-        "<label class=\"mdl-textfield__label\">" + AppMain.t("ACCESS_SELECTION_TO", "TASK_MANAGER") + "</label>" +
-        "</div>";
+            "<input class=\"mdl-textfield__input\" type=\"text\" id=\"add-access-from\" name=\"add-access-from\">" +
+            "<label class=\"mdl-textfield__label\">" + AppMain.t("ACCESS_SELECTION_FROM", "TASK_MANAGER") + "</label>" +
+            "</div>" +
+            "<div class=\"mdl-textfield mdl-textfield-less-padding mdl-textfield--floating-label mdl-js-textfield-datepicker textfield-short-160 is-dirty\">" +
+            "<input class=\"mdl-textfield__input\" type=\"text\" id=\"add-access-to\" name=\"add-access-to\">" +
+            "<label class=\"mdl-textfield__label\">" + AppMain.t("ACCESS_SELECTION_TO", "TASK_MANAGER") + "</label>" +
+            "</div>";
 
     const repeatingSelector = AppMain.html.formElementSelect("relative-selector",
-        CtrlActionTaskManager.relativeSelector, {
-            label: AppMain.t("RELATIVE_ACCESS_SELECTION", "TASK_MANAGER"),
-            elementSelected: "0"
-        }, undefined, "textfield-short-175 is-dirty");
+            CtrlActionTaskManager.relativeSelector, {
+        label: AppMain.t("RELATIVE_ACCESS_SELECTION", "TASK_MANAGER"),
+        elementSelected: "0"
+    }, undefined, "textfield-short-175 is-dirty");
 
 
     const timeSelRowHtml = "<div class=\"mdl-textfield mdl-textfield-less-padding mdl-textfield--floating-label is-dirty\" style='margin-right: 20px;'>" +
@@ -1788,10 +1876,9 @@ CtrlActionTaskManager.getAddCosemHTML = function (jobType, jobService) {
             label: AppMain.t("VALUE_TYPE", "TASK_MANAGER")
         }, undefined, "textfield-short-145 is-dirty");
 
-    const valueInput = AppMain.html.formTextInput("variable-value", AppMain.t("VALUE", "TASK_MANAGER"),
-        {
-            wrapperClass: "textfield-short-115 mdl-textfield-less-padding is-dirty"
-        });
+    const valueInput = AppMain.html.formTextInput("variable-value", AppMain.t("VALUE", "TASK_MANAGER"), {
+        wrapperClass: "textfield-short-115 mdl-textfield-less-padding is-dirty"
+    });
 
     const attrLabel = $("#attr-label");
     attrLabel.html(AppMain.t("ATTRIBUTE_ID", "TASK_MANAGER") + " *");
@@ -1802,7 +1889,8 @@ CtrlActionTaskManager.getAddCosemHTML = function (jobType, jobService) {
                 case "get":
                     return accessSelRowHtml;
                 case "action":
-                    attrLabel.html(AppMain.t("METHOD_ID", "TASK_MANAGER") + " *");/* FALLTHROUGH */
+                    attrLabel.html(AppMain.t("METHOD_ID", "TASK_MANAGER") + " *");
+                    return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
                 case "set":
                     return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
                 case "time-sync":
@@ -1814,7 +1902,8 @@ CtrlActionTaskManager.getAddCosemHTML = function (jobType, jobService) {
                 case "get":
                     return repeatingSelector;
                 case "action":
-                    attrLabel.html(AppMain.t("METHOD_ID", "TASK_MANAGER") + " *");/* FALLTHROUGH */
+                    attrLabel.html(AppMain.t("METHOD_ID", "TASK_MANAGER") + " *");
+                    return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
                 case "set":
                     return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
                 case "time-sync":
@@ -1827,11 +1916,12 @@ CtrlActionTaskManager.getAddCosemHTML = function (jobType, jobService) {
 
 /**
  * helper function service type
- * @param jobType
  * @param jobService
  * @returns {*}
  */
-CtrlActionTaskManager.getAddCosemTableHTML = function (jobType, jobService) {
+CtrlActionTaskManager.getAddCosemTableHTML = function (jobService) {
+    "use strict";
+
     switch (jobService) {
         case "get":
             return AppMain.t("ACCESS_SELECTION", "TASK_MANAGER");
@@ -1849,9 +1939,12 @@ CtrlActionTaskManager.getAddCosemTableHTML = function (jobType, jobService) {
  * @param jobObj
  */
 CtrlActionTaskManager.addJobFinal = function (jobObj) {
+    "use strict";
+
     CtrlActionTaskManager.hasCossemAttrs = false;
-    if (jobObj.jobType !== "upgrade")
+    if (jobObj.jobType !== "upgrade") {
         jobObj.jobService = "get";
+    }
     let objValues = {
         "0": "---"
     };
@@ -1876,15 +1969,14 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
         elementSelected: "1"
     }, undefined, "textfield-short-185 mdl-textfield-less-padding");
 
-    const serviceSelector = AppMain.html.formElementSelect("job-service",
-        {
-            "get": AppMain.t("GET", "TASK_MANAGER"),
-            "set": AppMain.t("SET", "TASK_MANAGER"),
-            "action": AppMain.t("ACTION", "TASK_MANAGER"),
-            "time-sync": AppMain.t("TIME_SYNC", "TASK_MANAGER")
-        }, {
-            label: AppMain.t("SELECT_JOB_SERVICE", "TASK_MANAGER")
-        }, undefined, "textfield-short-185 mdl-textfield-less-padding");
+    const serviceSelector = AppMain.html.formElementSelect("job-service", {
+        "get": AppMain.t("GET", "TASK_MANAGER"),
+        "set": AppMain.t("SET", "TASK_MANAGER"),
+        "action": AppMain.t("ACTION", "TASK_MANAGER"),
+        "time-sync": AppMain.t("TIME_SYNC", "TASK_MANAGER")
+    }, {
+        label: AppMain.t("SELECT_JOB_SERVICE", "TASK_MANAGER")
+    }, undefined, "textfield-short-185 mdl-textfield-less-padding");
 
     const classHtml = "<div class=\"mdl-textfield mdl-textfield-less-padding mdl-textfield--floating-label textfield-short-50 is-dirty\">" +
         "<input class=\"mdl-textfield__input just-number desc-check\" type=\"text\" id='add-class' maxlength='5' name=\"add-class\"/>" +
@@ -1932,7 +2024,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
 
     let styleHid = "";
     if (jobObj.jobType === "upgrade") {
-        styleHid = "display: none;"
+        styleHid = "display: none;";
     }
 
     let allHtml = allHtml1 +
@@ -1944,7 +2036,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
         "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("CLASS_ID", "TASK_MANAGER") + "</th>" +
         "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("INSTANCE_ID", "TASK_MANAGER") + "</th>" +
         "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("ATTRIBUTE_ID", "TASK_MANAGER") + "</th>" +
-        "<th class=\"mdl-data-table__cell--non-numeric\" id='tableCosemTH'>" + CtrlActionTaskManager.getAddCosemTableHTML(jobObj.jobType, jobObj.jobService) + "" +
+        "<th class=\"mdl-data-table__cell--non-numeric\" id='tableCosemTH'>" + CtrlActionTaskManager.getAddCosemTableHTML(jobObj.jobService) + "" +
         "</thead><tbody></tbody></table><br/>";
 
     $.confirm({
@@ -1953,19 +2045,21 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
         useBootstrap: false,
         draggable: false,
         theme: "material",
-        boxWidth: jobObj.jobType !== "upgrade" ? '85%' : undefined,
+        boxWidth: jobObj.jobType !== "upgrade"
+            ? "85%"
+            : undefined,
         buttons: {
             back: {
                 text: AppMain.t("BACK", "global"),
-                action:
-                    function () {
-                        jobObj.back = true;
-                        if (jobObj.devices && jobObj.devices.length > 0)
-                            CtrlActionTaskManager.addJobDevice(jobObj);
-                        else
-                            CtrlActionTaskManager.addJobGroup(jobObj);
-                        return true;
+                action: function () {
+                    jobObj.back = true;
+                    if (jobObj.devices && jobObj.devices.length > 0) {
+                        CtrlActionTaskManager.addJobDevice(jobObj);
+                    } else {
+                        CtrlActionTaskManager.addJobGroup(jobObj);
                     }
+                    return true;
+                }
             },
             confirm: {
                 text: AppMain.t("CREATE", "global"),
@@ -2001,10 +2095,9 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
             },
             cancel: {
                 text: AppMain.t("CANCEL", "global"),
-                action:
-                    function () {
-                        return true;
-                    }
+                action: function () {
+                    return true;
+                }
             }
         }
     });
@@ -2040,7 +2133,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
         let dateAccFrom = $("#add-access-from");
         dateAccFrom.datetimepicker({
             dayOfWeekStart: 1,
-            lang: 'sl',
+            lang: "sl",
             startDate: moment().add(1, "day").format(AppMain.localization("DATETIME_FORMAT")),
             format: AppMain.localization("DATETIME_FORMAT_DATETIMEPICKER")
         });
@@ -2048,7 +2141,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
         let dateAccTo = $("#add-access-to");
         dateAccTo.datetimepicker({
             dayOfWeekStart: 1,
-            lang: 'sl',
+            lang: "sl",
             startDate: moment().add(1, "day").format(AppMain.localization("DATETIME_FORMAT")),
             format: AppMain.localization("DATETIME_FORMAT_DATETIMEPICKER")
         });
@@ -2056,7 +2149,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
         $(".just-number").on("input", function () {
             if ($(this).hasClass("just-number")) {
                 const nonNumReg = /[^0-9]/g;
-                $(this).val($(this).val().replace(nonNumReg, ''));
+                $(this).val($(this).val().replace(nonNumReg, ""));
             }
         });
         if (jobObj.jobType === "upgrade") {
@@ -2082,24 +2175,22 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
                     buttons: {
                         confirm: {
                             text: AppMain.t("OK", "global"),
-                            action:
-                                function () {
-                                    $('table#cosem-table > tbody').html("");
-                                    CtrlActionTaskManager.hasCossemAttrs = false;
-                                    jS.change();
-                                    return true;
-                                }
+                            action: function () {
+                                $("table#cosem-table > tbody").html("");
+                                CtrlActionTaskManager.hasCossemAttrs = false;
+                                jS.change();
+                                return true;
+                            }
                         },
                         cancel: {
                             text: AppMain.t("CANCEL", "global"),
-                            action:
-                                function () {
-                                    setTimeout(function () {
-                                        jS.val(jSerPom);
-                                        jS.change();
-                                    }, 200);
-                                    return true;
-                                }
+                            action: function () {
+                                setTimeout(function () {
+                                    jS.val(jSerPom);
+                                    jS.change();
+                                }, 200);
+                                return true;
+                            }
                         }
                     }
                 });
@@ -2111,22 +2202,23 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
                 desc_cell.html();
             } else {
                 desc_cell.show();
-                if (jobObj.jobService === "time-sync")
+                if (jobObj.jobService === "time-sync") {
                     desc_cell.html(objectTimeSelector);
-                else
+                } else {
                     desc_cell.html(objectSelector);
+                }
             }
             $("#accessSelRow").html(CtrlActionTaskManager.getAddCosemHTML(jobObj.jobType, jobObj.jobService));
-            $("#tableCosemTH").html(CtrlActionTaskManager.getAddCosemTableHTML(jobObj.jobType, jobObj.jobService));
+            $("#tableCosemTH").html(CtrlActionTaskManager.getAddCosemTableHTML(jobObj.jobService));
             let varType = $("#variable-type");
             let varVal = $("#variable-value");
             setTimeout(function () {
                 AppMain.html.updateAllElements();
-                const jOd = $("#job-object");
+                const jOd2 = $("#job-object");
                 CtrlActionTaskManager.checkDesc();
-                jOd.on("change", function () {
-                    if (jOd.val() !== "0") {
-                        const newValPos = parseInt(jOd.val()) - 1;
+                jOd2.on("change", function () {
+                    if (jOd2.val() !== "0") {
+                        const newValPos = parseInt(jOd2.val()) - 1;
                         CtrlActionTaskManager.selectCosemHelper(objectList.get[newValPos]);
                     }
                 });
@@ -2136,7 +2228,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
                 dateAccFrom = $("#add-access-from");
                 dateAccFrom.datetimepicker({
                     dayOfWeekStart: 1,
-                    lang: 'sl',
+                    lang: "sl",
                     startDate: moment().add(1, "day").format(AppMain.localization("DATETIME_FORMAT")),
                     format: AppMain.localization("DATETIME_FORMAT_DATETIMEPICKER")
                 });
@@ -2144,11 +2236,10 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
                 dateAccTo = $("#add-access-to");
                 dateAccTo.datetimepicker({
                     dayOfWeekStart: 1,
-                    lang: 'sl',
+                    lang: "sl",
                     startDate: moment().add(1, "day").format(AppMain.localization("DATETIME_FORMAT")),
                     format: AppMain.localization("DATETIME_FORMAT_DATETIMEPICKER")
                 });
-
 
                 varType = $("#variable-type");
                 varVal = $("#variable-value");
@@ -2169,7 +2260,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
                     }
                     if (varVal.hasClass("just-number")) {
                         const nonNumReg = /[^0-9]/g;
-                        varVal.val(varVal.val().replace(nonNumReg, ''));
+                        varVal.val(varVal.val().replace(nonNumReg, ""));
                     }
                     return false;
                 });
@@ -2177,18 +2268,18 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
                 varVal.on("input", function () {
                     if (varVal.hasClass("just-number")) {
                         const nonNumReg = /[^0-9]/g;
-                        varVal.val(varVal.val().replace(nonNumReg, ''));
+                        varVal.val(varVal.val().replace(nonNumReg, ""));
                     }
                 });
 
                 $(".just-number").on("input", function () {
                     if ($(this).hasClass("just-number")) {
                         const nonNumReg = /[^0-9]/g;
-                        $(this).val($(this).val().replace(nonNumReg, ''));
+                        $(this).val($(this).val().replace(nonNumReg, ""));
                     }
                 });
             }, 200);
-        })
+        });
     }, 300);
 };
 
@@ -2197,6 +2288,8 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
  * @param cosemObj Object
  */
 CtrlActionTaskManager.selectCosemHelper = function (cosemObj) {
+    "use strict";
+
     $("#add-class").val(cosemObj.classId);
     const instanceArr = cosemObj.instanceId.split(".");
     $.each(instanceArr, function (index, instance) {
@@ -2204,13 +2297,13 @@ CtrlActionTaskManager.selectCosemHelper = function (cosemObj) {
     });
     $("#add-attr").val(cosemObj.attributeId);
 
-    if(cosemObj.classId === 7 && cosemObj.attributeId === 2){
-        if(cosemObj.instanceId === "1.0.99.1.0.255"){
+    if (cosemObj.classId === 7 && cosemObj.attributeId === 2) {
+        if (cosemObj.instanceId === "1.0.99.1.0.255") {
             $("#relative-selector").val("FFFDFFFF07FFFFFFFFFFFFFF");
-        }else {
+        } else {
             $("#relative-selector").val("FFFDFFFF1EFFFFFFFFFFFFFF");
         }
-    }else {
+    } else {
         $("#relative-selector").val("0");
     }
 };
@@ -2221,6 +2314,8 @@ CtrlActionTaskManager.selectCosemHelper = function (cosemObj) {
  * @returns {boolean}
  */
 CtrlActionTaskManager.updateAttrs = function (jobObj) {
+    "use strict";
+
     jobObj.attrs = [];
     let inputC = $("input[name='selectNode']:checked");
     inputC.each(function (i, elm) {
@@ -2270,6 +2365,8 @@ CtrlActionTaskManager.updateAttrs = function (jobObj) {
  * function is called on classID, attrID or InstanceId change
  */
 CtrlActionTaskManager.checkDesc = function () {
+    "use strict";
+
     const classId = parseInt($("#add-class").val());
     const instanceId = $("input[name='inst1']").val() + "." + $("input[name='inst2']").val() + "." +
         $("input[name='inst3']").val() + "." + $("input[name='inst4']").val() + "." +
@@ -2292,15 +2389,16 @@ CtrlActionTaskManager.checkDesc = function () {
             $("#job-object").val(index + 1);
         }
     });
-    if(classId === 7 && attrId === 2){
-        if(instanceId === "1.0.99.1.0.0"){
+    if (classId === 7 && attrId === 2) {
+        if (instanceId === "1.0.99.1.0.0") {
             $("#relative-selector").val("FFFDFFFF07FFFFFFFFFFFFFF");
-        }else {
+        } else {
             $("#relative-selector").val("FFFDFFFF1EFFFFFFFFFFFFFF");
         }
     }
-    if (isDesc)
+    if (isDesc) {
         $("#job-object").val("0");
+    }
 };
 
 /**
@@ -2308,19 +2406,25 @@ CtrlActionTaskManager.checkDesc = function () {
  * @returns {boolean}
  */
 CtrlActionTaskManager.addAttrPress = function () {
+    "use strict";
+
     const descVal = $("#job-object").val();
     const service = $("#job-service").val();
     let descTXT = "---";
     switch (service) {
         case "get":
-            descTXT = (defined(descVal) && descVal !== "0" && descVal !== "") ? objectList.get[parseInt(descVal) - 1].description : "---";
+            descTXT = (defined(descVal) && descVal !== "0" && descVal !== "")
+                ? objectList.get[parseInt(descVal) - 1].description
+                : "---";
             break;
         case "time-sync":
-            descTXT = (defined(descVal) && descVal !== "0" && descVal !== "") ? objectList.timeSync[parseInt(descVal) - 1].description : "---";
+            descTXT = (defined(descVal) && descVal !== "0" && descVal !== "")
+                ? objectList.timeSync[parseInt(descVal) - 1].description
+                : "---";
             break;
     }
     const classID = parseInt($("#add-class").val());
-    if (isNaN(classID) || classID < 0 || classID > 65536) {
+    if (Number.isNaN(classID) || classID < 0 || classID > 65536) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
             AppMain.t("CLASS_ID_ERROR_TXT", "TASK_MANAGER"));
         return false;
@@ -2328,90 +2432,100 @@ CtrlActionTaskManager.addAttrPress = function () {
 
     let instaID = "";
     let instaIDshort = "";
-    const instaID1 = parseInt($("input[name='inst1']").val());
-    if (isNaN(instaID1) || instaID1 < 0 || instaID1 > 255) {
+    const instaID1 = parseInt($("input[name='inst1']").val(), 10);
+    if (Number.isNaN(instaID1) || instaID1 < 0 || instaID1 > 255) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
             AppMain.t("ATTRIBUTE_ID_ERROR_TXT", "TASK_MANAGER"));
         return false;
-    } else {
-        instaIDshort += instaID1 + ".";
-        if (instaID1.toString(16).length === 2)
-            instaID += instaID1.toString(16);
-        else
-            instaID += "0" + instaID1.toString(16);
     }
-    const instaID2 = parseInt($("input[name='inst2']").val());
-    if (isNaN(instaID2) || instaID2 < 0 || instaID2 > 255) {
+    instaIDshort += instaID1 + ".";
+    if (instaID1.toString(16).length === 2) {
+        instaID += instaID1.toString(16);
+    } else {
+        instaID += "0" + instaID1.toString(16);
+    }
+
+    const instaID2 = parseInt($("input[name='inst2']").val(), 10);
+    if (Number.isNaN(instaID2) || instaID2 < 0 || instaID2 > 255) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
             AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
         return false;
-    } else {
-        instaIDshort += instaID2 + ".";
-        if (instaID2.toString(16).length === 2)
-            instaID += instaID2.toString(16);
-        else
-            instaID += "0" + instaID2.toString(16);
     }
-    const instaID3 = parseInt($("input[name='inst3']").val());
-    if (isNaN(instaID3) || instaID3 < 0 || instaID3 > 255) {
+    instaIDshort += instaID2 + ".";
+    if (instaID2.toString(16).length === 2) {
+        instaID += instaID2.toString(16);
+    } else {
+        instaID += "0" + instaID2.toString(16);
+    }
+
+    const instaID3 = parseInt($("input[name='inst3']").val(), 10);
+    if (Number.isNaN(instaID3) || instaID3 < 0 || instaID3 > 255) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
             AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
         return false;
-    } else {
-        instaIDshort += instaID3 + ".";
-        if (instaID3.toString(16).length === 2)
-            instaID += instaID3.toString(16);
-        else
-            instaID += "0" + instaID3.toString(16);
     }
-    const instaID4 = parseInt($("input[name='inst4']").val());
-    if (isNaN(instaID4) || instaID4 < 0 || instaID4 > 255) {
+    instaIDshort += instaID3 + ".";
+    if (instaID3.toString(16).length === 2) {
+        instaID += instaID3.toString(16);
+    } else {
+        instaID += "0" + instaID3.toString(16);
+    }
+
+    const instaID4 = parseInt($("input[name='inst4']").val(), 10);
+    if (Number.isNaN(instaID4) || instaID4 < 0 || instaID4 > 255) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
             AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
         return false;
-    } else {
-        instaIDshort += instaID4 + ".";
-        if (instaID4.toString(16).length === 2)
-            instaID += instaID4.toString(16);
-        else
-            instaID += "0" + instaID4.toString(16);
     }
-    const instaID5 = parseInt($("input[name='inst5']").val());
-    if (isNaN(instaID5) || instaID5 < 0 || instaID5 > 255) {
+    instaIDshort += instaID4 + ".";
+    if (instaID4.toString(16).length === 2) {
+        instaID += instaID4.toString(16);
+    } else {
+        instaID += "0" + instaID4.toString(16);
+    }
+
+    const instaID5 = parseInt($("input[name='inst5']").val(), 10);
+    if (Number.isNaN(instaID5) || instaID5 < 0 || instaID5 > 255) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
             AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
         return false;
-    } else {
-        instaIDshort += instaID5 + ".";
-        if (instaID5.toString(16).length === 2)
-            instaID += instaID5.toString(16);
-        else
-            instaID += "0" + instaID5.toString(16);
     }
-    const instaID6 = parseInt($("input[name='inst6']").val());
-    if (isNaN(instaID6) || instaID6 < 0 || instaID6 > 255) {
+    instaIDshort += instaID5 + ".";
+    if (instaID5.toString(16).length === 2) {
+        instaID += instaID5.toString(16);
+    } else {
+        instaID += "0" + instaID5.toString(16);
+    }
+
+    const instaID6 = parseInt($("input[name='inst6']").val(), 10);
+    if (Number.isNaN(instaID6) || instaID6 < 0 || instaID6 > 255) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
             AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
         return false;
-    } else {
-        instaIDshort += instaID6;
-        if (instaID6.toString(16).length === 2)
-            instaID += instaID6.toString(16);
-        else
-            instaID += "0" + instaID6.toString(16);
     }
+    instaIDshort += instaID6;
+    if (instaID6.toString(16).length === 2) {
+        instaID += instaID6.toString(16);
+    } else {
+        instaID += "0" + instaID6.toString(16);
+    }
+
     instaID = instaID.toUpperCase();
 
-    const attrID = parseInt($("#add-attr").val());
-    if (isNaN(attrID) || attrID < 0 || attrID > 127) {
+    const attrID = parseInt($("#add-attr").val(), 10);
+    if (Number.isNaN(attrID) || attrID < 0 || attrID > 127) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
             AppMain.t("ATTRIBUTE_ID_ERROR_TXT", "TASK_MANAGER"));
         return false;
     }
     let accessFrom = $("#add-access-from").val();
-    accessFrom = defined(accessFrom) && accessFrom !== "" ? moment(accessFrom).toISOString() : "";
+    accessFrom = (defined(accessFrom) && accessFrom !== "")
+        ? moment(accessFrom).toISOString()
+        : "";
     let accessTo = $("#add-access-to").val();
-    accessTo = defined(accessTo) && accessTo !== "" ? moment(accessTo).toISOString() : "";
+    accessTo = (defined(accessTo) && accessTo !== "")
+        ? moment(accessTo).toISOString()
+        : "";
     let accessFromTXT = accessFrom;
     let accessToTXT = accessTo;
     if ((accessFrom && accessFrom !== "") || (accessTo && accessTo !== "")) {// isAccessSel
@@ -2432,28 +2546,30 @@ CtrlActionTaskManager.addAttrPress = function () {
         }
     }
     let relAccessFrom = $("#relative-selector").val();
-    relAccessFrom = (defined(relAccessFrom) && relAccessFrom !== "0") ? relAccessFrom : "";
+    relAccessFrom = (defined(relAccessFrom) && relAccessFrom !== "0")
+        ? relAccessFrom
+        : "";
     let relAccessTo = "";
     if (relAccessFrom && relAccessFrom !== "") { // is relative access sel
         relAccessTo = "FFFEFFFFFFFFFFFFFFFFFFFF";
     }
 
-    const maxDiffInt = parseInt($("#max-time-diff").val());
+    const maxDiffInt = parseInt($("#max-time-diff").val(), 10);
     let maxDiff = "";
-    const minDiffInt = parseInt($("#min-time-diff").val());
+    const minDiffInt = parseInt($("#min-time-diff").val(), 10);
     let minDiff = "";
-    if (!isNaN(maxDiffInt) || !isNaN(minDiffInt)) { //is time sync
-        if (isNaN(maxDiffInt)) {
+    if (!Number.isNaN(maxDiffInt) || !Number.isNaN(minDiffInt)) { //is time sync
+        if (Number.isNaN(maxDiffInt)) {
             maxDiff = "";
         } else {
             maxDiff = maxDiffInt + "";
         }
-        if (isNaN(minDiffInt)) {
+        if (Number.isNaN(minDiffInt)) {
             minDiff = "";
         } else {
             minDiff = minDiffInt + "";
         }
-        if (!isNaN(minDiffInt) && !isNaN(maxDiffInt) && minDiffInt > maxDiffInt) {
+        if (!Number.isNaN(minDiffInt) && !Number.isNaN(maxDiffInt) && minDiffInt > maxDiffInt) {
             CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
                 AppMain.t("MAXMINDIF_ERROR_TXT", "TASK_MANAGER"));
             return false;
@@ -2473,17 +2589,17 @@ CtrlActionTaskManager.addAttrPress = function () {
 
     CtrlActionTaskManager.addAttrHtml(classID, instaID, attrID, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
         relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
-    if(classID === 4 && attrID === 2){
+    if (classID === 4 && attrID === 2) {
         CtrlActionTaskManager.addAttrHtml(classID, instaID, 4, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
             relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
         CtrlActionTaskManager.addAttrHtml(classID, instaID, 5, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
             relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
     }
-    if(classID === 5 && attrID === 2){
+    if (classID === 5 && attrID === 2) {
         CtrlActionTaskManager.addAttrHtml(classID, instaID, 5, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
             relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
     }
-    if(classID === 5 && attrID === 3){
+    if (classID === 5 && attrID === 3) {
         CtrlActionTaskManager.addAttrHtml(classID, instaID, 5, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
             relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
         CtrlActionTaskManager.addAttrHtml(classID, instaID, 6, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
@@ -2492,8 +2608,10 @@ CtrlActionTaskManager.addAttrPress = function () {
     return true;
 };
 
-CtrlActionTaskManager.addAttrHtml = function(classID, instaID, attrID, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
-                                             relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType){
+CtrlActionTaskManager.addAttrHtml = function (classID, instaID, attrID, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
+                                              relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType) {
+    "use strict";
+
     let devHtml = "<tr>" +
         "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-class='" + classID + "' " +
         "data-node-instance='" + instaID + "' data-node-attr='" + attrID + "' " +
@@ -2520,7 +2638,7 @@ CtrlActionTaskManager.addAttrHtml = function(classID, instaID, attrID, accessFro
         devHtml += "<td></td>";
     }
     devHtml += "</tr>";
-    const body = $('table#cosem-table > tbody');
+    const body = $("table#cosem-table > tbody");
     body.html(body.html() + devHtml);
     CtrlActionTaskManager.hasCossemAttrs = true;
 };
@@ -2530,12 +2648,11 @@ CtrlActionTaskManager.addAttrHtml = function(classID, instaID, attrID, accessFro
  * @param resource
  */
 CtrlActionTaskManager.addResourceXML = function (resource) {
+    "use strict";
 
     const addJson = CtrlActionTaskManager.getResourceJson(resource, undefined);
-
     let responseXML = AppMain.wsMes().getXML(addJson);
-
-    download("data:text/xml;charset=utf-8;base64," + btoa(responseXML), build.device + "_Job_" + moment().format('YYYY-MM-DD-HH-mm-ss') + ".xml", "text/xml");
+    download("data:text/xml;charset=utf-8;base64," + btoa(responseXML), build.device + "_Job_" + moment().format("YYYY-MM-DD-HH-mm-ss") + ".xml", "text/xml");
 };
 
 /**
@@ -2545,20 +2662,20 @@ CtrlActionTaskManager.addResourceXML = function (resource) {
  * @returns {boolean}
  */
 CtrlActionTaskManager.addResourceRest = function (resource, isEdit) {
+    "use strict";
 
     const addJson = CtrlActionTaskManager.getResourceJson(resource, isEdit);
-
     let response = AppMain.wsMes().exec("RequestMessage", addJson).getResponse(false);
-
     if (response && response.ResponseMessage && response.ResponseMessage.Reply && response.ResponseMessage.Reply.Result
         && response.ResponseMessage.Reply.Result.toString() === "OK") {
         CtrlActionTaskManager.exec();
-        if (!isEdit)
+        if (!isEdit) {
             AppMain.dialog("JOB_CREATED", "success", [response.ResponseMessage.Reply.ID.toString()]);
-        else
+        } else {
             AppMain.dialog("JOB_UPDATED", "success", [resource.ID.toString()]);
+        }
     }
-    return true
+    return true;
 };
 /**
  * add resource from XML rest function
@@ -2566,15 +2683,15 @@ CtrlActionTaskManager.addResourceRest = function (resource, isEdit) {
  * @returns {boolean}
  */
 CtrlActionTaskManager.addResourceXMLRest = function (resourceTXT) {
+    "use strict";
 
     let response = AppMain.wsMes().exec("RequestMessage", resourceTXT).getResponse(false);
-
     if (response && response.ResponseMessage && response.ResponseMessage.Reply && response.ResponseMessage.Reply.Result
         && response.ResponseMessage.Reply.Result.toString() === "OK") {
         CtrlActionTaskManager.exec();
         AppMain.dialog("JOB_CREATED", "success", [response.ResponseMessage.Reply.ID.toString()]);
     }
-    return true
+    return true;
 };
 
 /**
@@ -2584,13 +2701,15 @@ CtrlActionTaskManager.addResourceXMLRest = function (resourceTXT) {
  * @returns {{"mes:Header": {"mes:Noun": string, "mes:Verb": string, "mes:CorrelationID": string, "mes:Timestamp": string, "mes:MessageID": string}}}
  */
 CtrlActionTaskManager.getResourceJson = function (resource, isEdit) {
+    "use strict";
+
     let addJson = {
         "mes:Header": {
             "mes:Verb": "create",
             "mes:Noun": "DeviceAccess",
             "mes:Timestamp": moment().toISOString(),
             "mes:MessageID": "78465521",
-            "mes:CorrelationID": "78465521",
+            "mes:CorrelationID": "78465521"
         }
     };
     if (isEdit) {
@@ -2600,14 +2719,16 @@ CtrlActionTaskManager.getResourceJson = function (resource, isEdit) {
                 "mes:Noun": "DeviceAccess",
                 "mes:Timestamp": moment().toISOString(),
                 "mes:MessageID": "78465521",
-                "mes:CorrelationID": "78465521",
+                "mes:CorrelationID": "78465521"
             }
         };
     }
-    if (resource.AsyncReplyFlag && resource.AsyncReplyFlag !== "")
+    if (resource.AsyncReplyFlag && resource.AsyncReplyFlag !== "") {
         addJson["mes:Header"]["mes:AsyncReplyFlag"] = resource.AsyncReplyFlag;
-    if (resource.ReplyAddress && resource.ReplyAddress !== "")
+    }
+    if (resource.ReplyAddress && resource.ReplyAddress !== "") {
         addJson["mes:Header"]["mes:ReplyAddress"] = resource.ReplyAddress;
+    }
 
 
     const xmlMainEl = "mes:Payload";
@@ -2617,7 +2738,7 @@ CtrlActionTaskManager.getResourceJson = function (resource, isEdit) {
     if (isEdit) {
         addJson["mes:Request"] = {};
         addJson["mes:Request"]["mes:ID"] = resource.ID.toString();
-        addJson[xmlMainEl]["mes:DeviceAccess"]["_ID"] = resource.ID.toString();
+        addJson[xmlMainEl]["mes:DeviceAccess"]._ID = resource.ID.toString();
     }
 
     if (!isEdit) {
@@ -2645,14 +2766,15 @@ CtrlActionTaskManager.getResourceJson = function (resource, isEdit) {
             addJson[xmlMainEl]["mes:DeviceAccess"]["dev:CosemAccessList"] = {};
             addJson[xmlMainEl]["mes:DeviceAccess"]["dev:CosemAccessList"]["dev:CosemAccess"] = [];
             $.each(resource.attrs, function (i, elm) {
+                let obj;
                 if (resource.jobService === "time-sync") {
-                    let obj = {
+                    obj = {
                         "dev:CosemAccessDescriptor": {
                             "dev:CosemTimeSync": {
                                 "dev:cosem-object": {
                                     "cos:class-id": elm.cClass,
                                     "cos:instance-id": elm.cInstance,
-                                    "cos:attribute-id": elm.cAttr,
+                                    "cos:attribute-id": elm.cAttr
                                 }
                             }
                         }
@@ -2666,7 +2788,7 @@ CtrlActionTaskManager.getResourceJson = function (resource, isEdit) {
                     addJson[xmlMainEl]["mes:DeviceAccess"]["dev:CosemAccessList"]["dev:CosemAccess"].push(obj);
 
                 } else {
-                    let obj = {};
+                    obj = {};
                     if (resource.jobService === "set") {
                         obj = {
                             "dev:CosemAccessDescriptor": {
@@ -2740,8 +2862,7 @@ CtrlActionTaskManager.getResourceJson = function (resource, isEdit) {
                                     }
                                 };
                                 if (defined(elm.cAccessFrom) && elm.cAccessFrom !== "" && defined(elm.cAccessTo) && elm.cAccessTo !== "") {
-                                    obj["dev:CosemAccessDescriptor"]["dev:CosemXDLMSDescriptor"]["cos:get-request"]["cos:get-request-normal"]
-                                        ["cos:access-selection"] = {
+                                    obj["dev:CosemAccessDescriptor"]["dev:CosemXDLMSDescriptor"]["cos:get-request"]["cos:get-request-normal"]["cos:access-selection"] = {
                                         "cos:access-selector": 1,
                                         "cos:access-parameters": {
                                             "cos:structure": {
@@ -2750,15 +2871,13 @@ CtrlActionTaskManager.getResourceJson = function (resource, isEdit) {
                                                     "cos:integer": 2,
                                                     "cos:long-unsigned": [8, 0]
                                                 },
-                                                "cos:date-time": [
-                                                    elm.cAccessFrom, elm.cAccessTo]
+                                                "cos:date-time": [elm.cAccessFrom, elm.cAccessTo]
                                             }
                                         }
-                                    }
+                                    };
                                 }
                                 if (defined(elm.cRelAccessFrom) && elm.cRelAccessFrom !== "" && defined(elm.cRelAccessTo) && elm.cRelAccessTo !== "") {
-                                    obj["dev:CosemAccessDescriptor"]["dev:CosemXDLMSDescriptor"]["cos:get-request"]["cos:get-request-normal"]
-                                        ["cos:access-selection"] = {
+                                    obj["dev:CosemAccessDescriptor"]["dev:CosemXDLMSDescriptor"]["cos:get-request"]["cos:get-request-normal"]["cos:access-selection"] = {
                                         "cos:access-selector": 1,
                                         "cos:access-parameters": {
                                             "cos:structure": {
@@ -2767,11 +2886,10 @@ CtrlActionTaskManager.getResourceJson = function (resource, isEdit) {
                                                     "cos:integer": 2,
                                                     "cos:long-unsigned": [8, 0]
                                                 },
-                                                "cos:octet-string": [
-                                                    elm.cRelAccessFrom, elm.cRelAccessTo]
+                                                "cos:octet-string": [elm.cRelAccessFrom, elm.cRelAccessTo]
                                             }
                                         }
-                                    }
+                                    };
                                 }
                             }
                         }
@@ -2783,26 +2901,33 @@ CtrlActionTaskManager.getResourceJson = function (resource, isEdit) {
         }
     }
 
-    if (defined(resource.Priority))
+    if (defined(resource.Priority)) {
         addJson[xmlMainEl]["mes:DeviceAccess"]["dev:Priority"] = resource.Priority;
+    }
 
-    if (resource.Expires && resource.Expires !== "")
+    if (resource.Expires && resource.Expires !== "") {
         addJson[xmlMainEl]["mes:DeviceAccess"]["dev:Expires"] = resource.Expires;
+    }
 
-    if (resource.NotOlderThan && resource.NotOlderThan !== "")
+    if (resource.NotOlderThan && resource.NotOlderThan !== "") {
         addJson[xmlMainEl]["mes:DeviceAccess"]["dev:NotOlderThan"] = resource.NotOlderThan;
+    }
 
-    if (resource.AcceptDataNotification && resource.AcceptDataNotification !== "")
+    if (resource.AcceptDataNotification && resource.AcceptDataNotification !== "") {
         addJson[xmlMainEl]["mes:DeviceAccess"]["dev:AcceptDataNotification"] = resource.AcceptDataNotification;
+    }
 
-    if (resource.Activates && resource.Activates !== "")
+    if (resource.Activates && resource.Activates !== "") {
         addJson[xmlMainEl]["mes:DeviceAccess"]["dev:Activates"] = resource.Activates;
+    }
 
-    if (resource.RepeatingInterval && resource.RepeatingInterval !== "")
+    if (resource.RepeatingInterval && resource.RepeatingInterval !== "") {
         addJson[xmlMainEl]["mes:DeviceAccess"]["dev:RepeatingInterval"] = resource.RepeatingInterval;
+    }
 
-    if (resource.Duration && resource.Duration !== "")
+    if (resource.Duration && resource.Duration !== "") {
         addJson[xmlMainEl]["mes:DeviceAccess"]["dev:Duration"] = resource.Duration;
+    }
 
     return addJson;
 };
@@ -2812,10 +2937,12 @@ CtrlActionTaskManager.getResourceJson = function (resource, isEdit) {
  * @param node
  */
 CtrlActionTaskManager.initForm = function (node) {
+    "use strict";
+
     const dateExpires = $("#dateExpires");
     dateExpires.datetimepicker({
         dayOfWeekStart: 1,
-        lang: 'sl',
+        lang: "sl",
         startDate: moment().add(1, "day").format(AppMain.localization("DATETIME_FORMAT")),
         format: AppMain.localization("DATETIME_FORMAT_DATETIMEPICKER")
     });
@@ -2823,7 +2950,7 @@ CtrlActionTaskManager.initForm = function (node) {
     const dateNotOlderThan = $("#dateNotOlderThan");
     dateNotOlderThan.datetimepicker({
         dayOfWeekStart: 1,
-        lang: 'sl',
+        lang: "sl",
         startDate: moment().add(1, "day").format(AppMain.localization("DATETIME_FORMAT")),
         format: AppMain.localization("DATETIME_FORMAT_DATETIMEPICKER")
     });
@@ -2831,24 +2958,26 @@ CtrlActionTaskManager.initForm = function (node) {
     const dateStart = $("#dateStart");
     dateStart.datetimepicker({
         dayOfWeekStart: 1,
-        lang: 'sl',
+        lang: "sl",
         startDate: moment().add(1, "day").format(AppMain.localization("DATETIME_FORMAT")),
         format: AppMain.localization("DATETIME_FORMAT_DATETIMEPICKER")
     });
     if (node !== undefined) {
         $("input[name='priority']").val(node.Priority);
-        if (node.Expires)
+        if (node.Expires) {
             dateExpires.val(moment(node.Expires.toString()).format(AppMain.localization("DATETIME_FORMAT")));
-        if (node.NotOlderThan)
+        }
+        if (node.NotOlderThan) {
             dateNotOlderThan.val(moment(node.NotOlderThan.toString()).format(AppMain.localization("DATETIME_FORMAT")));
+        }
         if (node.AcceptDataNotification && (node.AcceptDataNotification.toString() === "true" || node.AcceptDataNotification === true)) {
-            $('input[name="push-meter-alarms"]').prop('checked', true);
+            $("input[name=\"push-meter-alarms\"]").prop("checked", true);
         }
         if (node.AsyncReplyFlag && (node.AsyncReplyFlag.toString() === "true" || node.AsyncReplyFlag === true)) {
-            $('input[name="async-data-push"]').prop('checked', true);
+            $("input[name=\"async-data-push\"]").prop("checked", true);
         }
         if (node.ReplyAddress) {
-            $("input[name='reply-address']").val(node.ReplyAddress)
+            $("input[name='reply-address']").val(node.ReplyAddress);
         }
         if (node.Activates) {
             dateStart.val(moment(node.Activates.toString()).format(AppMain.localization("DATETIME_FORMAT")));
@@ -2865,6 +2994,8 @@ CtrlActionTaskManager.initForm = function (node) {
  * @param nodesCosemStat
  */
 CtrlActionTaskManager.arrangeNodeCosemStat = function (nodesCosemStat) {
+    "use strict";
+
     this.nodesTitleObj = {};
     let nodesTitle = [];
     if (nodesCosemStat.length === undefined) {
@@ -2887,13 +3018,15 @@ CtrlActionTaskManager.arrangeNodeCosemStat = function (nodesCosemStat) {
  * @returns {Array} array of groups
  */
 CtrlActionTaskManager.getGroups = function () {
+    "use strict";
+
     let response = AppMain.wsMes().exec("RequestMessage", {
         "mes:Header": {
             "mes:Verb": "get",
             "mes:Noun": "DeviceGroup",
             "mes:Timestamp": moment().toISOString(),
             "mes:MessageID": "78465521",
-            "mes:CorrelationID": "78465521",
+            "mes:CorrelationID": "78465521"
         }
     }).getResponse(false);
 
@@ -2905,7 +3038,7 @@ CtrlActionTaskManager.getGroups = function () {
             groups = [groups];
         }
         $.each(groups, function (index, group) {
-            rez.push(group["_GroupID"]);
+            rez.push(group._GroupID);
         });
         return rez;
     }
@@ -2918,19 +3051,21 @@ CtrlActionTaskManager.getGroups = function () {
  * @param callback
  */
 CtrlActionTaskManager.readFileChunks = function (file, callback) {
+    "use strict";
+
     const chunkSize = 256 * 1024; // bytes
     let offset = 0;
-    let chunkReaderBlock = null;
+    let chunkReaderBlock;
     const readEventHandler = function (evt) {
-        if (evt.target.error == null) {
+        if (evt.target.error === null) {
             offset += evt.target.result.length;
             callback(evt.target.result, file); // callback for handling read chunk
         } else {
-            console.log("Read error: " + evt.target.error);
+            dmp("Read error: " + evt.target.error);
             return;
         }
         if (offset >= file.size) {
-            console.log("Done reading file");
+            dmp("Done reading file");
             return;
         }
         chunkReaderBlock(offset, chunkSize, file);
@@ -2950,6 +3085,7 @@ CtrlActionTaskManager.readFileChunks = function (file, callback) {
  */
 
 CtrlActionTaskManager.importClick = function () {
+    "use strict";
 
     let allHtml = AppMain.t("FILE_FOR_IMPORT", "TASK_MANAGER");
     allHtml += "<table class='mdl-data-table table-no-borders' style=\"width: 100%\"><tbody>" +
@@ -2984,10 +3120,9 @@ CtrlActionTaskManager.importClick = function () {
             },
             cancel: {
                 text: AppMain.t("CANCEL", "global"),
-                action:
-                    function () {
-                        return true;
-                    }
+                action: function () {
+                    return true;
+                }
             }
         }
     });
@@ -3005,6 +3140,7 @@ CtrlActionTaskManager.importClick = function () {
         inputElement.addEventListener("change", function () {
 
             let reader = new FileReader();
+            let file = inputElement.files[0];
             reader.onload = function (event) {
                 CtrlActionTaskManager.importXML = event.target.result;
                 inputElement.value = "";
@@ -3012,7 +3148,6 @@ CtrlActionTaskManager.importClick = function () {
                 $("#file-name-span").html(file.name);
                 $(".file-selected").show();
             };
-            let file = inputElement.files[0];
             reader.readAsText(file);
 
         }, false);
@@ -3020,7 +3155,9 @@ CtrlActionTaskManager.importClick = function () {
     }, 250);
 };
 
-CtrlActionTaskManager.getDataPopUp = function(e){
+CtrlActionTaskManager.getDataPopUp = function (e) {
+    "use strict";
+
     const $this = $(e.target);
     let nodeID = $this.attr("data-node-id");
 
@@ -3045,20 +3182,20 @@ CtrlActionTaskManager.getDataPopUp = function(e){
             let allHtml = AppMain.t("INSERT_GET_JOB_PARAMS", "TASK_MANAGER") + "</br>" +
                 "<table class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">"
                 + startHtml + endHtml + lastValidData + "</table>";
-            if(node.DeviceReference || node.GroupReference){
+            if (node.DeviceReference || node.GroupReference) {
                 allHtml += "<table id='devices-table' class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">" +
                     "<thead class=\"th-color-grey text-align-left\">" +
                     "<tr>" +
                     "<th style='width: 30px;padding-left: 18px'><input class=\"selectAllTitles\" name=\"selectAllTitles\" type=\"checkbox\"/></th>";
-                if(node.DeviceReference)
+                if (node.DeviceReference) {
                     allHtml += "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("DEVICE_TITLE", "TASK_MANAGER") + "</th>";
-                else
+                } else {
                     allHtml += "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("GROUP_ID", "TASK_MANAGER") + "</th>";
-                allHtml += "</tr>" +
-                    "</thead><tbody>";
+                }
+                allHtml += "</tr>" + "</thead><tbody>";
 
-                if(node.DeviceReference){
-                    if(!node.DeviceReference.length){
+                if (node.DeviceReference) {
+                    if (!node.DeviceReference.length) {
                         node.DeviceReference = [node.DeviceReference];
                     }
                     $.each(node.DeviceReference, function (index, title) {
@@ -3066,8 +3203,8 @@ CtrlActionTaskManager.getDataPopUp = function(e){
                         allHtml += "<td><input type='checkbox' name='selectTitle' class='selectTitle' data-node-title='" + title._DeviceID + "'/></td>";
                         allHtml += "<td class='deviceTitleTxT'>" + title._DeviceID + "</td>" + "</tr>";
                     });
-                }else {
-                    if(!node.GroupReference.length){
+                } else {
+                    if (!node.GroupReference.length) {
                         node.GroupReference = [node.GroupReference];
                     }
                     $.each(node.GroupReference, function (index, title) {
@@ -3093,26 +3230,27 @@ CtrlActionTaskManager.getDataPopUp = function(e){
                                 id: nodeID
                             };
                             const startTime = $("#dateStart").val();
-                            if(startTime !== ""){
+                            if (startTime !== "") {
                                 getDataObj.startTime = moment(startTime).toISOString();
                             }
                             const endTime = $("#dateEnd").val();
-                            if(endTime !== ""){
+                            if (endTime !== "") {
                                 getDataObj.endTime = moment(endTime).toISOString();
                             }
-                            if($('input[name="last-valid-data"]:checked').length > 0)
+                            if ($("input[name=\"last-valid-data\"]:checked").length > 0) {
                                 getDataObj.lastValidData = true;
+                            }
 
                             getDataObj.deviceReference = [];
                             getDataObj.groupReference = [];
                             let inputC = $("input[name='selectTitle']:checked");
                             inputC.each(function (i, elm) {
                                 const element = $(elm);
-                                if(node.DeviceReference){
+                                if (node.DeviceReference) {
                                     getDataObj.deviceReference.push({
                                         "_DeviceID": element.attr("data-node-title")
                                     });
-                                }else{
+                                } else {
                                     getDataObj.groupReference.push({
                                         "_GroupID": element.attr("data-node-title")
                                     });
@@ -3123,10 +3261,9 @@ CtrlActionTaskManager.getDataPopUp = function(e){
                     },
                     cancel: {
                         text: AppMain.t("CANCEL", "global"),
-                        action:
-                            function () {
-                                return true;
-                            }
+                        action: function () {
+                            return true;
+                        }
                     }
                 }
             });
@@ -3137,14 +3274,14 @@ CtrlActionTaskManager.getDataPopUp = function(e){
         const dateStart = $("#dateStart");
         dateStart.datetimepicker({
             dayOfWeekStart: 1,
-            lang: 'sl',
+            lang: "sl",
             startDate: moment().add(-1, "day").format(AppMain.localization("DATETIME_FORMAT")),
             format: AppMain.localization("DATETIME_FORMAT_DATETIMEPICKER")
         });
         const dateEnd = $("#dateEnd");
         dateEnd.datetimepicker({
             dayOfWeekStart: 1,
-            lang: 'sl',
+            lang: "sl",
             startDate: moment().format(AppMain.localization("DATETIME_FORMAT")),
             format: AppMain.localization("DATETIME_FORMAT_DATETIMEPICKER")
         });
@@ -3167,43 +3304,45 @@ CtrlActionTaskManager.getDataPopUp = function(e){
                 input[0].click();
             }
         });
-    },200);
+    }, 200);
 
 };
 
-CtrlActionTaskManager.getJobDataRest = function(getDataObj){
+CtrlActionTaskManager.getJobDataRest = function (getDataObj) {
+    "use strict";
+
     let restObj = {
         "mes:Header": {
             "mes:Verb": "get",
             "mes:Noun": "DeviceAccess",
             "mes:Timestamp": moment().toISOString(),
             "mes:MessageID": "78465521",
-            "mes:CorrelationID": "78465521",
+            "mes:CorrelationID": "78465521"
         },
-        "mes:Request":{
-            "mes:ID" : getDataObj.id
+        "mes:Request": {
+            "mes:ID": getDataObj.id
         },
-        "mes:Payload":{
-            "mes:DeviceAccess":{
-                "dev:DevicesReferenceList":{}
+        "mes:Payload": {
+            "mes:DeviceAccess": {
+                "dev:DevicesReferenceList": {}
             }
         }
     };
-    if(getDataObj.startTime){
+    if (getDataObj.startTime) {
         restObj["mes:Request"]["mes:StartTime"] = getDataObj.startTime;
     }
-    if(getDataObj.endTime){
+    if (getDataObj.endTime) {
         restObj["mes:Request"]["mes:EndTime"] = getDataObj.endTime;
     }
-    if(getDataObj.lastValidData){
+    if (getDataObj.lastValidData) {
         restObj["mes:Request"]["mes:LastValidData"] = "true";
     }
 
-    if(getDataObj.deviceReference.length > 0){
-        restObj["mes:Payload"]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:DeviceReference"] = getDataObj.deviceReference
+    if (getDataObj.deviceReference.length > 0) {
+        restObj["mes:Payload"]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:DeviceReference"] = getDataObj.deviceReference;
     }
-    if(getDataObj.groupReference > 0){
-        restObj["mes:Payload"]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:GroupReference"] = getDataObj.deviceReference
+    if (getDataObj.groupReference > 0) {
+        restObj["mes:Payload"]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:GroupReference"] = getDataObj.deviceReference;
     }
 
     let response = AppMain.wsMes().exec("RequestMessage", restObj).getResponse(true);
@@ -3211,7 +3350,7 @@ CtrlActionTaskManager.getJobDataRest = function(getDataObj){
     response = vkbeautify.xml(new XMLSerializer().serializeToString(response), 2);
 
     download("data:text/xml;charset=utf-8;base64," + btoa(response), build.device + "_JobData_ID_" + getDataObj.id + "_" +
-        moment().format('YYYY-MM-DD-HH-mm-ss') + ".xml", "text/xml");
+        moment().format("YYYY-MM-DD-HH-mm-ss") + ".xml", "text/xml");
 
     return true;
 };
