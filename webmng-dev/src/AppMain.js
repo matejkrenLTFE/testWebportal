@@ -378,8 +378,8 @@ global.AppMain = function (conf) {
      * @return {Object} initialized component.
      */
     this.getAppComponent = function (componentName) {
-        if (defined(this[componentName])) {
-            return this[componentName];
+        if (defined(this[`${componentName}`])) {
+            return this[`${componentName}`];
         }
         throw "AppMain: call to non-existing component " + componentName;
     };
