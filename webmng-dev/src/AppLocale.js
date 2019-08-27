@@ -92,7 +92,7 @@ module.exports.AppLocale = function (loc) {
             }
         } else {
             string = (defined(langStrings[context]) && defined(langStrings[context][string]))
-                ? langStrings[context][string]
+                ? langStrings[`${context}`][`${string}`]
                 : string;
         }
 

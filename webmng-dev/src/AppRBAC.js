@@ -44,7 +44,7 @@ module.exports.AppRBAC = function () {
                 const rbacCategory = rbacSelector[0];
                 const rbacParam = rbacSelector[1];
                 if (defined(rbac[rbacCategory]) && defined(rbac[rbacCategory][rbacParam])
-                        && (rbac[rbacCategory][rbacParam].toLowerCase() === "r" || rbac[rbacCategory][rbacParam].toLowerCase() === "h")) {
+                        && (rbac[`${rbacCategory}`][`${rbacParam}`].toLowerCase() === "r" || rbac[`${rbacCategory}`][`${rbacParam}`].toLowerCase() === "h")) {
                     const rbacSelectorReplace = "data-rbac-element=\"" + rbacCategory + "." + rbacParam + "\"";
                     content = content.replace(new RegExp(rbacSelectorReplace, "gi"), rbacSelectorReplace + " disabled ");
                 }

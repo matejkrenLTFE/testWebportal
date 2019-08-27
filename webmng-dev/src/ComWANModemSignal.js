@@ -134,8 +134,8 @@ ComWANModemSignal.getBitStatus = function (statusCode) {
         "31": "Reserved31"
     };
     dmp(statusCode);
-    return defined(status[statusCode])
-        ? status[statusCode]
+    return defined(status[`${statusCode}`])
+        ? status[`${statusCode}`]
         : "Unknown";
 };
 

@@ -249,8 +249,8 @@ CtrlActionNetwork.buildNodesAndLinks = function (routing) {
                 }
             });
         } else {
-            CtrlActionNetwork.nodes[destAddInd].data.hopCount = route["hop-count"];
-            CtrlActionNetwork.nodes[destAddInd].data.routeCost = route["route-cost"];
+            CtrlActionNetwork.nodes[`${destAddInd}`].data.hopCount = route["hop-count"];
+            CtrlActionNetwork.nodes[`${destAddInd}`].data.routeCost = route["route-cost"];
         }
         let nextHopAddInd = CtrlActionNetwork.nodesTmp.indexOf(nextHopAdd);
         if (nextHopAddInd === -1) {
@@ -317,7 +317,7 @@ CtrlActionNetwork.showHoverTooltip = function (node) {
     if (pathRouting && pathRouting.length) {
         path = "";
         pathRouting.forEach(function (value, i) {
-            path += CtrlActionNetwork.nodesTmp[value];
+            path += CtrlActionNetwork.nodesTmp[`${value}`];
             if (i !== pathRouting.length - 1) {
                 path += ", ";
             }
@@ -575,7 +575,7 @@ CtrlActionNetwork.checkForExistingData = function (nodes) {
             if (CtrlActionNetwork.nodesData[node["mac-address"]] && CtrlActionNetwork.nodesData[node["mac-address"]]["meter-id"]) {
                 nodeTitle = CtrlActionNetwork.nodesData[node["mac-address"]]["meter-id"].toString();
             }
-            CtrlActionNetwork.nodesInfo[shortAddress] = {
+            CtrlActionNetwork.nodesInfo[`${shortAddress}`] = {
                 ipAddress: node["ip-address"],
                 macAddress: node["mac-address"],
                 nodeState: node["node-state"],
@@ -616,8 +616,8 @@ CtrlActionNetwork.checkForExistingData = function (nodes) {
                             if (edgeInd === -1) { //nova povezava
                                 CtrlActionNetwork.addEdge(startInd, toInd, 1, 1);
                             } else { // samo spremenimo tip povezave
-                                CtrlActionNetwork.edges[edgeInd].data.type = 1;
-                                CtrlActionNetwork.edges[edgeInd].data.edgeDistanceType = 1;
+                                CtrlActionNetwork.edges[`${edgeInd}`].data.type = 1;
+                                CtrlActionNetwork.edges[`${edgeInd}`].data.edgeDistanceType = 1;
                             }
                             pathArr.push(toInd);
                             startInd = toInd;

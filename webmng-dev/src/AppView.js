@@ -161,18 +161,18 @@ module.exports.AppView = function () {
         //dmp(viewContent);
         $.each(placeholderData, function (placeholder) {
             let replace = "";
-            if (typeof placeholderData[placeholder] === "object") {
-                $.each(placeholderData[placeholder], function (property) {
+            if (typeof placeholderData[`${placeholder}`] === "object") {
+                $.each(placeholderData[`${placeholder}`], function (property) {
                     replace = "$" + placeholder + "." + property + "$";
                     viewContent = viewContent.replace(replace, (_this.renderEmptyTemplate && replace.indexOf("$_") < 0)
                         ? _this.emptyValuePlaceholder
-                        : placeholderData[placeholder][property]);
+                        : placeholderData[`${placeholder}`][`${property}`]);
                 });
             } else {
                 replace = "$" + placeholder + "$";
                 viewContent = viewContent.replace(replace, (_this.renderEmptyTemplate && replace.indexOf("$_") < 0)
                     ? _this.emptyValuePlaceholder
-                    : placeholderData[placeholder]);
+                    : placeholderData[`${placeholder}`]);
 
             }
         });

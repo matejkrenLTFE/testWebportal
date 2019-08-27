@@ -473,11 +473,11 @@ CtrlActionNodes.getNodeInfoTitle = function (e) {
         html += "<tr class='nodeListShowDetails id_" + randomId + "'>";
 
         html += "<td colspan='3'>" + AppMain.t("UNSUCCESSFUL_COMMUNICATIONS", "NODES") + "</td>";
-        html += "<td colspan='2'>" + this.nodesCosemStat[nodeMac]["unsuccessful-communications"] + "</td><td></td>";
+        html += "<td colspan='2'>" + this.nodesCosemStat[`${nodeMac}`]["unsuccessful-communications"] + "</td><td></td>";
 
         html += "<td colspan='2'>" + AppMain.t("LAST_UNSUCC_COMM_TIME", "NODES") + "</td>";
-        if (this.nodesCosemStat[nodeMac]["last-unsuccessful-communication"] && this.nodesCosemStat[nodeMac]["last-unsuccessful-communication"].toString() !== "0") {
-            html += "<td>" + moment(this.nodesCosemStat[nodeMac]["last-unsuccessful-communication"].toString()).format(AppMain.localization("DATETIME_FORMAT")) + "</td><td></td>";
+        if (this.nodesCosemStat[nodeMac]["last-unsuccessful-communication"] && this.nodesCosemStat[`${nodeMac}`]["last-unsuccessful-communication"].toString() !== "0") {
+            html += "<td>" + moment(this.nodesCosemStat[`${nodeMac}`]["last-unsuccessful-communication"].toString()).format(AppMain.localization("DATETIME_FORMAT")) + "</td><td></td>";
         } else {
             html += "<td>---</td><td></td>";
         }

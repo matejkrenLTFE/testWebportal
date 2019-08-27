@@ -89,7 +89,7 @@ CtrlActionNANPlc.exportParams = function () {
                 } else {
                     xml += "<" + index + ">";
                     key = Object.keys(value)[0];
-                    xml += "<" + key + ">" + value[key] + "</" + key + ">\n";
+                    xml += "<" + key + ">" + value[`${key}`] + "</" + key + ">\n";
                     xml += "</" + index + ">\n";
                 }
             } else {
