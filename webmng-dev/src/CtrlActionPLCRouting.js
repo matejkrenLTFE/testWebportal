@@ -2,7 +2,7 @@
  * @class CtrlActionPLCRouting Controller action using IControllerAction interface.
  */
 
-/* global AppMain, $ */
+/* global AppMain, $, dmp */
 /* jshint maxstatements: false */
 /* jslint browser:true, node:true*/
 /* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
@@ -28,7 +28,7 @@ CtrlActionPLCRouting.exec = function () {
     try {
         routing = AppMain.ws().exec("PlcRoutingTableGet", undefined).getResponse(false);
     } catch (e) {
-        console.log("err: PlcRoutingTableGet" + e.toString());
+        dmp("err: PlcRoutingTableGet" + e.toString());
     }
 
     let list = this.buildNeighborListHTML(routing);
