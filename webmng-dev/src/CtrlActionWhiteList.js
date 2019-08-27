@@ -369,20 +369,19 @@ CtrlActionWhiteList.addWhiteList = function () {
                                 && mac5.length === 2 && mac6.length === 2 && mac7.length === 2 && mac8.length === 2) {
                             CtrlActionWhiteList.exportNodeList(mac1 + ":" + mac2 + ":" + mac3 + ":" + mac4 + ":" + mac5 + ":" + mac6 + ":" + mac7 + ":" + mac8);
                             return true;
-                        } else {
-                            $.alert({
-                                title: AppMain.t("ERROR", "global"),
-                                content: AppMain.t("WHITE_LIST_ADD_ERR", "WHITE_LIST"),
-                                useBootstrap: false,
-                                theme: "material",
-                                buttons: {
-                                    confirm: {
-                                        text: AppMain.t("OK", "global")
-                                    }
-                                }
-                            });
-                            return false;
                         }
+                        $.alert({
+                            title: AppMain.t("ERROR", "global"),
+                            content: AppMain.t("WHITE_LIST_ADD_ERR", "WHITE_LIST"),
+                            useBootstrap: false,
+                            theme: "material",
+                            buttons: {
+                                confirm: {
+                                    text: AppMain.t("OK", "global")
+                                }
+                            }
+                        });
+                        return false;
                     }
                     if (radio === "input-import") {  // add from attached
                         if ($("#file-selected").is(":visible")) {

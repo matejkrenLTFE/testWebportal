@@ -1,4 +1,8 @@
 const List = require("list.js");
+/* global AppMain */
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
 
 /**
  * @class IControllerAction Action component interface
