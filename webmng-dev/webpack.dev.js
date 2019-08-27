@@ -1,5 +1,7 @@
-const webpack = require('webpack');
-const path = require('path');
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+const path = require("path");
 
 /*
  * SplitChunksPlugin is enabled by default and replaced
@@ -22,70 +24,56 @@ const path = require('path');
  *
  */
 
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+// const UglifyJSPlugin = require("uglifyjs-webpack-plugin");
 
 module.exports = {
-	module: {
-		rules: [
-			{
-				include: [path.resolve(__dirname, 'src')],
-				loader: 'babel-loader',
+    module: {
+        rules: [{
+            include: [path.resolve(__dirname, "src")],
+            loader: "babel-loader",
+            options: {
+                plugins: ["syntax-dynamic-import"],
+                presets: [
+                    ["@babel/preset-env", {
+                        modules: false
+                    }]
+                ]
+            },
+            test: /\.js$/
+        }, {
+            test: /\.css$/,
+            use: [
+                {
+                    loader: "style-loader",
+                    options: {
+                        sourceMap: true
+                    }
+                }, {
+                    loader: "css-loader"
+                }
+            ]
+        }]
+    },
+    output: {
+        chunkFilename: "[name].[chunkhash].js",
+        filename: "[name].[chunkhash].js",
+        path: path.resolve(__dirname, "webmng")
+    },
+    mode: "development",
 
-				options: {
-					plugins: ['syntax-dynamic-import'],
+    optimization: {
+        splitChunks: {
+            cacheGroups: {
+                vendors: {
+                    priority: -10,
+                    test: /[\\\/]node_modules[\\\/]/
+                }
+            },
 
-					presets: [
-						[
-							'@babel/preset-env',
-							{
-								modules: false
-							}
-						]
-					]
-				},
-
-				test: /\.js$/
-			},
-			{
-				test: /\.css$/,
-
-				use: [
-					{
-						loader: 'style-loader',
-
-						options: {
-							sourceMap: true
-						}
-					},
-					{
-						loader: 'css-loader'
-					}
-				]
-			}
-		]
-	},
-
-	output: {
-		chunkFilename: '[name].[chunkhash].js',
-		filename: '[name].[chunkhash].js',
-		path: path.resolve(__dirname, 'webmng')
-	},
-
-	mode: 'development',
-
-	optimization: {
-		splitChunks: {
-			cacheGroups: {
-				vendors: {
-					priority: -10,
-					test: /[\\/]node_modules[\\/]/
-				}
-			},
-
-			chunks: 'async',
-			minChunks: 1,
-			minSize: 30000,
-			name: true
-		}
-	}
+            chunks: "async",
+            minChunks: 1,
+            minSize: 30000,
+            name: true
+        }
+    }
 };
