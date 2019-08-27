@@ -127,7 +127,7 @@ CtrlActionNodes.exec = function () {
 
     const ctx2 = document.getElementById("chart_attached").getContext("2d");
 
-    Chart(ctx2, {
+    new Chart(ctx2, {
         type: "doughnut",
         data: data,
         options: {
