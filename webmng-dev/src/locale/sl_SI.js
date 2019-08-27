@@ -1,5 +1,9 @@
-var sl_SI = {
-    "Dashboard" : "Nadzorna plošča",
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
+const sl_SI = {
+    "Dashboard": "Nadzorna plošča",
     "Nodes": "Števci",
     "PLC Nodes": "PLC števci",
     "Alarms & Events": "Alarmi in dogodki",
@@ -9,14 +13,14 @@ var sl_SI = {
     "Username": "Uporabnik",
     "Password": "Geslo",
     "Reset statistics": "Osveži statistiko",
-    "Active":"Aktivni",
+    "Active": "Aktivni",
     "Events": "Alarmi in dogodki",
     "MAC address": "MAC naslov",
     mainmenu: {
-        "System" : "Sistemske nastavitve"
+        "System": "Sistemske nastavitve"
     },
     dialog: {
-        "Fetching nodes ..." : "Fečam noude"
+        "Fetching nodes ...": "Fečam noude"
     },
     // DateTime localization
     localization: {

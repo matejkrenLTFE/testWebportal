@@ -1,33 +1,40 @@
+/* global CtrlActionNetwork */
+/*jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
 const cyOptions = {
-    container: $('#network-graph'),
+    container: $("#network-graph"),
     boxSelectionEnabled: false,
     autounselectify: true,
     layout: {
-        name: 'cose',
+        name: "cose",
         animate: true,
         nodeDimensionsIncludeLabels: false,
         idealEdgeLength: function (e) {
+            "use strict";
             switch (e.type) {
-                case 1:
-                    return 200;
-                case 2:
-                    return 350;
-                case 3:
-                    return 400;
-                default:
-                    return 500;
+            case 1:
+                return 200;
+            case 2:
+                return 350;
+            case 3:
+                return 400;
+            default:
+                return 500;
             }
         },
         edgeElasticity: function (e) {
+            "use strict";
             switch (e.type) {
-                case 1:
-                    return 20;
-                case 2:
-                    return 3;
-                case 3:
-                    return 4;
-                default:
-                    return 50;
+            case 1:
+                return 20;
+            case 2:
+                return 3;
+            case 3:
+                return 4;
+            default:
+                return 50;
             }
         },
         nodeOverlap: 30,
@@ -45,7 +52,8 @@ const cyOptions = {
         coolingFactor: 0.95,
         minTemp: 1.0,
         stop: function () {
-            CtrlActionNetwork.cv.centre(CtrlActionNetwork.cv.$('#0'));
+            "use strict";
+            CtrlActionNetwork.cv.centre(CtrlActionNetwork.cv.$("#0"));
         }
     }
 };

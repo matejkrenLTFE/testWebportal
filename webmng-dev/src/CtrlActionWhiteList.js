@@ -36,13 +36,18 @@ CtrlActionWhiteList.exec = function () {
     }).getResponse(false);
 
     this.params = AppMain.ws().exec("GetParameters", {"plc": ""}).getResponse(false);
-    this.params = defined(this.params.GetParametersResponse.plc) ? this.params.GetParametersResponse.plc : {};
+    this.params = defined(this.params.GetParametersResponse.plc)
+        ? this.params.GetParametersResponse.plc
+        : {};
     let list = {};
     let tooltipHtml = "";
 
-    this.nodes = (this.nodes.GetNodeListResponse.node instanceof Array) ? this.nodes.GetNodeListResponse.node : this.nodes.GetNodeListResponse;
-    if (this.nodes.__prefix !== undefined)
+    this.nodes = (Object.prototype.toString.call(this.nodes.GetNodeListResponse.node) === "[object Array]")
+        ? this.nodes.GetNodeListResponse.node
+        : this.nodes.GetNodeListResponse;
+    if (this.nodes.__prefix !== undefined) {
         delete this.nodes.__prefix;
+    }
 
     //fix for white list length of 1
     if (this.params["white-list"] !== undefined && typeof this.params["white-list"]["mac-address"] === "string") {
@@ -53,10 +58,10 @@ CtrlActionWhiteList.exec = function () {
         $.each(this.params["white-list"]["mac-address"], function (index, node) {
             CtrlActionWhiteList.whiteListArr.push(node);
         });
-        list = this._buildNodeListHTML(this, this.nodes, this.params["white-list"]["mac-address"]);
-        tooltipHtml = this.htmlTooltips(this, this.nodes, this.params["white-list"]["mac-address"]);
+        list = this.buildNodeListHTML(this.nodes, this.params["white-list"]["mac-address"]);
+        tooltipHtml = this.htmlTooltips(this.nodes, this.params["white-list"]["mac-address"]);
     } else {
-        list = this._buildNodeListHTML(this, this.nodes, []);
+        list = this.buildNodeListHTML(this.nodes, []);
     }
 
     this.view.render("WhiteList#WhiteList", {
@@ -77,7 +82,7 @@ CtrlActionWhiteList.exec = function () {
         },
         elements: {
             useWhiteList: AppMain.html.formElementSwitch("use-white-list", "true", {
-                checked: this._getWhiteListStatus(this.params),
+                checked: this.getWhiteListStatus(this.params),
                 labelClass: "useWhiteListClass",
                 inputAttr: {
                     "data-bind-event": "click",
@@ -97,11 +102,12 @@ CtrlActionWhiteList.exec = function () {
     this.initTable("whiteNodesList", "whiteNodesList", tableOptions);
     this.initSelectAll("selectAllNodes");
 
-    $("[name='use-white-list']").val(CtrlActionWhiteList._getWhiteListStatus(this.params));
+    $("[name='use-white-list']").val(CtrlActionWhiteList.getWhiteListStatus(this.params));
     AppMain.html.updateElements([".mdl-textfield", ".mdl-js-switch"]);
 };
 
-CtrlActionWhiteList._getWhiteListStatus = function (params) {
+CtrlActionWhiteList.getWhiteListStatus = function (params) {
+    "use strict";
     return (params["use-white-list"] === "true" && params["acl-auto-add-mode"] === "false");
 };
 
@@ -109,7 +115,8 @@ CtrlActionWhiteList._getWhiteListStatus = function (params) {
  * Build HTML nodes table.
  * @return {Object} {htmlNodes, totalNodes}
  */
-CtrlActionWhiteList._buildNodeListHTML = function (_this, nodes, whiteList) {
+CtrlActionWhiteList.buildNodeListHTML = function (nodes, whiteList) {
+    "use strict";
     let list = {totalNodes: 0, htmlNodes: ""};
 
     let i = 1;
@@ -119,15 +126,15 @@ CtrlActionWhiteList._buildNodeListHTML = function (_this, nodes, whiteList) {
             whiteList.splice(ind, 1);
             list.htmlNodes += "<tr>";
             list.htmlNodes += "<td class='mdl-data-table__cell--non-numeric checkbox-col'>" +
-                "<input type='checkbox' name='selectNode' class='selectNode' " +
-                "data-node-id='" + i + "'" +
-                " data-node-mac='" + node["mac-address"] + "'" +
-                " data-node-ip='" + node["ip-address"] + "'" +
-                "/></td>";
+                    "<input type='checkbox' name='selectNode' class='selectNode' " +
+                    "data-node-id='" + i + "'" +
+                    " data-node-mac='" + node["mac-address"] + "'" +
+                    " data-node-ip='" + node["ip-address"] + "'" +
+                    "/></td>";
             list.htmlNodes += "<td class='mdl-data-table__cell--non-numeric mac-address'>" + node["mac-address"] + "</td>";
             list.htmlNodes += "<td class='mdl-data-table__cell--non-numeric ip-address'>" + node["ip-address"] + "</td>";
             list.htmlNodes += "</tr>";
-            i++;
+            i += 1;
         }
     });
 
@@ -135,16 +142,16 @@ CtrlActionWhiteList._buildNodeListHTML = function (_this, nodes, whiteList) {
     $.each(whiteList, function (index, node) {
         list.htmlNodes += "<tr>";
         list.htmlNodes += "<td class='mdl-data-table__cell--non-numeric checkbox-col'>" +
-            "<input type='checkbox' name='selectNode' class='selectNode' " +
-            "data-node-id='" + i + "'" +
-            " data-node-mac='" + node + "'" +
-            " data-node-ip='---'" +
-            "/></td>";
+                "<input type='checkbox' name='selectNode' class='selectNode' " +
+                "data-node-id='" + i + "'" +
+                " data-node-mac='" + node + "'" +
+                " data-node-ip='---'" +
+                "/></td>";
         // list.htmlNodes += "<td style=\"text-align: left!important;\" >"+i+"."+"</td>";
         list.htmlNodes += "<td class='mdl-data-table__cell--non-numeric '>" + node + "</td>";
         list.htmlNodes += "<td class='mdl-data-table__cell--non-numeric '> --- </td>";
         list.htmlNodes += "</tr>";
-        i++;
+        i += 1;
     });
 
     list.totalNodes = i - 1;
@@ -155,6 +162,7 @@ CtrlActionWhiteList._buildNodeListHTML = function (_this, nodes, whiteList) {
 };
 
 CtrlActionWhiteList.setWhiteList = function (arr) {
+    "use strict";
     const client = AppMain.ws();
     client.xmlSetElement("plc");
     client.xmlSetElement("white-list");
@@ -167,13 +175,15 @@ CtrlActionWhiteList.setWhiteList = function (arr) {
     if (defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK") {
         AppMain.dialog("SUCC_UPDATED", "success");
         this.exec();
-    } else
+    } else {
         AppMain.dialog("Error occurred: " + response.SetParametersResponse.toString(), "error");
+    }
 
     AppMain.html.updateElements(["#macinput", ".mdl-js-switch"]);
 };
 
-CtrlActionWhiteList.__exportNodeList = function (newMac) {
+CtrlActionWhiteList.exportNodeList = function (newMac) {
+    "use strict";
 
     let whitelistArr = this.whiteListArr.slice();
     whitelistArr.push(newMac);
@@ -181,11 +191,13 @@ CtrlActionWhiteList.__exportNodeList = function (newMac) {
 };
 
 
-CtrlActionWhiteList.__exportNodeListArr = function () {
+CtrlActionWhiteList.exportNodeListArr = function () {
+    "use strict";
     CtrlActionWhiteList.setWhiteList(this.export);
 };
 
 CtrlActionWhiteList.removeMac = function (e) {
+    "use strict";
     const $this = $(e.target);
     const mac = $this.attr("data-node-mac");
     const ind = this.whiteListArr.indexOf(mac);
@@ -197,6 +209,7 @@ CtrlActionWhiteList.removeMac = function (e) {
 };
 
 CtrlActionWhiteList.useWhiteListConfirm = function () {
+    "use strict";
     const switchButton = document.querySelector(".mdl-js-switch").MaterialSwitch;
     const enabled = $("[name='enable']").val() === "true";
 
@@ -209,26 +222,27 @@ CtrlActionWhiteList.useWhiteListConfirm = function () {
             confirm: {
                 text: AppMain.t("OK", "global"),
                 action: function () {
-                    CtrlActionWhiteList.__useWhiteList();
+                    CtrlActionWhiteList.useWhiteList();
                     return true;
                 }
             },
             cancel: {
                 text: AppMain.t("CANCEL", "global"),
-                action:
-                    function () {
-                        if (enabled)
-                            switchButton.on();
-                        else
-                            switchButton.off();
-                        return true;
+                action: function () {
+                    if (enabled) {
+                        switchButton.on();
+                    } else {
+                        switchButton.off();
                     }
+                    return true;
+                }
             }
         }
     });
 };
 
-CtrlActionWhiteList.__useWhiteList = function () {
+CtrlActionWhiteList.useWhiteList = function () {
+    "use strict";
     const sw = $("[name='use-white-list']");
     const switchButton = document.querySelector(".mdl-js-switch").MaterialSwitch;
     const enabled = sw.val() === "true";
@@ -251,15 +265,17 @@ CtrlActionWhiteList.__useWhiteList = function () {
     const p = client.xmlGetStructure();
     const response = client.exec("SetParameters", p).getResponse(false);
 
-    if (defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK")
+    if (defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK") {
         AppMain.dialog("SUCC_UPDATED", "success");
-    else
+    } else {
         AppMain.dialog("Error occurred: " + response.SetParametersResponse.toString(), "error");
+    }
 
     AppMain.html.updateElements(["#macinput", ".mdl-js-switch"]);
 };
 
 CtrlActionWhiteList.addWhiteList = function () {
+    "use strict";
     let selObj = {};
     $.each(this.nodes, function (index, node) {
         selObj["'" + node["mac-address"] + "'"] = node["mac-address"];
@@ -271,59 +287,59 @@ CtrlActionWhiteList.addWhiteList = function () {
     let selectRow = "";
     if (this.nodes.length > 0) {
         selectRow = "<tr>\n    " +
-            "<td class=\"mdl-data-table__cell--non-numeric\">\n        " +
-            "<label class=\"mdl-radio mdl-js-radio\" for=\"input-type\">\n            " +
-            "<input type=\"radio\" value='input-attached' id=\"input-attached\" name=\"input-type\" class=\"mdl-radio__button\" checked>\n        " +
-            "</label>\n    " +
-            "</td>\n    " +
-            "<td>\n        " +
-            AppMain.t("SELECT_FROM_ATTACHED", "WHITE_LIST") + selectHTML +
-            "</td>\n" +
-            "</tr>";
+                "<td class=\"mdl-data-table__cell--non-numeric\">\n        " +
+                "<label class=\"mdl-radio mdl-js-radio\" for=\"input-type\">\n            " +
+                "<input type=\"radio\" value='input-attached' id=\"input-attached\" name=\"input-type\" class=\"mdl-radio__button\" checked>\n        " +
+                "</label>\n    " +
+                "</td>\n    " +
+                "<td>\n        " +
+                AppMain.t("SELECT_FROM_ATTACHED", "WHITE_LIST") + selectHTML +
+                "</td>\n" +
+                "</tr>";
     }
     const macRow = "<tr>\n    " +
-        "<td class=\"mdl-data-table__cell--non-numeric\">\n        " +
-        "<label class=\"mdl-radio mdl-js-radio\" for=\"input-type\">\n            " +
-        "<input type=\"radio\" value='input-mac' id=\"input-mac\" name=\"input-type\" class=\"mdl-radio__button\">\n        " +
-        "</label>\n    " +
-        "</td>\n    " +
-        "<td>\n    " +
-        AppMain.t("SELECT_FROM_MAC", "WHITE_LIST") +
-        "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mac-input\"><input  class=\"mdl-textfield__input\" type=\"text\" name=\"mac1\" maxlength=\"2\"/></div> : " +
-        "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mac-input\"><input  class=\"mdl-textfield__input\" type=\"text\" name=\"mac2\" maxlength=\"2\"/></div> : " +
-        "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mac-input\"><input  class=\"mdl-textfield__input\" type=\"text\" name=\"mac3\" maxlength=\"2\"/></div> : " +
-        "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mac-input\"><input  class=\"mdl-textfield__input\" type=\"text\" name=\"mac4\" maxlength=\"2\"/></div> : " +
-        "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mac-input\"><input  class=\"mdl-textfield__input\" type=\"text\" name=\"mac5\" maxlength=\"2\"/></div> : " +
-        "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mac-input\"><input  class=\"mdl-textfield__input\" type=\"text\" name=\"mac6\" maxlength=\"2\"/></div> : " +
-        "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mac-input\"><input  class=\"mdl-textfield__input\" type=\"text\" name=\"mac7\" maxlength=\"2\"/></div> : " +
-        "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mac-input\"><input  class=\"mdl-textfield__input\" type=\"text\" name=\"mac8\" maxlength=\"2\"/></div>" +
-        "</td>" +
-        "</tr>";
+            "<td class=\"mdl-data-table__cell--non-numeric\">\n        " +
+            "<label class=\"mdl-radio mdl-js-radio\" for=\"input-type\">\n            " +
+            "<input type=\"radio\" value='input-mac' id=\"input-mac\" name=\"input-type\" class=\"mdl-radio__button\">\n        " +
+            "</label>\n    " +
+            "</td>\n    " +
+            "<td>\n    " +
+            AppMain.t("SELECT_FROM_MAC", "WHITE_LIST") +
+            "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mac-input\"><input  class=\"mdl-textfield__input\" type=\"text\" name=\"mac1\" maxlength=\"2\"/></div> : " +
+            "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mac-input\"><input  class=\"mdl-textfield__input\" type=\"text\" name=\"mac2\" maxlength=\"2\"/></div> : " +
+            "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mac-input\"><input  class=\"mdl-textfield__input\" type=\"text\" name=\"mac3\" maxlength=\"2\"/></div> : " +
+            "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mac-input\"><input  class=\"mdl-textfield__input\" type=\"text\" name=\"mac4\" maxlength=\"2\"/></div> : " +
+            "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mac-input\"><input  class=\"mdl-textfield__input\" type=\"text\" name=\"mac5\" maxlength=\"2\"/></div> : " +
+            "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mac-input\"><input  class=\"mdl-textfield__input\" type=\"text\" name=\"mac6\" maxlength=\"2\"/></div> : " +
+            "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mac-input\"><input  class=\"mdl-textfield__input\" type=\"text\" name=\"mac7\" maxlength=\"2\"/></div> : " +
+            "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mac-input\"><input  class=\"mdl-textfield__input\" type=\"text\" name=\"mac8\" maxlength=\"2\"/></div>" +
+            "</td>" +
+            "</tr>";
 
     const importHtml = "\n    <tr>\n        " +
-        "        <td class=\"mdl-data-table__cell--non-numeric\">\n            " +
-        "          <label class = \"mdl-radio mdl-js-radio\" for = \"option2\">\n                " +
-        "          <input type = \"radio\" value='input-import' id = \"input-import\" name = \"input-type\" class=\"mdl-radio__button\">\n            " +
-        "         </label>\n        " +
-        "        </td>\n        " +
-        "       <td>\n            " +
-        "<span>" + AppMain.t("SELECT_FROM_IMPORT", "WHITE_LIST") + "</span>" +
-        "           <span class=\"select-file\">\n                " +
-        "               <input id=\"file\" type=\"file\" name=\"upload\" />\n            " +
-        "           </span>\n            " +
-        "           <div id=\'file-selected\' style=\"display: none;float: right;\" class=\"file-selected\">\n                " +
-        "               <i class=\'material-icons cursor-pointer\' id=\'remove-\' onclick=\'$(\"#file\").val(\"\");$(\".select-file\").show();$(\"#file-name\").html(\"\");$(\".file-selected\").hide();\'>clear</i>\n" +
-        "           </div>\n            " +
-        "           <div style=\"display: none;float:right; margin-right: 15px;margin-top: 3px;\" class=\"file-selected\" id=\"file-name\"></div>\n" +
-        "        </td>\n    " +
-        "</tr>";
+            "        <td class=\"mdl-data-table__cell--non-numeric\">\n            " +
+            "          <label class = \"mdl-radio mdl-js-radio\" for = \"option2\">\n                " +
+            "          <input type = \"radio\" value='input-import' id = \"input-import\" name = \"input-type\" class=\"mdl-radio__button\">\n            " +
+            "         </label>\n        " +
+            "        </td>\n        " +
+            "       <td>\n            " +
+            "<span>" + AppMain.t("SELECT_FROM_IMPORT", "WHITE_LIST") + "</span>" +
+            "           <span class=\"select-file\">\n                " +
+            "               <input id=\"file\" type=\"file\" name=\"upload\" />\n            " +
+            "           </span>\n            " +
+            "           <div id=\'file-selected\' style=\"display: none;float: right;\" class=\"file-selected\">\n                " +
+            "               <i class=\'material-icons cursor-pointer\' id=\'remove-\' onclick=\'$(\"#file\").val(\"\");$(\".select-file\").show();$(\"#file-name\").html(\"\");$(\".file-selected\").hide();\'>clear</i>\n" +
+            "           </div>\n            " +
+            "           <div style=\"display: none;float:right; margin-right: 15px;margin-top: 3px;\" class=\"file-selected\" id=\"file-name\"></div>\n" +
+            "        </td>\n    " +
+            "</tr>";
 
 
     let allHtml = "<table class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">" +
-        selectRow +
-        macRow +
-        importHtml +
-        "</table>";
+            selectRow +
+            macRow +
+            importHtml +
+            "</table>";
 
     $.confirm({
         title: AppMain.t("ADD_WHITE_LIST_TXT", "WHITE_LIST"),
@@ -337,7 +353,7 @@ CtrlActionWhiteList.addWhiteList = function () {
                     const radio = $("input[type='radio']:checked").val();
                     if (radio === "input-attached") {  // add from attached
                         const mac = $("select[name='add-from-attached']").val();
-                        CtrlActionWhiteList.__exportNodeList(mac.replace("'", "").replace("'", ""));
+                        CtrlActionWhiteList.exportNodeList(mac.replace("'", "").replace("'", ""));
                         return true;
                     }
                     if (radio === "input-mac") {  // add from attached
@@ -350,8 +366,8 @@ CtrlActionWhiteList.addWhiteList = function () {
                         const mac7 = $("input[name='mac7']").val();
                         const mac8 = $("input[name='mac8']").val();
                         if (mac1.length === 2 && mac2.length === 2 && mac3.length === 2 && mac4.length === 2
-                            && mac5.length === 2 && mac6.length === 2 && mac7.length === 2 && mac8.length === 2) {
-                            CtrlActionWhiteList.__exportNodeList(mac1 + ":" + mac2 + ":" + mac3 + ":" + mac4 + ":" + mac5 + ":" + mac6 + ":" + mac7 + ":" + mac8);
+                                && mac5.length === 2 && mac6.length === 2 && mac7.length === 2 && mac8.length === 2) {
+                            CtrlActionWhiteList.exportNodeList(mac1 + ":" + mac2 + ":" + mac3 + ":" + mac4 + ":" + mac5 + ":" + mac6 + ":" + mac7 + ":" + mac8);
                             return true;
                         } else {
                             $.alert({
@@ -370,7 +386,7 @@ CtrlActionWhiteList.addWhiteList = function () {
                     }
                     if (radio === "input-import") {  // add from attached
                         if ($("#file-selected").is(":visible")) {
-                            CtrlActionWhiteList.__exportNodeListArr();
+                            CtrlActionWhiteList.exportNodeListArr();
                             return true;
                         } else {
                             $.alert({
@@ -393,10 +409,9 @@ CtrlActionWhiteList.addWhiteList = function () {
             },
             cancel: {
                 text: AppMain.t("CANCEL", "global"),
-                action:
-                    function () {
-                        return true;
-                    }
+                action: function () {
+                    return true;
+                }
             }
         }
     });
@@ -434,15 +449,14 @@ CtrlActionWhiteList.addWhiteList = function () {
                 if (ind === -1) {
                     CtrlActionWhiteList.importAlert(AppMain.t("IMPORT_WHITE_LIST_ERROR", "WHITE_LIST"));
                 }
-                for (let index in allTextLines) {
-                    if (allTextLines.hasOwnProperty(index)) {
-                        if (parseInt(index) < startInd)
-                            continue;
-                        const line = allTextLines[index];
-                        if (line !== "")
-                            CtrlActionWhiteList.export.push(line.split(",")[ind].replace("\"", "").replace("\"", ""));
+                allTextLines.forEach(function (line, index) {
+                    if (index < startInd) {
+                        return;
                     }
-                }
+                    if (line !== "") {
+                        CtrlActionWhiteList.export.push(line.split(",")[ind].replace("\"", "").replace("\"", ""));
+                    }
+                });
             };
             reader.readAsText(uploadElement.files[0]);
             $(".select-file").hide();
@@ -453,7 +467,8 @@ CtrlActionWhiteList.addWhiteList = function () {
 };
 
 
-CtrlActionWhiteList.__exportWhiteList = function () {
+CtrlActionWhiteList.exportWhiteList = function () {
+    "use strict";
     let csv = "";
     let isNotSelected = true;
     let inputC = $("input:checked");
@@ -489,19 +504,20 @@ CtrlActionWhiteList.__exportWhiteList = function () {
 
 
 CtrlActionWhiteList.importWhiteList = function () {
+    "use strict";
     let html = "<table class=\"mdl-data-table mdl-js-data-table\" style=\"width: 100%\">\n    " +
-        "<tr>" +
-        "  \n        <td class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("UPLOAD_FILE", "WHITE_LIST") + "</td>" +
-        "  \n        <td>" +
-        "                            \n            <div class=\"select-file\">\n" +
-        "                <input id=\"file\" type=\"file\" name=\"upload\" />\n" +
-        "            </div>\n" +
-        " " +
-        "           <div id='file-selected' style=\"display: none;float: right;\" class=\"file-selected\">\n                " +
-        "<i class=\'material-icons cursor-pointer\' id=\'remove-\' onclick=\'$(\"#file\").val(\"\");$(\".select-file\").show();$(\"#file-name\").html(\"\");$(\".file-selected\").hide();\'>clear</i>\n" +
-        "            </div>\n            " +
-        "<div style=\"display: none;float:right; margin-right: 15px;margin-top: 3px;\" class=\"file-selected\" id=\"file-name\"></div>\n        " +
-        "</td>\n    </tr>\n</table>\n";
+            "<tr>" +
+            "  \n        <td class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("UPLOAD_FILE", "WHITE_LIST") + "</td>" +
+            "  \n        <td>" +
+            "                            \n            <div class=\"select-file\">\n" +
+            "                <input id=\"file\" type=\"file\" name=\"upload\" />\n" +
+            "            </div>\n" +
+            " " +
+            "           <div id='file-selected' style=\"display: none;float: right;\" class=\"file-selected\">\n                " +
+            "<i class=\'material-icons cursor-pointer\' id=\'remove-\' onclick=\'$(\"#file\").val(\"\");$(\".select-file\").show();$(\"#file-name\").html(\"\");$(\".file-selected\").hide();\'>clear</i>\n" +
+            "            </div>\n            " +
+            "<div style=\"display: none;float:right; margin-right: 15px;margin-top: 3px;\" class=\"file-selected\" id=\"file-name\"></div>\n        " +
+            "</td>\n    </tr>\n</table>\n";
 
     $.confirm({
         title: AppMain.t("IMPORT_WHITE_LIST_TXT", "WHITE_LIST"),
@@ -513,7 +529,7 @@ CtrlActionWhiteList.importWhiteList = function () {
                 text: AppMain.t("IMPORT", "global"),
                 action: function () {
                     if ($("#file-selected").is(":visible")) {
-                        CtrlActionWhiteList.__exportNodeListArr();
+                        CtrlActionWhiteList.exportNodeListArr();
                         return true;
                     } else {
                         $.alert({
@@ -533,10 +549,9 @@ CtrlActionWhiteList.importWhiteList = function () {
             },
             cancel: {
                 text: AppMain.t("CANCEL", "global"),
-                action:
-                    function () {
-                        return true;
-                    }
+                action: function () {
+                    return true;
+                }
             }
         }
     });
@@ -545,6 +560,7 @@ CtrlActionWhiteList.importWhiteList = function () {
 
 
 CtrlActionWhiteList.importAlert = function (content) {
+    "use strict";
     $.alert({
         useBootstrap: false,
         theme: "material",
@@ -563,23 +579,25 @@ CtrlActionWhiteList.importAlert = function (content) {
 };
 
 
-CtrlActionWhiteList.htmlTooltips = function (_this, nodes, whiteList) {
+CtrlActionWhiteList.htmlTooltips = function (nodes, whiteList) {
+    "use strict";
     let html = "";
 
     let i = 1;
     $.each(nodes, function () {
         html += "<div class='mdl-tooltip' data-mdl-for='remove-" + i + "'>" + AppMain.t("REMOVE", "global") + " </div>";
-        i++;
+        i += 1;
     });
     $.each(whiteList, function () {
         html += "<div class='mdl-tooltip' data-mdl-for='remove-" + i + "'>" + AppMain.t("REMOVE", "global") + "</div>";
-        i++;
+        i += 1;
     });
 
     return html;
 };
 
 CtrlActionWhiteList.deleteWhiteList = function () {
+    "use strict";
     const inputChecked = $("input:checked");
     let isEmpty = true;
     if (inputChecked.length > 0) {
@@ -605,11 +623,9 @@ CtrlActionWhiteList.deleteWhiteList = function () {
 };
 
 CtrlActionWhiteList.init = function () {
+    "use strict";
     this.controller.attachEvent("onBeforeExecute", this.onBeforeExecute);
     this.controller.attachEvent("onAfterExecute", this.onAfterExecute);
-};
-CtrlActionWhiteList.onBeforeExecute = function () {
-    // $(".main-canvas").removeClass("main-canvas-attached-devices");
 };
 
 module.exports.CtrlActionWhiteList = CtrlActionWhiteList;

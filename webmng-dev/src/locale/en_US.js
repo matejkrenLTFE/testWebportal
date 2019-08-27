@@ -464,13 +464,13 @@ const en_US = {
         SELECT_JOB_DESCRIPTION: "Description",
         SELECT_REFERENCE: "Please select reference type.",
         SELECT_DEVICE_REFERENCE: "Please select device references by checking the checkboxes in the table below, where you can "
-                + "find all the attached devices. If you want to add additional nodes, you may insert node title in the input field "
-                + "below and click add or import the nodes from file by clicking on the import button.",
+            + "find all the attached devices. If you want to add additional nodes, you may insert node title in the input field "
+            + "below and click add or import the nodes from file by clicking on the import button.",
         SELECT_GROUP_REFERENCE: "Please select group references by checking the checkboxes in the table below, where you can find all created groups.",
         INSERT_COSEM_ATTRS: "Please insert cosem attribute descriptors. Firstly, select the job service, then insert class ID, instance ID "
-                + "and attribute ID and click add. Each attribute is selected with a checkbox. Clicking on the Create button finishes job creation process.",
+            + "and attribute ID and click add. Each attribute is selected with a checkbox. Clicking on the Create button finishes job creation process.",
         INSERT_COSEM_ATTRS_FOR_UP: "Please insert cosem attributes descriptors. Insert class ID, instance ID and attribute ID "
-                + "and click on create button that finishes job creation process.",
+            + "and click on create button that finishes job creation process.",
         INSERT_JOB_PARAMS: "Please insert job parameters, (*) fields are required.",
         INSERT_GET_JOB_PARAMS: "Please insert get job data optional parameters.",
         FILE_FOR_UPGRADE: "Please upload file and insert job parameters.",
@@ -517,7 +517,7 @@ const en_US = {
         ADD_JOB_UPLOAD_FILE_ERR_TXT: "Please upload file.",
         ADD_JOB_NOTIFICATION_ERR_TITLE: "Meter data notification",
         NOTIFICATION_EXISTS_ERR: "Only one meter data notification job is allowed on the system. To create a new meter data "
-                + "notification job, delete the old one first.",
+            + "notification job, delete the old one first.",
         ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT: "Invalid cosem parameter",
         DATA_VALID_ERROR_TXT: "Parameter \"Store until\" must be greater than current time.",
         PUSH_DEST_ERROR_TXT: "Invalid character in push destination address.",
@@ -618,8 +618,8 @@ const en_US = {
         IMPORT_FROM_FILE: "Create from file",
         EDIT_GROUP: "Edit group",
         SELECT_DEVICES: "Please select devices by checking the checkboxes in the table below, where you can find all the attached devices. "
-                + "If you want to add additional devices, you may insert node title in the input field below and click add or import the devices "
-                + "from file by clicking on the import button. For dynamic groups insert a group prefix. Required field is marked with *.",
+            + "If you want to add additional devices, you may insert node title in the input field below and click add or import the devices "
+            + "from file by clicking on the import button. For dynamic groups insert a group prefix. Required field is marked with *.",
         DEVICES_SELECT_ERROR: "Please select some devices or insert group prefix.",
         GROUP_ID_ERROR: "Please insert group ID.",
         ADD_GROUP_ERROR: "Error",
@@ -1007,14 +1007,14 @@ const en_US = {
         EVT_PLC_NODE_ROUTE_DISCOVERED_DESC: "New device has successfully completed the association procedure  and is now part of the PLC network",
         EVT_PLC_NODE_LEAVE_INDICATION_DESC: "Attached device has been successfully unregistered from the PLC network due to its request to leave",
         EVT_PLC_NODE_LEAVE_CONFORMATION_DESC: "Attached device has been successfully unregistered from the PLC network due to a request from the PAN <br/>"
-                + " coordinator to leave",
+            + " coordinator to leave",
         EVT_PLC_NETWORK_CFM_DESC: "PLC modem was initialized after reset/restart",
         EVT_PLC_NODE_JOIN_DECLINED_DESC: "Request to join the PLC network was declined",
         EVT_PLC_NODE_ROUTE_ERROR_DESC: "The route towards the intended destination is not established",
         EVT_RS485_S650_ALARM_DESC: "Alarm received from meter S650",
         EVT_PLC_METER_JOINED_DESC: "New device is ready for communication after joining to the PLC network",
         EVT_PLC_METER_REMOVED_DESC: "Attached Device has been unregistered from the PLC network due to its request   from PAN coordinator or expiration <br/>"
-                + " of No-communication timeout",
+            + " of No-communication timeout",
         EVT_SYS_POWER_FAIL_DESC: "Short break in power supply which are related to the device or the network",
         EVT_SYS_POWER_RETURN_DESC: "The device is powered (at least one phase is connected)",
         EVT_SYS_POWER_BACKUP_LOW_DESC: "Backup power supply for system backup is low",
@@ -1045,7 +1045,7 @@ const en_US = {
         EVT_SYS_BATTERY_LOW_LEVEL_DESC: "Battery power for RTC backup is low",
         EVT_SYS_BOOT_PARTITION_SWITCH_DESC: "Device has been booted from the backup boot partition",
         EVT_WAN_WAN1_CONNECT_DESC: "Cellular modem is ready for communication after it was successfully registered  to the network  PDP context was  <br/>"
-                + " established and parameters were set (WAN1)",
+            + " established and parameters were set (WAN1)",
         EVT_WAN_WAN1_DISCONNECT_DESC: "Cellular modem was disconnected from the network (WAN1)",
         EVT_WAN_WAN1_CONNECT_FAIL_DESC: "Cellular modem failed to connect to the network (WAN1)",
         EVT_WAN_WAN1_PING_FAIL_DESC: "PING request (connection test) failed to reach the destination (WAN1)",
@@ -1061,7 +1061,7 @@ const en_US = {
         EVT_WAN_WAN1_MODEM_SIM_ERROR_DESC: "SIM card is not detected  not inserted correctly or PIN is incorrect",
         EVT_WAN_WAN1_MODEM_DETECTED_DESC: "Communication module was inserted  (FEM1T)",
         EVT_WAN_WAN1_CMUX_ERROR_DESC: "Cellular modem didn't respond to CMUX command/setup request or CMUX virtual serial ports are not correctly <br/>"
-                + " opened. Due to this error  the system is set to operate without CMUX",
+            + " opened. Due to this error  the system is set to operate without CMUX",
         EVT_WAN_WAN1_MODEM_FW_UPGRADE_OK_DESC: "Cellular modem firmware was successfully upgraded (WAN1)",
         EVT_WAN_WAN1_MODEM_FW_UPGRADE_ERROR_DESC: "Cellular modem firmware upgrade failed (WAN1)",
         EVT_WAN_WAN1_MODEM_SIM_OK_DESC: "SIM card is ready/capable of entering PIN",
@@ -1100,7 +1100,7 @@ const en_US = {
         EVT_SEND_DATA_RESOURCE_DESC: "Request for data was received",
         EVT_CONFIG_RESOURCE_CHANGED_DESC: "Job device list changed",
         EVT_UPGRADE_FIRMWARE_FAILED_DESC: "Job meter upgrade failed to start because of wrong parameters  upgrade file NOK or anther upgrade job is <br/>"
-                + " already in progress",
+            + " already in progress",
         EVT_SEC_WEB_LOGIN_OK_DESC: "Login to Web User Interface succeeded",
         EVT_SEC_WEB_LOGIN_CERT_MISMATCH_DESC: "Login to Web User Interface failed due to certificate mismatch error",
         EVT_SEC_WEB_LOGIN_PASS_MISMATCH_DESC: "Login to Web User Interface failed due to incorrect password",
