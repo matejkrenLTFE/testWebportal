@@ -1,24 +1,34 @@
 /**
  * @class CtrlActionSystemInformation Controller action using IControllerAction interface.
  */
-var modulecontrolleraction = require("./IControllerAction");
-var CtrlActionSystemInformation = Object.create(new modulecontrolleraction.IControllerAction);
-//var fs = require("fs");
 
-CtrlActionSystemInformation.exec = function() {    
+/* global AppMain, $, dmp */
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
+const modulecontrolleraction = require("./IControllerAction");
+let CtrlActionSystemInformation = Object.create(new modulecontrolleraction.IControllerAction());
+
+CtrlActionSystemInformation.exec = function () {
+    "use strict";
+
     this.view.setTitle("SYS_INFO");
 
-     var generalInfo = { 
+    let generalInfo = {
         system: {},
         wan: {},
-        PLC:{}
+        PLC: {}
     };
 
-    var info = AppMain.ws().getResponseCache("GetInfos");
+    let info = AppMain.ws().getResponseCache("GetInfos", undefined);
     // Prepare params
-    $.each(info.GetInfosResponse.info, function(i, obj){	
-        if (typeof generalInfo[obj.category] !== "undefined")		
-            generalInfo[obj.category][obj.name] = (!obj.value) ? "---" : obj.value;
+    $.each(info.GetInfosResponse.info, function (i, obj) {
+        if (generalInfo[obj.category] !== undefined) {
+            generalInfo[obj.category][obj.name] = (!obj.value)
+                ? "---"
+                : obj.value;
+        }
     });
     //this.view.renderSection("default.dashboard#SectionSecondaryMenu", ".page-title", {}, true);
     dmp(generalInfo);

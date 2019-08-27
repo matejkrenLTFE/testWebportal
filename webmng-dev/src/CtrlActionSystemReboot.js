@@ -1,14 +1,22 @@
 /**
  * @class CtrlActionSystemReboot Controller action using IControllerAction interface.
  */
-var modulecontrolleraction = require("./IControllerAction");
-var CtrlActionSystemReboot = Object.create(new modulecontrolleraction.IControllerAction);
 
-CtrlActionSystemReboot.exec = function(e) {
+/* global AppMain, $, dmp */
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
+const modulecontrolleraction = require("./IControllerAction");
+let CtrlActionSystemReboot = Object.create(new modulecontrolleraction.IControllerAction());
+
+CtrlActionSystemReboot.exec = function () {
+    "use strict";
+
     this.view.setTitle("SYS_REBOOT");
-    
+
     this.view.render(this.controller.action, {
-        _title: AppMain.t("SYS_REBOOT", "SYS_SETTINGS"),
+        title: AppMain.t("SYS_REBOOT", "SYS_SETTINGS"),
         labels: {
             btnReboot: AppMain.t("SYS_REBOOT", "SYS_SETTINGS"),
             lbReboot: AppMain.t("SYS_REBOOT", "SYS_SETTINGS"),
@@ -20,8 +28,10 @@ CtrlActionSystemReboot.exec = function(e) {
 };
 
 
-CtrlActionSystemReboot.systemReboot = function(e) {
-    if(!AppMain.user.getRBACpermissionElement("settings", "reboot")){
+CtrlActionSystemReboot.systemReboot = function () {
+    "use strict";
+
+    if (!AppMain.user.getRBACpermissionElement("settings", "reboot")) {
         return;
     }
     $.confirm({
@@ -30,20 +40,19 @@ CtrlActionSystemReboot.systemReboot = function(e) {
         useBootstrap: false,
         theme: "material",
         buttons: {
-            confirm:{
+            confirm: {
                 text: AppMain.t("OK", "global"),
                 action: function () {
-                            CtrlActionSystemReboot.reboot();
-                            CtrlActionSystemReboot.controller.userLogout();
-                            return true;
-                        }
-            } ,
+                    CtrlActionSystemReboot.reboot();
+                    CtrlActionSystemReboot.controller.userLogout();
+                    return true;
+                }
+            },
             cancel: {
                 text: AppMain.t("CANCEL", "global"),
-                action:
-                    function () {
-                        return true;
-                    }
+                action: function () {
+                    return true;
+                }
             }
         }
     });
@@ -51,31 +60,31 @@ CtrlActionSystemReboot.systemReboot = function(e) {
     AppMain.html.updateElements([".mdl-button"]);
 };
 
-CtrlActionSystemReboot.reboot = function() {
-    var data = AppMain.html.getFormData("#SystemSettingsForm");
+
+CtrlActionSystemReboot.reboot = function () {
+    "use strict";
+
+    let data = AppMain.html.getFormData("#SystemSettingsForm");
     if (defined(data.rebootType)) {
         AppMain.dialog("SYS_REBOOT_WARNING", "warning");
         AppMain.ws().exec("ExecuteAction", {"Reboot": data.rebootType});
 
         // Waiting for WS to boot-up
-
-        var interval = setInterval(function(){
-            $.get(AppMain.getUrl("base") + "/soap/").success(function(resp){
+        let interval;
+        interval = setInterval(function () {
+            $.get(AppMain.getUrl("base") + "/soap/").success(function (resp) {
                 dmp("Success");
                 dmp(resp);
-                killTimeout();
+                clearTimeout(interval);
                 //window.location = AppMain.getUrl("app") + "#SystemSettings";
-            }).error(function(response){
+            }).error(function (response) {
                 dmp("Error occurred ... WS down! --> " + response.status);
                 dmp(response);
-                if (response.status===405) {
+                if (response.status === 405) {
                     window.location = AppMain.getUrl("app") + "#SystemSettings";
                 }
             });
         }, 4000);
-        function killTimeout() {
-            clearTimeout(interval);
-        }
     }
 };
 
