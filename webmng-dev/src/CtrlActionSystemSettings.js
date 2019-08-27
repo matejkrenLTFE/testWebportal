@@ -2,7 +2,7 @@
  * @class CtrlActionSystemSettings Controller action using IControllerAction interface.
  */
 
-/* global AppMain, $ */
+/* global AppMain, $, defined */
 /* jshint maxstatements: false */
 /* jslint browser:true, node:true*/
 /* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
