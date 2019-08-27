@@ -328,7 +328,8 @@ CtrlActionWhiteList.addWhiteList = function () {
             "               <input id=\"file\" type=\"file\" name=\"upload\" />\n            " +
             "           </span>\n            " +
             "           <div id=\'file-selected\' style=\"display: none;float: right;\" class=\"file-selected\">\n                " +
-            "               <i class=\'material-icons cursor-pointer\' id=\'remove-\' onclick=\'$(\"#file\").val(\"\");$(\".select-file\").show();$(\"#file-name\").html(\"\");$(\".file-selected\").hide();\'>clear</i>\n" +
+            "               <i class=\'material-icons cursor-pointer\' id=\'remove-\' onclick=\'$(\"#file\").val(\"\");" +
+            "$(\".select-file\").show();$(\"#file-name\").html(\"\");$(\".file-selected\").hide();\'>clear</i>\n" +
             "           </div>\n            " +
             "           <div style=\"display: none;float:right; margin-right: 15px;margin-top: 3px;\" class=\"file-selected\" id=\"file-name\"></div>\n" +
             "        </td>\n    " +
@@ -387,20 +388,19 @@ CtrlActionWhiteList.addWhiteList = function () {
                         if ($("#file-selected").is(":visible")) {
                             CtrlActionWhiteList.exportNodeListArr();
                             return true;
-                        } else {
-                            $.alert({
-                                useBootstrap: false,
-                                theme: "material",
-                                title: AppMain.t("IMPORT_WHITE_LIST_TXT", "WHITE_LIST"),
-                                content: AppMain.t("IMPORT_WHITE_LIST_SELECT_FILE", "WHITE_LIST"),
-                                buttons: {
-                                    confirm: {
-                                        text: AppMain.t("OK", "global")
-                                    }
-                                }
-                            });
-                            return false;
                         }
+                        $.alert({
+                            useBootstrap: false,
+                            theme: "material",
+                            title: AppMain.t("IMPORT_WHITE_LIST_TXT", "WHITE_LIST"),
+                            content: AppMain.t("IMPORT_WHITE_LIST_SELECT_FILE", "WHITE_LIST"),
+                            buttons: {
+                                confirm: {
+                                    text: AppMain.t("OK", "global")
+                                }
+                            }
+                        });
+                        return false;
                     }
 
 

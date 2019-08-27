@@ -126,7 +126,7 @@ CtrlActionNodes.exec = function () {
     };
 
     const ctx2 = document.getElementById("chart_attached").getContext("2d");
-
+    /* eslint-disable no-new */
     new Chart(ctx2, {
         type: "doughnut",
         data: data,
@@ -156,6 +156,7 @@ CtrlActionNodes.exec = function () {
             }
         }
     });
+    /* eslint-enable no-new */
     $(".main-canvas").addClass("main-canvas-attached-devices");
     AppMain.html.updateAllElements();
 };
