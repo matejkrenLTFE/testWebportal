@@ -1283,7 +1283,7 @@ CtrlActionTaskManager.addJobSecond = function (jobType, node) {
 
                             jobObj.RepeatingInterval = $("#repeating").val();
 
-                            const dMinutes = parseInt($("#d-minutes").val());
+                            const dMinutes = parseInt($("#d-minutes").val(), 10);
                             jobObj.Duration = moment.duration({
                                 seconds: 0,
                                 minutes: (Number.isNaN(dMinutes) || dMinutes < 0)
@@ -1570,15 +1570,14 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
                         CtrlActionTaskManager.importAlert(AppMain.t("DEVICES_ERR_TITLE_TXT", "TASK_MANAGER"),
                                 AppMain.t("DEVICES_SELECT_ERROR", "TASK_MANAGER"));
                         return false;
-                    } else {
-                        jobObj.groups = [];
-                        if (jobObj.jobType === "notification") {
-                            CtrlActionTaskManager.addResourceRest(jobObj);
-                        } else {
-                            CtrlActionTaskManager.addJobFinal(jobObj);
-                        }
-                        return true;
                     }
+                    jobObj.groups = [];
+                    if (jobObj.jobType === "notification") {
+                        CtrlActionTaskManager.addResourceRest(jobObj);
+                    } else {
+                        CtrlActionTaskManager.addJobFinal(jobObj);
+                    }
+                    return true;
                 }
             },
             cancel: {
@@ -1810,7 +1809,8 @@ CtrlActionTaskManager.addJobGroup = function (jobObj) {
 
 /**
  * relative range selector
- * @type {{"0": string, FFFDFFFF5AFFFFFFFFFFFFFF: String, FFFDFFFF1EFFFFFFFFFFFFFF: String, FFFDFFFF01FFFFFFFFFFFFFF: String, FFFDFFFFFF01FFFFFFFFFFFF: String, FFFDFFFF07FFFFFFFFFFFFFF: String, FFFDFFFFB4FFFFFFFFFFFFFF: String}}
+ * @type {{"0": string, FFFDFFFF5AFFFFFFFFFFFFFF: String, FFFDFFFF1EFFFFFFFFFFFFFF: String, FFFDFFFF01FFFFFFFFFFFFFF: String, FFFDFFFFFF01FFFFFFFFFFFF:
+ * String, FFFDFFFF07FFFFFFFFFFFFFF: String, FFFDFFFFB4FFFFFFFFFFFFFF: String}}
  */
 CtrlActionTaskManager.relativeSelector = {
     "0": "---",
@@ -1846,7 +1846,8 @@ CtrlActionTaskManager.typeSelector = {
 CtrlActionTaskManager.getAddCosemHTML = function (jobType, jobService) {
     "use strict";
 
-    const accessSelRowHtml = "<div class=\"mdl-textfield mdl-textfield-less-padding mdl-textfield--floating-label mdl-js-textfield-datepicker textfield-short-160 is-dirty\" style='margin-right: 20px;'>" +
+    const accessSelRowHtml = "<div class=\"mdl-textfield mdl-textfield-less-padding mdl-textfield--floating-label mdl-js-textfield-datepicker " +
+            "textfield-short-160 is-dirty\" style='margin-right: 20px;'>" +
             "<input class=\"mdl-textfield__input\" type=\"text\" id=\"add-access-from\" name=\"add-access-from\">" +
             "<label class=\"mdl-textfield__label\">" + AppMain.t("ACCESS_SELECTION_FROM", "TASK_MANAGER") + "</label>" +
             "</div>" +
@@ -1863,18 +1864,18 @@ CtrlActionTaskManager.getAddCosemHTML = function (jobType, jobService) {
 
 
     const timeSelRowHtml = "<div class=\"mdl-textfield mdl-textfield-less-padding mdl-textfield--floating-label is-dirty\" style='margin-right: 20px;'>" +
-        "<input class=\"mdl-textfield__input just-number\" type=\"text\" id='min-time-diff' name=\"min-time-diff\"/>" +
-        "<label class=\"mdl-textfield__label\">" + AppMain.t("MIN_TIME_DIFF", "TASK_MANAGER") + "</label>" +
-        "</div>" +
-        "<div class=\"mdl-textfield mdl-textfield-less-padding mdl-textfield--floating-label is-dirty\">" +
-        "<input class=\"mdl-textfield__input just-number\" type=\"text\" id='max-time-diff' name=\"max-time-diff\"/>" +
-        "<label class=\"mdl-textfield__label\">" + AppMain.t("MAX_TIME_DIFF", "TASK_MANAGER") + "</label>" +
-        "</div>";
+            "<input class=\"mdl-textfield__input just-number\" type=\"text\" id='min-time-diff' name=\"min-time-diff\"/>" +
+            "<label class=\"mdl-textfield__label\">" + AppMain.t("MIN_TIME_DIFF", "TASK_MANAGER") + "</label>" +
+            "</div>" +
+            "<div class=\"mdl-textfield mdl-textfield-less-padding mdl-textfield--floating-label is-dirty\">" +
+            "<input class=\"mdl-textfield__input just-number\" type=\"text\" id='max-time-diff' name=\"max-time-diff\"/>" +
+            "<label class=\"mdl-textfield__label\">" + AppMain.t("MAX_TIME_DIFF", "TASK_MANAGER") + "</label>" +
+            "</div>";
 
     const typeSelector = AppMain.html.formElementSelect("variable-type",
-        CtrlActionTaskManager.typeSelector, {
-            label: AppMain.t("VALUE_TYPE", "TASK_MANAGER")
-        }, undefined, "textfield-short-145 is-dirty");
+            CtrlActionTaskManager.typeSelector, {
+        label: AppMain.t("VALUE_TYPE", "TASK_MANAGER")
+    }, undefined, "textfield-short-145 is-dirty");
 
     const valueInput = AppMain.html.formTextInput("variable-value", AppMain.t("VALUE", "TASK_MANAGER"), {
         wrapperClass: "textfield-short-115 mdl-textfield-less-padding is-dirty"
@@ -1884,32 +1885,32 @@ CtrlActionTaskManager.getAddCosemHTML = function (jobType, jobService) {
     attrLabel.html(AppMain.t("ATTRIBUTE_ID", "TASK_MANAGER") + " *");
 
     switch (jobType) {
-        case "on-demand":
-            switch (jobService) {
-                case "get":
-                    return accessSelRowHtml;
-                case "action":
-                    attrLabel.html(AppMain.t("METHOD_ID", "TASK_MANAGER") + " *");
-                    return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
-                case "set":
-                    return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
-                case "time-sync":
-                    return timeSelRowHtml;
-            }
-            break;
-        case "scheduled":
-            switch (jobService) {
-                case "get":
-                    return repeatingSelector;
-                case "action":
-                    attrLabel.html(AppMain.t("METHOD_ID", "TASK_MANAGER") + " *");
-                    return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
-                case "set":
-                    return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
-                case "time-sync":
-                    return timeSelRowHtml;
-            }
-            break;
+    case "on-demand":
+        switch (jobService) {
+        case "get":
+            return accessSelRowHtml;
+        case "action":
+            attrLabel.html(AppMain.t("METHOD_ID", "TASK_MANAGER") + " *");
+            return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
+        case "set":
+            return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
+        case "time-sync":
+            return timeSelRowHtml;
+        }
+        break;
+    case "scheduled":
+        switch (jobService) {
+        case "get":
+            return repeatingSelector;
+        case "action":
+            attrLabel.html(AppMain.t("METHOD_ID", "TASK_MANAGER") + " *");
+            return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
+        case "set":
+            return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
+        case "time-sync":
+            return timeSelRowHtml;
+        }
+        break;
     }
     return "";
 };
@@ -1923,13 +1924,13 @@ CtrlActionTaskManager.getAddCosemTableHTML = function (jobService) {
     "use strict";
 
     switch (jobService) {
-        case "get":
-            return AppMain.t("ACCESS_SELECTION", "TASK_MANAGER");
-        case "set":
-        case "action":
-            return AppMain.t("VALUE", "TASK_MANAGER");
-        case "time-sync":
-            return AppMain.t("TIME_SYNC", "TASK_MANAGER");
+    case "get":
+        return AppMain.t("ACCESS_SELECTION", "TASK_MANAGER");
+    case "set":
+    case "action":
+        return AppMain.t("VALUE", "TASK_MANAGER");
+    case "time-sync":
+        return AppMain.t("TIME_SYNC", "TASK_MANAGER");
     }
     return "";
 };
@@ -1979,46 +1980,52 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
     }, undefined, "textfield-short-185 mdl-textfield-less-padding");
 
     const classHtml = "<div class=\"mdl-textfield mdl-textfield-less-padding mdl-textfield--floating-label textfield-short-50 is-dirty\">" +
-        "<input class=\"mdl-textfield__input just-number desc-check\" type=\"text\" id='add-class' maxlength='5' name=\"add-class\"/>" +
-        "<label class=\"mdl-textfield__label\">" + AppMain.t("CLASS_ID", "TASK_MANAGER") + " *</label>" +
-        "</div>";
+            "<input class=\"mdl-textfield__input just-number desc-check\" type=\"text\" id='add-class' maxlength='5' name=\"add-class\"/>" +
+            "<label class=\"mdl-textfield__label\">" + AppMain.t("CLASS_ID", "TASK_MANAGER") + " *</label>" +
+            "</div>";
 
     const instHtml = "<div class=\"mdl-textfield mdl-textfield-less-padding mdl-textfield--floating-label is-dirty\" style='width: 180px;'>" +
-        "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-25 desc-check\"><input  class=\"mdl-textfield__input just-number\" type=\"text\" name=\"inst1\" maxlength=\"3\"/></div>." +
-        "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-25 desc-check\"><input  class=\"mdl-textfield__input just-number\" type=\"text\" name=\"inst2\" maxlength=\"3\"/></div>." +
-        "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-25 desc-check\"><input  class=\"mdl-textfield__input just-number\" type=\"text\" name=\"inst3\" maxlength=\"3\"/></div>." +
-        "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-25 desc-check\"><input  class=\"mdl-textfield__input just-number\" type=\"text\" name=\"inst4\" maxlength=\"3\"/></div>." +
-        "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-25 desc-check\"><input  class=\"mdl-textfield__input just-number\" type=\"text\" name=\"inst5\" maxlength=\"3\"/></div>." +
-        "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-25 desc-check\"><input  class=\"mdl-textfield__input just-number\" type=\"text\" name=\"inst6\" maxlength=\"3\"/></div>" +
-        "<label class=\"mdl-textfield__label\">" + AppMain.t("INSTANCE_ID", "TASK_MANAGER") + " *</label>" +
-        "</div>";
+            "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-25 desc-check\">" +
+            "<input  class=\"mdl-textfield__input just-number\" type=\"text\" name=\"inst1\" maxlength=\"3\"/></div>." +
+            "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-25 desc-check\">" +
+            "<input  class=\"mdl-textfield__input just-number\" type=\"text\" name=\"inst2\" maxlength=\"3\"/></div>." +
+            "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-25 desc-check\">" +
+            "<input  class=\"mdl-textfield__input just-number\" type=\"text\" name=\"inst3\" maxlength=\"3\"/></div>." +
+            "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-25 desc-check\">" +
+            "<input  class=\"mdl-textfield__input just-number\" type=\"text\" name=\"inst4\" maxlength=\"3\"/></div>." +
+            "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-25 desc-check\">" +
+            "<input  class=\"mdl-textfield__input just-number\" type=\"text\" name=\"inst5\" maxlength=\"3\"/></div>." +
+            "<div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-25 desc-check\">" +
+            "<input  class=\"mdl-textfield__input just-number\" type=\"text\" name=\"inst6\" maxlength=\"3\"/></div>" +
+            "<label class=\"mdl-textfield__label\">" + AppMain.t("INSTANCE_ID", "TASK_MANAGER") + " *</label>" +
+            "</div>";
 
     const attrHtml = "<div class=\"mdl-textfield mdl-textfield-less-padding mdl-textfield--floating-label is-dirty\" style='width: 77px;'>" +
-        "<input class=\"mdl-textfield__input just-number desc-check\" type=\"text\" id='add-attr' maxlength='3' name=\"add-attr\"/>" +
-        "<label class=\"mdl-textfield__label\" id='attr-label'>" + AppMain.t("ATTRIBUTE_ID", "TASK_MANAGER") + " *</label>" +
-        "</div>";
+            "<input class=\"mdl-textfield__input just-number desc-check\" type=\"text\" id='add-attr' maxlength='3' name=\"add-attr\"/>" +
+            "<label class=\"mdl-textfield__label\" id='attr-label'>" + AppMain.t("ATTRIBUTE_ID", "TASK_MANAGER") + " *</label>" +
+            "</div>";
 
     const addHtml = "<button id='add-icon' class='mdl-button mdl-js-button mdl-button--raised mdl-button-small ' style='margin-left: 5px;position: relative;top: 12px;'>" +
-        AppMain.t("ADD", "global") + "</button>";
+            AppMain.t("ADD", "global") + "</button>";
 
     let allHtml1;
     if (jobObj.jobType === "upgrade") {
         allHtml1 = this.addJobStepsHtml(5, jobObj.jobType) + AppMain.t("INSERT_COSEM_ATTRS_FOR_UP", "TASK_MANAGER") + "</br>" +
-            "<div style='width: 100%;padding: 0;' class='mdl-grid'>";
+                "<div style='width: 100%;padding: 0;' class='mdl-grid'>";
     } else {
         allHtml1 = this.addJobStepsHtml(5, jobObj.jobType) + AppMain.t("INSERT_COSEM_ATTRS", "TASK_MANAGER") + "</br>" +
-            "<div style='width: 100%;padding: 0;' class='mdl-grid'>" +
-            "<div class='mdl-cell' style='width: 100%;'>" + serviceSelector + "</div>";
+                "<div style='width: 100%;padding: 0;' class='mdl-grid'>" +
+                "<div class='mdl-cell' style='width: 100%;'>" + serviceSelector + "</div>";
     }
 
     allHtml1 += "<div class='mdl-cell' id='obj_desc_cell' style='width: auto; margin-right: 15px;'>" + objectSelector + "</div>" +
-        "<div class='mdl-cell' style='width:auto;margin-right:15px;'>" + classHtml + "</div>" +
-        "<div class='mdl-cell' style='width:auto;margin-right:15px;'>" + instHtml + "</div>" +
-        "<div class='mdl-cell' style='width:auto;margin-right:15px;'>" + attrHtml + "</div>";
+            "<div class='mdl-cell' style='width:auto;margin-right:15px;'>" + classHtml + "</div>" +
+            "<div class='mdl-cell' style='width:auto;margin-right:15px;'>" + instHtml + "</div>" +
+            "<div class='mdl-cell' style='width:auto;margin-right:15px;'>" + attrHtml + "</div>";
     if (jobObj.jobType !== "upgrade") {
         allHtml1 += "<div id='accessSelRow' class='mdl-cell' style='width: auto; margin-right: 15px;'>" +
-            CtrlActionTaskManager.getAddCosemHTML(jobObj.jobType, jobObj.jobService) + "</div>" +
-            "<div class='mdl-cell' style='width: auto; margin-right: 15px;'>" + addHtml + "</div>";
+                CtrlActionTaskManager.getAddCosemHTML(jobObj.jobType, jobObj.jobService) + "</div>" +
+                "<div class='mdl-cell' style='width: auto; margin-right: 15px;'>" + addHtml + "</div>";
     }
     allHtml1 += "</div>";
 
@@ -2028,16 +2035,16 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
     }
 
     let allHtml = allHtml1 +
-        "<table id='cosem-table' class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%;" + styleHid + "\">" +
-        "<thead class=\"th-color-grey text-align-left\">" +
-        "<tr>" +
-        "<th style='width: 30px;'><input class=\"selectAllNodes\" name=\"selectAllNodes\" type=\"checkbox\"/></th>" +
-        "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("SELECT_JOB_DESCRIPTION", "TASK_MANAGER") + "</th>" +
-        "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("CLASS_ID", "TASK_MANAGER") + "</th>" +
-        "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("INSTANCE_ID", "TASK_MANAGER") + "</th>" +
-        "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("ATTRIBUTE_ID", "TASK_MANAGER") + "</th>" +
-        "<th class=\"mdl-data-table__cell--non-numeric\" id='tableCosemTH'>" + CtrlActionTaskManager.getAddCosemTableHTML(jobObj.jobService) + "" +
-        "</thead><tbody></tbody></table><br/>";
+            "<table id='cosem-table' class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%;" + styleHid + "\">" +
+            "<thead class=\"th-color-grey text-align-left\">" +
+            "<tr>" +
+            "<th style='width: 30px;'><input class=\"selectAllNodes\" name=\"selectAllNodes\" type=\"checkbox\"/></th>" +
+            "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("SELECT_JOB_DESCRIPTION", "TASK_MANAGER") + "</th>" +
+            "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("CLASS_ID", "TASK_MANAGER") + "</th>" +
+            "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("INSTANCE_ID", "TASK_MANAGER") + "</th>" +
+            "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("ATTRIBUTE_ID", "TASK_MANAGER") + "</th>" +
+            "<th class=\"mdl-data-table__cell--non-numeric\" id='tableCosemTH'>" + CtrlActionTaskManager.getAddCosemTableHTML(jobObj.jobService) + "" +
+            "</thead><tbody></tbody></table><br/>";
 
     $.confirm({
         title: AppMain.t("ADD_JOB", "TASK_MANAGER"),
@@ -2067,7 +2074,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
                     if (CtrlActionTaskManager.updateAttrs(jobObj)) {
                         if (jobObj.attrs.length === 0) {
                             CtrlActionTaskManager.importAlert(AppMain.t("COSEM_ERR_TITLE_TXT", "TASK_MANAGER"),
-                                AppMain.t("COSEM_SELECT_ERROR", "TASK_MANAGER"));
+                                    AppMain.t("COSEM_SELECT_ERROR", "TASK_MANAGER"));
                             return false;
                         }
                     } else {
@@ -2083,7 +2090,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
                     if (CtrlActionTaskManager.updateAttrs(jobObj)) {
                         if (jobObj.attrs.length === 0) {
                             CtrlActionTaskManager.importAlert(AppMain.t("COSEM_ERR_TITLE_TXT", "TASK_MANAGER"),
-                                AppMain.t("COSEM_SELECT_ERROR", "TASK_MANAGER"));
+                                    AppMain.t("COSEM_SELECT_ERROR", "TASK_MANAGER"));
                             return false;
                         }
                     } else {
@@ -2158,7 +2165,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
         const jOd = $("#job-object");
         jOd.on("change", function () {
             if (jOd.val() !== "0") {
-                const newValPos = parseInt(jOd.val()) - 1;
+                const newValPos = parseInt(jOd.val(), 10) - 1;
                 CtrlActionTaskManager.selectCosemHelper(objectList.get[newValPos]);
             }
         });
@@ -2196,16 +2203,16 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
                 });
             }
             jobObj.jobService = jS.val();
-            const desc_cell = $("#obj_desc_cell");
+            const descCell = $("#obj_desc_cell");
             if (jobObj.jobService !== "get" && jobObj.jobService !== "time-sync") {
-                desc_cell.hide();
-                desc_cell.html();
+                descCell.hide();
+                descCell.html();
             } else {
-                desc_cell.show();
+                descCell.show();
                 if (jobObj.jobService === "time-sync") {
-                    desc_cell.html(objectTimeSelector);
+                    descCell.html(objectTimeSelector);
                 } else {
-                    desc_cell.html(objectSelector);
+                    descCell.html(objectSelector);
                 }
             }
             $("#accessSelRow").html(CtrlActionTaskManager.getAddCosemHTML(jobObj.jobType, jobObj.jobService));
@@ -2218,7 +2225,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
                 CtrlActionTaskManager.checkDesc();
                 jOd2.on("change", function () {
                     if (jOd2.val() !== "0") {
-                        const newValPos = parseInt(jOd2.val()) - 1;
+                        const newValPos = parseInt(jOd2.val(), 10) - 1;
                         CtrlActionTaskManager.selectCosemHelper(objectList.get[newValPos]);
                     }
                 });
@@ -2246,17 +2253,17 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
                 varVal.addClass("just-number"); // also enum is integer
                 varType.on("change", function () {
                     switch (varType.val()) {
-                        case "cos:enum":
-                        case "cos:integer":
-                        case "cos:long":
-                        case "cos:boolean":
-                        case "cos:long-unsigned":
-                        case "cos:unsigned":
-                        case "cos:double-long-unsigned":
-                            varVal.addClass("just-number");
-                            break;
-                        default:
-                            varVal.removeClass("just-number");
+                    case "cos:enum":
+                    case "cos:integer":
+                    case "cos:long":
+                    case "cos:boolean":
+                    case "cos:long-unsigned":
+                    case "cos:unsigned":
+                    case "cos:double-long-unsigned":
+                        varVal.addClass("just-number");
+                        break;
+                    default:
+                        varVal.removeClass("just-number");
                     }
                     if (varVal.hasClass("just-number")) {
                         const nonNumReg = /[^0-9]/g;
@@ -2367,20 +2374,20 @@ CtrlActionTaskManager.updateAttrs = function (jobObj) {
 CtrlActionTaskManager.checkDesc = function () {
     "use strict";
 
-    const classId = parseInt($("#add-class").val());
+    const classId = parseInt($("#add-class").val(), 10);
     const instanceId = $("input[name='inst1']").val() + "." + $("input[name='inst2']").val() + "." +
-        $("input[name='inst3']").val() + "." + $("input[name='inst4']").val() + "." +
-        $("input[name='inst5']").val() + "." + $("input[name='inst6']").val();
-    const attrId = parseInt($("#add-attr").val());
+            $("input[name='inst3']").val() + "." + $("input[name='inst4']").val() + "." +
+            $("input[name='inst5']").val() + "." + $("input[name='inst6']").val();
+    const attrId = parseInt($("#add-attr").val(), 10);
     const service = $("#job-service").val();
     let list = [];
     switch (service) {
-        case "get":
-            list = objectList.get;
-            break;
-        case "time-sync":
-            list = objectList.timeSync;
-            break;
+    case "get":
+        list = objectList.get;
+        break;
+    case "time-sync":
+        list = objectList.timeSync;
+        break;
     }
     let isDesc = true;
     $.each(list, function (index, cosem) {
@@ -2412,21 +2419,21 @@ CtrlActionTaskManager.addAttrPress = function () {
     const service = $("#job-service").val();
     let descTXT = "---";
     switch (service) {
-        case "get":
-            descTXT = (defined(descVal) && descVal !== "0" && descVal !== "")
-                ? objectList.get[parseInt(descVal) - 1].description
-                : "---";
-            break;
-        case "time-sync":
-            descTXT = (defined(descVal) && descVal !== "0" && descVal !== "")
-                ? objectList.timeSync[parseInt(descVal) - 1].description
-                : "---";
-            break;
+    case "get":
+        descTXT = (defined(descVal) && descVal !== "0" && descVal !== "")
+            ? objectList.get[parseInt(descVal, 10) - 1].description
+            : "---";
+        break;
+    case "time-sync":
+        descTXT = (defined(descVal) && descVal !== "0" && descVal !== "")
+            ? objectList.timeSync[parseInt(descVal, 10) - 1].description
+            : "---";
+        break;
     }
-    const classID = parseInt($("#add-class").val());
+    const classID = parseInt($("#add-class").val(), 10);
     if (Number.isNaN(classID) || classID < 0 || classID > 65536) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-            AppMain.t("CLASS_ID_ERROR_TXT", "TASK_MANAGER"));
+                AppMain.t("CLASS_ID_ERROR_TXT", "TASK_MANAGER"));
         return false;
     }
 
@@ -2435,7 +2442,7 @@ CtrlActionTaskManager.addAttrPress = function () {
     const instaID1 = parseInt($("input[name='inst1']").val(), 10);
     if (Number.isNaN(instaID1) || instaID1 < 0 || instaID1 > 255) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-            AppMain.t("ATTRIBUTE_ID_ERROR_TXT", "TASK_MANAGER"));
+                AppMain.t("ATTRIBUTE_ID_ERROR_TXT", "TASK_MANAGER"));
         return false;
     }
     instaIDshort += instaID1 + ".";
@@ -2448,7 +2455,7 @@ CtrlActionTaskManager.addAttrPress = function () {
     const instaID2 = parseInt($("input[name='inst2']").val(), 10);
     if (Number.isNaN(instaID2) || instaID2 < 0 || instaID2 > 255) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-            AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
+                AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
         return false;
     }
     instaIDshort += instaID2 + ".";
@@ -2461,7 +2468,7 @@ CtrlActionTaskManager.addAttrPress = function () {
     const instaID3 = parseInt($("input[name='inst3']").val(), 10);
     if (Number.isNaN(instaID3) || instaID3 < 0 || instaID3 > 255) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-            AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
+                AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
         return false;
     }
     instaIDshort += instaID3 + ".";
@@ -2474,7 +2481,7 @@ CtrlActionTaskManager.addAttrPress = function () {
     const instaID4 = parseInt($("input[name='inst4']").val(), 10);
     if (Number.isNaN(instaID4) || instaID4 < 0 || instaID4 > 255) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-            AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
+                AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
         return false;
     }
     instaIDshort += instaID4 + ".";
@@ -2487,7 +2494,7 @@ CtrlActionTaskManager.addAttrPress = function () {
     const instaID5 = parseInt($("input[name='inst5']").val(), 10);
     if (Number.isNaN(instaID5) || instaID5 < 0 || instaID5 > 255) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-            AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
+                AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
         return false;
     }
     instaIDshort += instaID5 + ".";
@@ -2500,7 +2507,7 @@ CtrlActionTaskManager.addAttrPress = function () {
     const instaID6 = parseInt($("input[name='inst6']").val(), 10);
     if (Number.isNaN(instaID6) || instaID6 < 0 || instaID6 > 255) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-            AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
+                AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
         return false;
     }
     instaIDshort += instaID6;
@@ -2515,7 +2522,7 @@ CtrlActionTaskManager.addAttrPress = function () {
     const attrID = parseInt($("#add-attr").val(), 10);
     if (Number.isNaN(attrID) || attrID < 0 || attrID > 127) {
         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-            AppMain.t("ATTRIBUTE_ID_ERROR_TXT", "TASK_MANAGER"));
+                AppMain.t("ATTRIBUTE_ID_ERROR_TXT", "TASK_MANAGER"));
         return false;
     }
     let accessFrom = $("#add-access-from").val();
@@ -2531,17 +2538,17 @@ CtrlActionTaskManager.addAttrPress = function () {
     if ((accessFrom && accessFrom !== "") || (accessTo && accessTo !== "")) {// isAccessSel
         if (accessFrom === "") {
             CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                AppMain.t("FROM_ERROR_TXT", "TASK_MANAGER"));
+                    AppMain.t("FROM_ERROR_TXT", "TASK_MANAGER"));
             return false;
         }
         if (accessTo === "") {
             CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                AppMain.t("TO_ERROR_TXT", "TASK_MANAGER"));
+                    AppMain.t("TO_ERROR_TXT", "TASK_MANAGER"));
             return false;
         }
         if (moment(accessFrom).isAfter(accessTo)) {
             CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                AppMain.t("FROM_TO_ERROR_TXT", "TASK_MANAGER"));
+                    AppMain.t("FROM_TO_ERROR_TXT", "TASK_MANAGER"));
             return false;
         }
     }
@@ -2571,7 +2578,7 @@ CtrlActionTaskManager.addAttrPress = function () {
         }
         if (!Number.isNaN(minDiffInt) && !Number.isNaN(maxDiffInt) && minDiffInt > maxDiffInt) {
             CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                AppMain.t("MAXMINDIF_ERROR_TXT", "TASK_MANAGER"));
+                    AppMain.t("MAXMINDIF_ERROR_TXT", "TASK_MANAGER"));
             return false;
         }
     } else {
@@ -2588,50 +2595,50 @@ CtrlActionTaskManager.addAttrPress = function () {
     }
 
     CtrlActionTaskManager.addAttrHtml(classID, instaID, attrID, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
-        relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
+            relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
     if (classID === 4 && attrID === 2) {
         CtrlActionTaskManager.addAttrHtml(classID, instaID, 4, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
-            relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
+                relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
         CtrlActionTaskManager.addAttrHtml(classID, instaID, 5, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
-            relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
+                relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
     }
     if (classID === 5 && attrID === 2) {
         CtrlActionTaskManager.addAttrHtml(classID, instaID, 5, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
-            relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
+                relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
     }
     if (classID === 5 && attrID === 3) {
         CtrlActionTaskManager.addAttrHtml(classID, instaID, 5, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
-            relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
+                relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
         CtrlActionTaskManager.addAttrHtml(classID, instaID, 6, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
-            relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
+                relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
     }
     return true;
 };
 
 CtrlActionTaskManager.addAttrHtml = function (classID, instaID, attrID, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
-                                              relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType) {
+        relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType) {
     "use strict";
 
     let devHtml = "<tr>" +
-        "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-class='" + classID + "' " +
-        "data-node-instance='" + instaID + "' data-node-attr='" + attrID + "' " +
-        "data-node-access-from='" + accessFrom + "' data-node-access-to='" + accessTo + "' data-node-max-diff='" + maxDiff + "'" +
-        " data-node-min-diff='" + minDiff + "' data-node-rel-access-from='" + relAccessFrom + "'" +
-        " data-node-rel-access-to='" + relAccessTo + "'" +
-        " data-node-var-type='" + varType + "'" +
-        " data-node-var-value='" + varValue + "' checked/></td>" +
-        "<td>" + descTXT + "</td>" +
-        "<td>" + classID + "</td>" +
-        "<td>" + instaIDshort + "</td>" +
-        "<td>" + attrID + "</td>";
+            "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-class='" + classID + "' " +
+            "data-node-instance='" + instaID + "' data-node-attr='" + attrID + "' " +
+            "data-node-access-from='" + accessFrom + "' data-node-access-to='" + accessTo + "' data-node-max-diff='" + maxDiff + "'" +
+            " data-node-min-diff='" + minDiff + "' data-node-rel-access-from='" + relAccessFrom + "'" +
+            " data-node-rel-access-to='" + relAccessTo + "'" +
+            " data-node-var-type='" + varType + "'" +
+            " data-node-var-value='" + varValue + "' checked/></td>" +
+            "<td>" + descTXT + "</td>" +
+            "<td>" + classID + "</td>" +
+            "<td>" + instaIDshort + "</td>" +
+            "<td>" + attrID + "</td>";
     if ((accessFrom && accessFrom !== "") || (accessTo && accessTo !== "")) {
         devHtml += "<td colspan='2'>" + AppMain.t("ACCESS_SELECTION_FROM", "TASK_MANAGER") + ": " + accessFromTXT + " <br/> "
-            + AppMain.t("ACCESS_SELECTION_TO", "TASK_MANAGER") + ": " + accessToTXT + "</td>";
+                + AppMain.t("ACCESS_SELECTION_TO", "TASK_MANAGER") + ": " + accessToTXT + "</td>";
     } else if (relAccessFrom && relAccessFrom !== "") {
         devHtml += "<td colspan='2'>" + CtrlActionTaskManager.relativeSelector[relAccessFrom] + "</td>";
     } else if ((maxDiff !== "") || (minDiff !== "")) {
         devHtml += "<td colspan='2'>" + AppMain.t("MAX_TIME_DIFF", "TASK_MANAGER") + ": " + maxDiff + " <br/> "
-            + AppMain.t("MIN_TIME_DIFF", "TASK_MANAGER") + ": " + minDiff + "</td>";
+                + AppMain.t("MIN_TIME_DIFF", "TASK_MANAGER") + ": " + minDiff + "</td>";
     } else if (vType.length) {
         devHtml += "<td colspan='2'>" + CtrlActionTaskManager.typeSelector[varType] + "(" + varValue + ")</td>";
     } else {
@@ -2667,7 +2674,7 @@ CtrlActionTaskManager.addResourceRest = function (resource, isEdit) {
     const addJson = CtrlActionTaskManager.getResourceJson(resource, isEdit);
     let response = AppMain.wsMes().exec("RequestMessage", addJson).getResponse(false);
     if (response && response.ResponseMessage && response.ResponseMessage.Reply && response.ResponseMessage.Reply.Result
-        && response.ResponseMessage.Reply.Result.toString() === "OK") {
+            && response.ResponseMessage.Reply.Result.toString() === "OK") {
         CtrlActionTaskManager.exec();
         if (!isEdit) {
             AppMain.dialog("JOB_CREATED", "success", [response.ResponseMessage.Reply.ID.toString()]);
@@ -2687,7 +2694,7 @@ CtrlActionTaskManager.addResourceXMLRest = function (resourceTXT) {
 
     let response = AppMain.wsMes().exec("RequestMessage", resourceTXT).getResponse(false);
     if (response && response.ResponseMessage && response.ResponseMessage.Reply && response.ResponseMessage.Reply.Result
-        && response.ResponseMessage.Reply.Result.toString() === "OK") {
+            && response.ResponseMessage.Reply.Result.toString() === "OK") {
         CtrlActionTaskManager.exec();
         AppMain.dialog("JOB_CREATED", "success", [response.ResponseMessage.Reply.ID.toString()]);
     }
@@ -2827,7 +2834,8 @@ CtrlActionTaskManager.getResourceJson = function (resource, isEdit) {
                                     }
                                 }
                             };
-                            obj["dev:CosemAccessDescriptor"]["dev:CosemXDLMSDescriptor"]["cos:action-request"]["cos:action-request-normal"]["cos:method-invocation-parameters"][elm.cVarType] = elm.cVarValue;
+                            obj["dev:CosemAccessDescriptor"]["dev:CosemXDLMSDescriptor"]["cos:action-request"]["cos:action-request-normal"]
+                                ["cos:method-invocation-parameters"][elm.cVarType] = elm.cVarValue;
                         } else {
                             if (resource.jobType === "upgrade") {
                                 obj = {
@@ -3031,7 +3039,7 @@ CtrlActionTaskManager.getGroups = function () {
     }).getResponse(false);
 
     if (response && response.ResponseMessage && response.ResponseMessage.Reply && response.ResponseMessage.Reply.Result
-        && response.ResponseMessage.Reply.Result.toString() === "OK") {
+            && response.ResponseMessage.Reply.Result.toString() === "OK") {
         let groups = response.ResponseMessage.Payload.DeviceGroup.DeviceGroup;
         let rez = [];
         if (groups.length === undefined) {
@@ -3089,18 +3097,18 @@ CtrlActionTaskManager.importClick = function () {
 
     let allHtml = AppMain.t("FILE_FOR_IMPORT", "TASK_MANAGER");
     allHtml += "<table class='mdl-data-table table-no-borders' style=\"width: 100%\"><tbody>" +
-        "<tr>" +
-        "<td>" + AppMain.t("FILE", "TASK_MANAGER") + " *<div id=\"fileUploadProgressSpinner\" class=\"mdl-spinner mdl-spinner--single-color mdl-js-spinner hidden\"></div></td>" +
-        "<td style='text-align: left;'><div class=\"select-file\" style='padding-top: 5px;'><input id=\"sel-file-import\" type=\"file\" name=\"upload\" /></div>" +
-        "<div style=\"display: none;\" class=\"file-selected\">" +
-        "<span id='file-name-span'></span>" +
-        "<i class='material-icons cursor-pointer' id='clear-icon' style='position:relative;top: 7px;'>clear</i>" +
-        "</div>" +
-        "</td></tr>" +
-        "</tbody>" +
-        "<tfoot><tr><td></td>" +
-        "<td></td>" +
-        "</tr></tfoot></table>";
+            "<tr>" +
+            "<td>" + AppMain.t("FILE", "TASK_MANAGER") + " *<div id=\"fileUploadProgressSpinner\" class=\"mdl-spinner mdl-spinner--single-color mdl-js-spinner hidden\"></div></td>" +
+            "<td style='text-align: left;'><div class=\"select-file\" style='padding-top: 5px;'><input id=\"sel-file-import\" type=\"file\" name=\"upload\" /></div>" +
+            "<div style=\"display: none;\" class=\"file-selected\">" +
+            "<span id='file-name-span'></span>" +
+            "<i class='material-icons cursor-pointer' id='clear-icon' style='position:relative;top: 7px;'>clear</i>" +
+            "</div>" +
+            "</td></tr>" +
+            "</tbody>" +
+            "<tfoot><tr><td></td>" +
+            "<td></td>" +
+            "</tr></tfoot></table>";
 
     $.confirm({
         title: AppMain.t("IMPORT_JOB", "TASK_MANAGER"),
@@ -3165,28 +3173,28 @@ CtrlActionTaskManager.getDataPopUp = function (e) {
         if (node.ID.toString() === nodeID) {
 
             const startHtml = "<tr><td>" + AppMain.t("START_TIME", "TASK_MANAGER") + "</td>" +
-                "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-js-textfield-datepicker textfield-short-175\">" +
-                "<input class=\"mdl-textfield__input\" type=\"text\" id=\"dateStart\"></div>" +
-                "</td></tr>";
+                    "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-js-textfield-datepicker textfield-short-175\">" +
+                    "<input class=\"mdl-textfield__input\" type=\"text\" id=\"dateStart\"></div>" +
+                    "</td></tr>";
 
             const endHtml = "<tr> <td>" + AppMain.t("END_TIME", "TASK_MANAGER") + "</td>" +
-                "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-js-textfield-datepicker textfield-short-175\">" +
-                "<input class=\"mdl-textfield__input\" type=\"text\" id=\"dateEnd\"></div>" +
-                "</td></tr>";
+                    "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-js-textfield-datepicker textfield-short-175\">" +
+                    "<input class=\"mdl-textfield__input\" type=\"text\" id=\"dateEnd\"></div>" +
+                    "</td></tr>";
 
             const lastValidData = "<tr> <td>" + AppMain.t("LAST_VALID_DATA", "TASK_MANAGER") + "</td>" +
-                "<td style='text-align: left'><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-145\">" +
-                "<input class=\"mdl-textfield__input\" type=\"checkbox\" name=\"last-valid-data\"/></div></td>" +
-                "</tr>";
+                    "<td style='text-align: left'><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-145\">" +
+                    "<input class=\"mdl-textfield__input\" type=\"checkbox\" name=\"last-valid-data\"/></div></td>" +
+                    "</tr>";
 
             let allHtml = AppMain.t("INSERT_GET_JOB_PARAMS", "TASK_MANAGER") + "</br>" +
-                "<table class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">"
-                + startHtml + endHtml + lastValidData + "</table>";
+                    "<table class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">"
+                    + startHtml + endHtml + lastValidData + "</table>";
             if (node.DeviceReference || node.GroupReference) {
                 allHtml += "<table id='devices-table' class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">" +
-                    "<thead class=\"th-color-grey text-align-left\">" +
-                    "<tr>" +
-                    "<th style='width: 30px;padding-left: 18px'><input class=\"selectAllTitles\" name=\"selectAllTitles\" type=\"checkbox\"/></th>";
+                        "<thead class=\"th-color-grey text-align-left\">" +
+                        "<tr>" +
+                        "<th style='width: 30px;padding-left: 18px'><input class=\"selectAllTitles\" name=\"selectAllTitles\" type=\"checkbox\"/></th>";
                 if (node.DeviceReference) {
                     allHtml += "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("DEVICE_TITLE", "TASK_MANAGER") + "</th>";
                 } else {
@@ -3350,7 +3358,7 @@ CtrlActionTaskManager.getJobDataRest = function (getDataObj) {
     response = vkbeautify.xml(new XMLSerializer().serializeToString(response), 2);
 
     download("data:text/xml;charset=utf-8;base64," + btoa(response), build.device + "_JobData_ID_" + getDataObj.id + "_" +
-        moment().format("YYYY-MM-DD-HH-mm-ss") + ".xml", "text/xml");
+            moment().format("YYYY-MM-DD-HH-mm-ss") + ".xml", "text/xml");
 
     return true;
 };

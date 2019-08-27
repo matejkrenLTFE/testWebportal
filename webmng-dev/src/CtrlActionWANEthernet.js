@@ -1,18 +1,28 @@
 /**
  * @class CtrlActionWANEthernet Controller action using IControllerAction interface.
  */
-let modulecontrolleraction = require("./IControllerAction");
-let CtrlActionWANEthernet = Object.create(new modulecontrolleraction.IControllerAction);
+
+/* global AppMain, $, defined */
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
+const modulecontrolleraction = require("./IControllerAction");
+let CtrlActionWANEthernet = Object.create(new modulecontrolleraction.IControllerAction());
 const moment = require("moment");
 const build = require("../build.info");
 const download = require("./vendor/download.js");
 
 CtrlActionWANEthernet.formId = "WANEthernetForm";
 CtrlActionWANEthernet.exec = function () {
+    "use strict";
+
     this.view.setTitle("WAN_ETHERNET");
 
     let params = AppMain.ws().exec("GetParameters", {"wan2": ""}).getResponse(false);
-    params = defined(params.GetParametersResponse.wan2) ? params.GetParametersResponse.wan2 : {};
+    params = defined(params.GetParametersResponse.wan2)
+        ? params.GetParametersResponse.wan2
+        : {};
 
     this.view.render(this.controller.action, {
         title: AppMain.t("WAN2", "WAN_ETHERNET"),
@@ -23,7 +33,7 @@ CtrlActionWANEthernet.exec = function () {
                 labelClass: "switchEnable",
                 inputAttr: {
                     "data-bind-event": "click",
-                    "data-bind-method": "CtrlActionWANEthernet.__useInterface"
+                    "data-bind-method": "CtrlActionWANEthernet.useInterface"
                 }
             }),
             ipConfigIpv6: AppMain.html.formElementSwitch("ip-config-ipv6", "true", {
@@ -35,7 +45,7 @@ CtrlActionWANEthernet.exec = function () {
                 labelClass: "ipConfigClientDhcp",
                 inputAttr: {
                     "data-bind-event": "click",
-                    "data-bind-method": "CtrlActionWANEthernet.__useDHCP",
+                    "data-bind-method": "CtrlActionWANEthernet.useDHCP",
                     "data-rbac-element": "wan2.dhcp"
                 }
             })
@@ -67,24 +77,25 @@ CtrlActionWANEthernet.exec = function () {
     setTimeout(function () {
         $(".just-number").on("input", function () {
             const nonNumReg = /[^0-9]/g;
-            $(this).val($(this).val().replace(nonNumReg, ''));
+            $(this).val($(this).val().replace(nonNumReg, ""));
             const v = parseInt($(this).val());
             if (v > 128) {
                 $(this).val("128");
             }
         });
-    }, 100)
+    }, 100);
 };
 
 /**
  * Form element callback: enable/disable interface.
  */
-CtrlActionWANEthernet.__useInterface = function () {
+CtrlActionWANEthernet.useInterface = function () {
+    "use strict";
 
     // Show interface: enabled/disabled
-    const switchButton = document.querySelector('.mdl-js-switch').MaterialSwitch;
+    const switchButton = document.querySelector(".mdl-js-switch").MaterialSwitch;
     let enabled = $("[name='enable']").val() === "true";
-    if (!enabled === false) {
+    if (enabled === true) {
         $.confirm({
             title: AppMain.t("WAN2", "WAN_ETHERNET"),
             content: AppMain.t("CONFIRM_PROMPT", "global"),
@@ -95,24 +106,31 @@ CtrlActionWANEthernet.__useInterface = function () {
                     text: AppMain.t("OK", "global"),
                     action: function () {
                         CtrlActionWANEthernet.enableInterface(!enabled, $("[name='ip-config-client-dhcp']").val() === "true");
-                        (enabled) ? switchButton.off() : switchButton.on();
+                        if (enabled) {
+                            switchButton.off();
+                        } else {
+                            switchButton.on();
+                        }
                         CtrlActionWANEthernet.setParams();
                         return true;
                     }
                 },
                 cancel: {
                     text: AppMain.t("CANCEL", "global"),
-                    action:
-                        function () {
-                            switchButton.on(); //IE fix
-                            return true;
-                        }
+                    action: function () {
+                        switchButton.on(); //IE fix
+                        return true;
+                    }
                 }
             }
         });
     } else {
         CtrlActionWANEthernet.enableInterface(!enabled, $("[name='ip-config-client-dhcp']").val() === "true");
-        (enabled) ? switchButton.off() : switchButton.on();
+        if (enabled) {
+            switchButton.off();
+        } else {
+            switchButton.on();
+        }
         CtrlActionWANEthernet.setParams();
     }
 };
@@ -120,22 +138,31 @@ CtrlActionWANEthernet.__useInterface = function () {
 /**
  * Form element callback: enable/disable DHCP.
  */
-CtrlActionWANEthernet.__useDHCP = function () {
+CtrlActionWANEthernet.useDHCP = function () {
+    "use strict";
+
     // Show interface: enabled/disabled
-    const switchButton = document.querySelector('.ipConfigClientDhcp').MaterialSwitch;
+    const switchButton = document.querySelector(".ipConfigClientDhcp").MaterialSwitch;
 
     let enabled = $("[name='ip-config-client-dhcp']").val() === "true";
 
     CtrlActionWANEthernet.enableInterface($("[name='enable']").val() === "true", !enabled);
-    enabled ? switchButton.off() : switchButton.on();
+    if (enabled) {
+        switchButton.off();
+    } else {
+        switchButton.on();
+    }
 
-    const response = AppMain.ws().exec("SetParameters", {"wan2": {
-        "ip-config-client-dhcp" : $("[name='ip-config-client-dhcp']").val()
-        }}).getResponse(false);
-    if (defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK")
+    const response = AppMain.ws().exec("SetParameters", {
+        "wan2": {
+            "ip-config-client-dhcp": $("[name='ip-config-client-dhcp']").val()
+        }
+    }).getResponse(false);
+    if (defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK") {
         AppMain.dialog("Successfully updated!", "success");
-    else
+    } else {
         AppMain.dialog("Error occurred: " + response.SetParametersResponse.toString(), "error");
+    }
 
     // CtrlActionWANEthernet.setParams();
 };
@@ -146,6 +173,8 @@ CtrlActionWANEthernet.__useDHCP = function () {
  * @param {Boolean} useDHCP
  */
 CtrlActionWANEthernet.enableInterface = function (enabled, useDHCP) {
+    "use strict";
+
     if (!enabled) {
         $("[name='enable']").val(false);
         $("#" + CtrlActionWANEthernet.formId).css({"color": "rgb(150, 150, 150)"});
@@ -153,8 +182,9 @@ CtrlActionWANEthernet.enableInterface = function (enabled, useDHCP) {
         $("tr#FormActions > td").hide();
         $("input[type='text'], input[type='password']").attr("disabled", "disabled");
         $("input[type='checkbox']").each(function (i, elm) {
-            if (elm.id !== "enable")
+            if (elm.id !== "enable") {
                 $(elm).attr("disabled", "disabled");
+            }
         });
         $("label.mdl-switch").addClass("is-disabled");
         AppMain.html.updateElements([".mdl-js-switch"]);
@@ -200,6 +230,8 @@ CtrlActionWANEthernet.enableInterface = function (enabled, useDHCP) {
 };
 
 CtrlActionWANEthernet.setParams = function () {
+    "use strict";
+
     const dhcpEnabled = $("[name='ip-config-client-dhcp']").val() === "true";
     const ipStr = $("[name='ip-config-ip']").val();
     const maskStr = $("[name='ip-config-net-mask']").val();
@@ -209,42 +241,49 @@ CtrlActionWANEthernet.setParams = function () {
     const re = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
     const reIpV6 = "(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))";
     if (dhcpEnabled || (ipStr.match(re) && maskStr.match(re) && dns1Str.match(re) && dns2Str.match(re) && (ipV6.match(reIpV6)
-        || ipV6 === "---" || ipV6 === ""))) {
+            || ipV6 === "---" || ipV6 === ""))) {
 
         const form = $("#" + CtrlActionWANEthernet.formId);
         let data = form.serialize();
         data = form.deserialize(data);
-        data["ip-config-ipv6"] = ( defined(data["ip-config-ipv6-addr"]) && data["ip-config-ipv6-addr"] !== "");
+        data["ip-config-ipv6"] = (defined(data["ip-config-ipv6-addr"]) && data["ip-config-ipv6-addr"] !== "");
 
         const response = AppMain.ws().exec("SetParameters", {"wan2": data}).getResponse(false);
-        if (defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK")
+        if (defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK") {
             AppMain.dialog("Successfully updated!", "success");
-        else
+        } else {
             AppMain.dialog("Error occurred: " + response.SetParametersResponse.toString(), "error");
+        }
     } else {
-        if (!ipStr.match(re))
+        if (!ipStr.match(re)) {
             AppMain.dialog("Please enter correct IP address.", "warning");
-        if (!maskStr.match(re))
+        }
+        if (!maskStr.match(re)) {
             AppMain.dialog("Please enter correct Subnet mask.", "warning");
-        if (!dns1Str.match(re))
+        }
+        if (!dns1Str.match(re)) {
             AppMain.dialog("Please enter correct DNS server 1.", "warning");
-        if (!dns2Str.match(re))
+        }
+        if (!dns2Str.match(re)) {
             AppMain.dialog("Please enter correct DNS server 2.", "warning");
-        if (!(ipV6.match(reIpV6) || ipV6 === "---" || ipV6 === ""))
+        }
+        if (!(ipV6.match(reIpV6) || ipV6 === "---" || ipV6 === "")) {
             AppMain.dialog("Please enter correct IPv6 IP address.", "warning");
+        }
     }
     AppMain.html.updateElements([".mdl-button"]);
 };
 
 CtrlActionWANEthernet.exportParams = function () {
+    "use strict";
+
     const response = AppMain.ws().exec("GetParameters", {"wan2": ""}).getResponse(false);
 
     if (defined(response.GetParametersResponse.wan2)) {
         let xml = "<wan2>\n";
-        for (let elm in response.GetParametersResponse.wan2) {
-            if (response.GetParametersResponse.wan2.hasOwnProperty(elm))
-                xml += "<" + elm + ">" + response.GetParametersResponse.wan2[elm] + "</" + elm + ">\n";
-        }
+        $.each(response.GetParametersResponse.wan2, function (elm, value) {
+            xml += "<" + elm + ">" + value + "</" + elm + ">\n";
+        });
 
         xml += "</wan2>";
 
