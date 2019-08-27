@@ -1,34 +1,51 @@
 /**
  * @class CtrlActionWANModem Controller action using IControllerAction interface.
  */
+
+/* global AppMain, $, defined */
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
 const modulecontrolleraction = require("./IControllerAction");
-let CtrlActionWANModem = Object.create(new modulecontrolleraction.IControllerAction);
+let CtrlActionWANModem = Object.create(new modulecontrolleraction.IControllerAction());
 const comsignal = require("./ComWANModemSignal");
 const moment = require("moment");
 const build = require("../build.info");
 const download = require("./vendor/download.js");
 
 CtrlActionWANModem.formId = "WANModemForm";
-CtrlActionWANModem.exec = function() {
-    this.view.setTitle("WAN_MODEM");
-    
-    let params = AppMain.ws().exec("GetParameters", {"wan1":""}).getResponse(false);
-    params = defined(params.GetParametersResponse.wan1) ? params.GetParametersResponse.wan1 : {};
+CtrlActionWANModem.exec = function () {
+    "use strict";
 
-    const infos = AppMain.ws().getResponseCache("GetInfos",undefined);
+    this.view.setTitle("WAN_MODEM");
+
+    let params = AppMain.ws().exec("GetParameters", {"wan1": ""}).getResponse(false);
+    params = defined(params.GetParametersResponse.wan1)
+        ? params.GetParametersResponse.wan1
+        : {};
+
+    const infos = AppMain.ws().getResponseCache("GetInfos", undefined);
 
     if (infos && defined(infos.GetInfosResponse)) {
-        for (let i in infos.GetInfosResponse.info) {
-            if(infos.GetInfosResponse.info.hasOwnProperty(i)){
-                if (infos.GetInfosResponse.info[i].category === "wan")
-                    params[infos.GetInfosResponse.info[i].name] = infos.GetInfosResponse.info[i].value;
+        infos.GetInfosResponse.info.forEach(function (infoValue) {
+            if (infoValue.category === "wan") {
+                params[infoValue.name] = infoValue.value;
             }
-        }            
+        });
     }
-    params["Type"] = (params["Type"]) ? AppMain.t(params["Type"], "WAN_MODEM") : "---";
-    params["CardID"] = (params["CardID"]) ? params["CardID"] : "---";
-    params["Network"] = (params["Network"]) ? params["Network"] : "---";
-    params["IMEI"] = (params["IMEI"]) ? params["IMEI"] : "---";
+    params.Type = (params.Type)
+        ? AppMain.t(params.Type, "WAN_MODEM")
+        : "---";
+    if (!params.CardID) {
+        params.CardID = "---";
+    }
+    if (!params.Network) {
+        params.Network = "---";
+    }
+    if (!params.IMEI) {
+        params.IMEI = "---";
+    }
 
     comsignal.ComWANModemSignal.getConnectionStatus(params);
     this.view.render(this.controller.action, {
@@ -36,11 +53,11 @@ CtrlActionWANModem.exec = function() {
         params: params,
         elements: {
             enable: AppMain.html.formElementSwitch("enable", "true", {
-                checked: params.enable==="true",
+                checked: params.enable === "true",
                 labelClass: "switchEnable",
                 inputAttr: {
                     "data-bind-event": "click",
-                    "data-bind-method": "CtrlActionWANModem.__useInterface",
+                    "data-bind-method": "CtrlActionWANModem.useInterface",
                     "data-rbac-element": "wan1.enable"
                 }
             })
@@ -79,78 +96,85 @@ CtrlActionWANModem.exec = function() {
     const enabled = params.enable === "true";
     CtrlActionWANModem.enableInterface(enabled);
 
-    this._showSignalIndicator(params.GSM_Signal_Level, params);
+    this.showSignalIndicator(params.GSM_Signal_Level, params);
     AppMain.html.updateElements([".mdl-textfield"]);
 
     setTimeout(function () {
-        $(".just-number").on("input", function() {
+        $(".just-number").on("input", function () {
             const nonNumReg = /[^0-9]/g;
-            $(this).val($(this).val().replace(nonNumReg, ''));
+            $(this).val($(this).val().replace(nonNumReg, ""));
             const v = parseInt($(this).val());
-            if(v > 128){
+            if (v > 128) {
                 $(this).val("128");
             }
         });
-    },100)
+    }, 100);
 };
 
-CtrlActionWANModem.init = function() {    
-    this.controller.attachEvent("onAfterExecute", this.onAfterExecute);    
+CtrlActionWANModem.init = function () {
+    "use strict";
+    this.controller.attachEvent("onAfterExecute", this.onAfterExecute);
 };
 
-CtrlActionWANModem.onAfterExecute = function() {
-
-};
-
-CtrlActionWANModem.setParams = function() {
-    const form = $( "#" + CtrlActionWANModem.formId );
+CtrlActionWANModem.setParams = function () {
+    "use strict";
+    const form = $("#" + CtrlActionWANModem.formId);
     let data = form.serialize();
     data = form.deserialize(data);
 
-    const response = AppMain.ws().exec("SetParameters", {"wan1": data }).getResponse(false);
-    if(defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK")
-        AppMain.dialog( "SUCC_UPDATED", "success" );
-    else
-        AppMain.dialog( "Error occurred: " + response.SetParametersResponse.toString(), "error" );
+    const response = AppMain.ws().exec("SetParameters", {"wan1": data}).getResponse(false);
+    if (defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK") {
+        AppMain.dialog("SUCC_UPDATED", "success");
+    } else {
+        AppMain.dialog("Error occurred: " + response.SetParametersResponse.toString(), "error");
+    }
     AppMain.html.updateElements([".mdl-button"]);
 };
 
 /**
  * Form element callback: enable/disable interface.
  */
-CtrlActionWANModem.__useInterface = function() {
+CtrlActionWANModem.useInterface = function () {
+    "use strict";
     // Show interface: enabled/disabled
-    const switchButton = document.querySelector('.mdl-js-switch').MaterialSwitch;
+    const switchButton = document.querySelector(".mdl-js-switch").MaterialSwitch;
     const enabled = $("[name='enable']").val() === "true";
-    if(!enabled === false){
+    if (enabled === true) {
         $.confirm({
             title: AppMain.t("WAN", "WAN_MODEM"),
             content: AppMain.t("CONFIRM_PROMPT", "global"),
             useBootstrap: false,
             theme: "material",
             buttons: {
-                confirm:{
+                confirm: {
                     text: AppMain.t("OK", "global"),
                     action: function () {
                         CtrlActionWANModem.enableInterface(!enabled);
-                        (enabled) ? switchButton.off() : switchButton.on();
+                        if (enabled) {
+                            switchButton.off();
+                        } else {
+                            switchButton.on();
+                        }
                         CtrlActionWANModem.setParams();
                         return true;
                     }
-                } ,
+                },
                 cancel: {
                     text: AppMain.t("CANCEL", "global"),
-                    action:
-                        function () {
-                            switchButton.on(); //IE fix
-                            return true;
-                        }
+                    action: function () {
+                        switchButton.on(); //IE fix
+                        return true;
+                    }
                 }
             }
         });
-    }else{
+    } else {
         CtrlActionWANModem.enableInterface(!enabled);
-        (enabled) ? switchButton.off() : switchButton.on();
+        if (enabled) {
+            switchButton.off();
+        } else {
+            switchButton.on();
+        }
         CtrlActionWANModem.setParams();
     }
 };
@@ -159,32 +183,33 @@ CtrlActionWANModem.__useInterface = function() {
  * Show interface as enabled/disabled (grayed out).
  * @param {Boolean} enabled
  */
-CtrlActionWANModem.enableInterface = function(enabled) {    
-    if (!enabled) {                
+CtrlActionWANModem.enableInterface = function (enabled) {
+    "use strict";
+    if (!enabled) {
         $("[name='enable']").val(false);
-        $( "#" + CtrlActionWANModem.formId ).css({"color": "#e5e5e5"});
-        $( "tr#FormActions > td").hide();
-        $( "input[type='text'], input[type='password']" ).attr("disabled", "disabled");
-        $("input[type='checkbox']").each(function(i, elm){
-            if (elm.id !== "enable")
-                $(elm).attr("disabled", "disabled");            
+        $("#" + CtrlActionWANModem.formId).css({"color": "#e5e5e5"});
+        $("tr#FormActions > td").hide();
+        $("input[type='text'], input[type='password']").attr("disabled", "disabled");
+        $("input[type='checkbox']").each(function (i, elm) {
+            if (elm.id !== "enable") {
+                $(elm).attr("disabled", "disabled");
+            }
         });
         $("label.mdl-switch").addClass("is-disabled");
         AppMain.html.updateElements([".mdl-js-switch"]);
-    }
-    else {                
+    } else {
         $("[name='enable']").val(true);
-        $( "#" + CtrlActionWANModem.formId ).css({"color": "#000"});
-        $( "tr#FormActions > td").show();
+        $("#" + CtrlActionWANModem.formId).css({"color": "#000"});
+        $("tr#FormActions > td").show();
         // tu noter daj preverjanje rbac!!!!
-        if(AppMain.user.getRBACpermissionElement("wan1", "apn")){
-            $( "input[type='text'][name='apn']" ).removeAttr("disabled");
+        if (AppMain.user.getRBACpermissionElement("wan1", "apn")) {
+            $("input[type='text'][name='apn']").removeAttr("disabled");
         }
-        if(AppMain.user.getRBACpermissionElement("wan1", "user-name")){
-            $( "input[type='text'][name='user-name']" ).removeAttr("disabled");
+        if (AppMain.user.getRBACpermissionElement("wan1", "user-name")) {
+            $("input[type='text'][name='user-name']").removeAttr("disabled");
         }
-        if(AppMain.user.getRBACpermissionElement("wan1", "password")){
-            $( "input[type='password'][name='password']" ).removeAttr("disabled");
+        if (AppMain.user.getRBACpermissionElement("wan1", "password")) {
+            $("input[type='password'][name='password']").removeAttr("disabled");
         }
         $("input[type='checkbox']").removeAttr("disabled");
         $("label.mdl-switch").removeClass("is-disabled");
@@ -192,7 +217,8 @@ CtrlActionWANModem.enableInterface = function(enabled) {
     }
 };
 
-CtrlActionWANModem._showSignalIndicator = function(signal, params) {
+CtrlActionWANModem.showSignalIndicator = function (signal, params) {
+    "use strict";
     comsignal.ComWANModemSignal.init({
         signal: signal,
         elementSelector: "#SignalLevelIndicator",
@@ -200,36 +226,29 @@ CtrlActionWANModem._showSignalIndicator = function(signal, params) {
     });
 };
 
-CtrlActionWANModem.exportParams = function() {
-    const response = AppMain.ws().exec("GetParameters", {"wan1": "" }).getResponse(false);
+CtrlActionWANModem.exportParams = function () {
+    "use strict";
+    const response = AppMain.ws().exec("GetParameters", {"wan1": ""}).getResponse(false);
 
     if (defined(response.GetParametersResponse.wan1)) {
-        let xml="<wan1>\n";
-        for (let elm in response.GetParametersResponse.wan1) {
-            if(response.GetParametersResponse.wan1.hasOwnProperty(elm)){
-                if (typeof response.GetParametersResponse.wan1[elm] === "object") {
-                    for(let value in response.GetParametersResponse.wan1[elm]) {
-                        if(response.GetParametersResponse.wan1[elm].hasOwnProperty(value)){
-                            xml += "<" + elm + ">";
-                            for (let param in response.GetParametersResponse.wan1[elm][value]) {
-                                if(response.GetParametersResponse.wan1[elm][value].hasOwnProperty(param)){
-                                    xml += "<" + value + ">";
-                                    xml += response.GetParametersResponse.wan1[elm][value][param];
-                                    xml += "</" + value + ">\n";
-                                }
-                            }
-                            xml += "</" + elm + ">\n";
-                        }
-
-                    }
-                }
-                else
-                    xml += "<" + elm + ">" + response.GetParametersResponse.wan1[elm] + "</" + elm + ">\n";
+        let xml = "<wan1>\n";
+        $.each(response.GetParametersResponse.wan1, function (elm, elmValue) {
+            if (Object.prototype.toString.call(elmValue) === "[object Object]") {
+                $.each(elmValue, function (value, elmSubValue) {
+                    xml += "<" + elm + ">";
+                    elmSubValue.forEach(function (param) {
+                        xml += "<" + value + ">";
+                        xml += param;
+                        xml += "</" + value + ">\n";
+                    });
+                    xml += "</" + elm + ">\n";
+                });
+            } else {
+                xml += "<" + elm + ">" + elmValue + "</" + elm + ">\n";
             }
-
-        }
+        });
         xml += "</wan1>";
-        const dateStr = moment(new Date()).format( AppMain.localization("EXPORT_DATETIME_FORMAT") );
+        const dateStr = moment(new Date()).format(AppMain.localization("EXPORT_DATETIME_FORMAT"));
         download("data:application/xml;charset=utf-8;base64," + btoa(xml), build.device + "_Parameters_Modem_" + dateStr + ".xml", "application/xml");
     }
 };
