@@ -1,4 +1,9 @@
-window.$ = window.jQuery = require("jquery");
+/* global AppMain */
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+window.jQuery = require("jquery");
+window.$ = window.jQuery;
 // Load vendor dependencies
 
 
@@ -20,11 +25,11 @@ require("./AppMain");
 
 // Application bootstrap
 // AppMain must be global singelton instance.
-window["AppMain"] = new AppMain({
-	environment: "prod", // dev|prod
+window.AppMain = new AppMain({
+    environment: "prod", // dev|prod
     httpsEnabled: true,
-	supportedLocale: [],
-    authBasic:true,
-	authType: "basic" // basic | certificate
+    supportedLocale: [],
+    authBasic: true,
+    authType: "basic" // basic | certificate
 });
-window["AppMain"].run();
+window.AppMain.run();

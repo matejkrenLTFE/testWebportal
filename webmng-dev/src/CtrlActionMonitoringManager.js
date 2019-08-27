@@ -466,7 +466,7 @@ CtrlActionMonitoringManager.setCounters = function (counters, profileCategory, p
     this.bodyHTML = "";
     const self = this;
     counters.forEach(function (val, index) {
-        if (this.typeObj[profileType] === "COUNTER" && index === 0) {
+        if (self.typeObj[profileType] === "COUNTER" && index === 0) {
             return;
         }
         self.chartLabels.push(moment(val["time-stamp"]).format(AppMain.localization("DATETIME_FORMAT")));

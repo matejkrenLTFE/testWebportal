@@ -1,12 +1,20 @@
 /**
  * @class CtrlActionWhiteList Controller action using IControllerAction interface.
  */
+
+/* global AppMain, $, defined */
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
 const modulecontrolleraction = require("./IControllerAction");
-const CtrlActionWhiteList = Object.create(new modulecontrolleraction.IControllerAction);
+const CtrlActionWhiteList = Object.create(new modulecontrolleraction.IControllerAction());
 const moment = require("moment");
 const build = require("../build.info");
 
-CtrlActionWhiteList.exec = function() {
+CtrlActionWhiteList.exec = function () {
+    "use strict";
+
     this.view.setTitle("WHITE_LIST");
 
     if (this.view.cached("WhiteList#WhiteList")) {
@@ -24,63 +32,63 @@ CtrlActionWhiteList.exec = function() {
     }
 
     this.nodes = AppMain.ws().exec("GetNodeList", {
-        "with-data":true
+        "with-data": true
     }).getResponse(false);
 
-    this.params = AppMain.ws().exec("GetParameters", {"plc":""}).getResponse(false);
+    this.params = AppMain.ws().exec("GetParameters", {"plc": ""}).getResponse(false);
     this.params = defined(this.params.GetParametersResponse.plc) ? this.params.GetParametersResponse.plc : {};
     let list = {};
     let tooltipHtml = "";
 
     this.nodes = (this.nodes.GetNodeListResponse.node instanceof Array) ? this.nodes.GetNodeListResponse.node : this.nodes.GetNodeListResponse;
-    if (typeof nodes["__prefix"] !== "undefined")
-        delete nodes["__prefix"];
+    if (this.nodes.__prefix !== undefined)
+        delete this.nodes.__prefix;
 
     //fix for white list length of 1
-    if(this.params["white-list"] !== undefined &&typeof this.params["white-list"]["mac-address"] === "string"){
+    if (this.params["white-list"] !== undefined && typeof this.params["white-list"]["mac-address"] === "string") {
         this.params["white-list"]["mac-address"] = [this.params["white-list"]["mac-address"]];
     }
     this.whiteListArr = [];
-    if(this.params && this.params["white-list"] && this.params["white-list"]["mac-address"]) {
-        $.each(this.params["white-list"]["mac-address"], function(index, node){
+    if (this.params && this.params["white-list"] && this.params["white-list"]["mac-address"]) {
+        $.each(this.params["white-list"]["mac-address"], function (index, node) {
             CtrlActionWhiteList.whiteListArr.push(node);
         });
         list = this._buildNodeListHTML(this, this.nodes, this.params["white-list"]["mac-address"]);
         tooltipHtml = this.htmlTooltips(this, this.nodes, this.params["white-list"]["mac-address"]);
-    }else{
+    } else {
         list = this._buildNodeListHTML(this, this.nodes, []);
     }
 
     this.view.render("WhiteList#WhiteList", {
-            labels: {
-                title: AppMain.t("WHITE_LIST_MNG", "WHITE_LIST"),
-                description: "",
-                btnRefresh: AppMain.t("REFRESH_LIST", "WHITE_LIST"),
-                btnExport: AppMain.t("EXPORT", "WHITE_LIST"),
-                btnDelete: AppMain.t("DELETE", "WHITE_LIST"),
-                useWhiteListText: AppMain.t("USE_WHITE_LIST", "WHITE_LIST"),
-                macAddress: AppMain.t("MAC_ADDRESS", "WHITE_LIST"),
-                ipAddress: AppMain.t("IP_ADDRESS", "WHITE_LIST"),
-                totalWhiteListDevices: AppMain.t("TOTAL_WHITE_LIST", "WHITE_LIST"),
-                macAddressLabel: AppMain.t("MAC_ADDRESS", "WHITE_LIST"),
-                addWhiteListTxt: AppMain.t("ADD_WHITE_LIST_TXT", "WHITE_LIST"),
-                addMac: AppMain.t("ADD", "global"),
-                filter: AppMain.t("FILTER", "global")
-            },
-            elements:{
-                useWhiteList: AppMain.html.formElementSwitch("use-white-list", "true", {
-                    checked: this._getWhiteListStatus(this.params),
-                    labelClass: "useWhiteListClass",
-                    inputAttr: {
-                        "data-bind-event": "click",
-                        "data-bind-method": "CtrlActionWANEthernet.useWhiteListConfirm"
-                    }
-                })
-            },
-            htmlNodes: list.htmlNodes,
-            totalNodes: list.totalNodes,
-            activeNodes: list.totalNodes,
-            htmlTooltips: tooltipHtml
+        labels: {
+            title: AppMain.t("WHITE_LIST_MNG", "WHITE_LIST"),
+            description: "",
+            btnRefresh: AppMain.t("REFRESH_LIST", "WHITE_LIST"),
+            btnExport: AppMain.t("EXPORT", "WHITE_LIST"),
+            btnDelete: AppMain.t("DELETE", "WHITE_LIST"),
+            useWhiteListText: AppMain.t("USE_WHITE_LIST", "WHITE_LIST"),
+            macAddress: AppMain.t("MAC_ADDRESS", "WHITE_LIST"),
+            ipAddress: AppMain.t("IP_ADDRESS", "WHITE_LIST"),
+            totalWhiteListDevices: AppMain.t("TOTAL_WHITE_LIST", "WHITE_LIST"),
+            macAddressLabel: AppMain.t("MAC_ADDRESS", "WHITE_LIST"),
+            addWhiteListTxt: AppMain.t("ADD_WHITE_LIST_TXT", "WHITE_LIST"),
+            addMac: AppMain.t("ADD", "global"),
+            filter: AppMain.t("FILTER", "global")
+        },
+        elements: {
+            useWhiteList: AppMain.html.formElementSwitch("use-white-list", "true", {
+                checked: this._getWhiteListStatus(this.params),
+                labelClass: "useWhiteListClass",
+                inputAttr: {
+                    "data-bind-event": "click",
+                    "data-bind-method": "CtrlActionWANEthernet.useWhiteListConfirm"
+                }
+            })
+        },
+        htmlNodes: list.htmlNodes,
+        totalNodes: list.totalNodes,
+        activeNodes: list.totalNodes,
+        htmlTooltips: tooltipHtml
     }, true);
 
     const tableOptions = {
@@ -93,22 +101,22 @@ CtrlActionWhiteList.exec = function() {
     AppMain.html.updateElements([".mdl-textfield", ".mdl-js-switch"]);
 };
 
-CtrlActionWhiteList._getWhiteListStatus = function(params){
-    return (params["use-white-list"]==="true" && params["acl-auto-add-mode"]==="false");
+CtrlActionWhiteList._getWhiteListStatus = function (params) {
+    return (params["use-white-list"] === "true" && params["acl-auto-add-mode"] === "false");
 };
 
 /**
  * Build HTML nodes table.
  * @return {Object} {htmlNodes, totalNodes}
  */
-CtrlActionWhiteList._buildNodeListHTML = function(_this, nodes, whiteList) {
-    let list = {totalNodes: 0, htmlNodes:""};
+CtrlActionWhiteList._buildNodeListHTML = function (_this, nodes, whiteList) {
+    let list = {totalNodes: 0, htmlNodes: ""};
 
-    let i=1;
-    $.each(nodes, function(index, node){
+    let i = 1;
+    $.each(nodes, function (index, node) {
         const ind = whiteList.indexOf(node["mac-address"]);
-        if(ind !== -1){ // node is in white list
-            whiteList.splice(ind,1);
+        if (ind !== -1) { // node is in white list
+            whiteList.splice(ind, 1);
             list.htmlNodes += "<tr>";
             list.htmlNodes += "<td class='mdl-data-table__cell--non-numeric checkbox-col'>" +
                 "<input type='checkbox' name='selectNode' class='selectNode' " +
@@ -124,7 +132,7 @@ CtrlActionWhiteList._buildNodeListHTML = function(_this, nodes, whiteList) {
     });
 
     //display the rest of white list, those have unknown IP
-    $.each(whiteList, function(index, node){
+    $.each(whiteList, function (index, node) {
         list.htmlNodes += "<tr>";
         list.htmlNodes += "<td class='mdl-data-table__cell--non-numeric checkbox-col'>" +
             "<input type='checkbox' name='selectNode' class='selectNode' " +
@@ -139,33 +147,33 @@ CtrlActionWhiteList._buildNodeListHTML = function(_this, nodes, whiteList) {
         i++;
     });
 
-    list.totalNodes = i-1;
-    if(list.totalNodes === 0){
+    list.totalNodes = i - 1;
+    if (list.totalNodes === 0) {
         list.htmlNodes = "<tr><td colspan='3'><p style='text-align:center'>" + AppMain.t("WHITE_LIST_EMPTY", "WHITE_LIST") + "</p></td></tr>";
     }
     return list;
 };
 
-CtrlActionWhiteList.setWhiteList = function(arr){
+CtrlActionWhiteList.setWhiteList = function (arr) {
     const client = AppMain.ws();
     client.xmlSetElement("plc");
     client.xmlSetElement("white-list");
-    $(arr).each(function(index, mac){
+    $(arr).each(function (index, mac) {
         client.xmlSetParam("mac-address", mac);
     });
     const p = client.xmlGetStructure();
     const response = client.exec("SetParameters", p).getResponse(false);
 
-    if (defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK"){
+    if (defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK") {
         AppMain.dialog("SUCC_UPDATED", "success");
         this.exec();
-    }else
+    } else
         AppMain.dialog("Error occurred: " + response.SetParametersResponse.toString(), "error");
 
-    AppMain.html.updateElements(["#macinput",".mdl-js-switch"]);
+    AppMain.html.updateElements(["#macinput", ".mdl-js-switch"]);
 };
 
-CtrlActionWhiteList.__exportNodeList = function(newMac) {
+CtrlActionWhiteList.__exportNodeList = function (newMac) {
 
     let whitelistArr = this.whiteListArr.slice();
     whitelistArr.push(newMac);
@@ -173,23 +181,23 @@ CtrlActionWhiteList.__exportNodeList = function(newMac) {
 };
 
 
-CtrlActionWhiteList.__exportNodeListArr = function() {
+CtrlActionWhiteList.__exportNodeListArr = function () {
     CtrlActionWhiteList.setWhiteList(this.export);
 };
 
-CtrlActionWhiteList.removeMac = function(e) {
+CtrlActionWhiteList.removeMac = function (e) {
     const $this = $(e.target);
     const mac = $this.attr("data-node-mac");
     const ind = this.whiteListArr.indexOf(mac);
-    if(ind !== -1){
+    if (ind !== -1) {
         this.whiteListArr.splice(ind, 1);
     }
     let whitelistArr = this.whiteListArr.slice();
     CtrlActionWhiteList.setWhiteList(whitelistArr);
 };
 
-CtrlActionWhiteList.useWhiteListConfirm = function() {
-    const switchButton = document.querySelector('.mdl-js-switch').MaterialSwitch;
+CtrlActionWhiteList.useWhiteListConfirm = function () {
+    const switchButton = document.querySelector(".mdl-js-switch").MaterialSwitch;
     const enabled = $("[name='enable']").val() === "true";
 
     $.confirm({
@@ -198,18 +206,18 @@ CtrlActionWhiteList.useWhiteListConfirm = function() {
         useBootstrap: false,
         theme: "material",
         buttons: {
-            confirm:{
+            confirm: {
                 text: AppMain.t("OK", "global"),
                 action: function () {
                     CtrlActionWhiteList.__useWhiteList();
                     return true;
                 }
-            } ,
+            },
             cancel: {
                 text: AppMain.t("CANCEL", "global"),
                 action:
                     function () {
-                        if(enabled)
+                        if (enabled)
                             switchButton.on();
                         else
                             switchButton.off();
@@ -220,19 +228,24 @@ CtrlActionWhiteList.useWhiteListConfirm = function() {
     });
 };
 
-CtrlActionWhiteList.__useWhiteList = function() {
+CtrlActionWhiteList.__useWhiteList = function () {
     const sw = $("[name='use-white-list']");
-    const switchButton = document.querySelector('.mdl-js-switch').MaterialSwitch;
+    const switchButton = document.querySelector(".mdl-js-switch").MaterialSwitch;
     const enabled = sw.val() === "true";
-    (enabled) ? switchButton.off() : switchButton.on();
-    (enabled) ? sw.val(false) : sw.val(true);
+    if (enabled) {
+        switchButton.off();
+        sw.val(false);
+    } else {
+        switchButton.on();
+        sw.val(true);
+    }
 
     const client = AppMain.ws();
     client.xmlSetElement("plc");
     client.xmlSetParam("use-white-list", true); //this is now always true
-    if(enabled){
+    if (enabled) {
         client.xmlSetParam("acl-auto-add-mode", enabled);
-    }else{
+    } else {
         client.xmlSetParam("acl-auto-add-mode", enabled);
     }
     const p = client.xmlGetStructure();
@@ -246,17 +259,17 @@ CtrlActionWhiteList.__useWhiteList = function() {
     AppMain.html.updateElements(["#macinput", ".mdl-js-switch"]);
 };
 
-CtrlActionWhiteList.addWhiteList = function() {
+CtrlActionWhiteList.addWhiteList = function () {
     let selObj = {};
-    $.each(this.nodes, function(index, node){
-        selObj["'"+node["mac-address"]+"'"] = node["mac-address"];
+    $.each(this.nodes, function (index, node) {
+        selObj["'" + node["mac-address"] + "'"] = node["mac-address"];
     });
     const selectHTML = AppMain.html.formElementSelect("add-from-attached", selObj, {
         label: "",
         elementSelected: ""
     });
     let selectRow = "";
-    if(this.nodes.length > 0){
+    if (this.nodes.length > 0) {
         selectRow = "<tr>\n    " +
             "<td class=\"mdl-data-table__cell--non-numeric\">\n        " +
             "<label class=\"mdl-radio mdl-js-radio\" for=\"input-type\">\n            " +
@@ -264,7 +277,7 @@ CtrlActionWhiteList.addWhiteList = function() {
             "</label>\n    " +
             "</td>\n    " +
             "<td>\n        " +
-            AppMain.t("SELECT_FROM_ATTACHED", "WHITE_LIST") +  selectHTML +
+            AppMain.t("SELECT_FROM_ATTACHED", "WHITE_LIST") + selectHTML +
             "</td>\n" +
             "</tr>";
     }
@@ -294,7 +307,7 @@ CtrlActionWhiteList.addWhiteList = function() {
         "         </label>\n        " +
         "        </td>\n        " +
         "       <td>\n            " +
-        "<span>"+ AppMain.t("SELECT_FROM_IMPORT", "WHITE_LIST") + "</span>"+
+        "<span>" + AppMain.t("SELECT_FROM_IMPORT", "WHITE_LIST") + "</span>" +
         "           <span class=\"select-file\">\n                " +
         "               <input id=\"file\" type=\"file\" name=\"upload\" />\n            " +
         "           </span>\n            " +
@@ -318,16 +331,16 @@ CtrlActionWhiteList.addWhiteList = function() {
         useBootstrap: false,
         theme: "material",
         buttons: {
-            confirm:{
+            confirm: {
                 text: AppMain.t("ADD", "global"),
                 action: function () {
-                    const radio =  $("input[type='radio']:checked").val();
-                    if(radio ==="input-attached"){  // add from attached
+                    const radio = $("input[type='radio']:checked").val();
+                    if (radio === "input-attached") {  // add from attached
                         const mac = $("select[name='add-from-attached']").val();
-                        CtrlActionWhiteList.__exportNodeList(mac.replace("'","").replace("'",""));
+                        CtrlActionWhiteList.__exportNodeList(mac.replace("'", "").replace("'", ""));
                         return true;
                     }
-                    if(radio ==="input-mac"){  // add from attached
+                    if (radio === "input-mac") {  // add from attached
                         const mac1 = $("input[name='mac1']").val();
                         const mac2 = $("input[name='mac2']").val();
                         const mac3 = $("input[name='mac3']").val();
@@ -336,12 +349,11 @@ CtrlActionWhiteList.addWhiteList = function() {
                         const mac6 = $("input[name='mac6']").val();
                         const mac7 = $("input[name='mac7']").val();
                         const mac8 = $("input[name='mac8']").val();
-                        if(mac1.length === 2 && mac2.length === 2 && mac3.length === 2 && mac4.length === 2
-                            && mac5.length === 2 && mac6.length === 2 && mac7.length === 2 && mac8.length === 2){
+                        if (mac1.length === 2 && mac2.length === 2 && mac3.length === 2 && mac4.length === 2
+                            && mac5.length === 2 && mac6.length === 2 && mac7.length === 2 && mac8.length === 2) {
                             CtrlActionWhiteList.__exportNodeList(mac1 + ":" + mac2 + ":" + mac3 + ":" + mac4 + ":" + mac5 + ":" + mac6 + ":" + mac7 + ":" + mac8);
                             return true;
-                        }
-                        else{
+                        } else {
                             $.alert({
                                 title: AppMain.t("ERROR", "global"),
                                 content: AppMain.t("WHITE_LIST_ADD_ERR", "WHITE_LIST"),
@@ -349,18 +361,18 @@ CtrlActionWhiteList.addWhiteList = function() {
                                 theme: "material",
                                 buttons: {
                                     confirm: {
-                                        text: AppMain.t("OK", "global"),
+                                        text: AppMain.t("OK", "global")
                                     }
                                 }
                             });
                             return false;
                         }
                     }
-                    if(radio ==="input-import"){  // add from attached
-                        if($("#file-selected").is(":visible")){
+                    if (radio === "input-import") {  // add from attached
+                        if ($("#file-selected").is(":visible")) {
                             CtrlActionWhiteList.__exportNodeListArr();
                             return true;
-                        }else{
+                        } else {
                             $.alert({
                                 useBootstrap: false,
                                 theme: "material",
@@ -368,7 +380,7 @@ CtrlActionWhiteList.addWhiteList = function() {
                                 content: AppMain.t("IMPORT_WHITE_LIST_SELECT_FILE", "WHITE_LIST"),
                                 buttons: {
                                     confirm: {
-                                        text: AppMain.t("OK", "global"),
+                                        text: AppMain.t("OK", "global")
                                     }
                                 }
                             });
@@ -378,7 +390,7 @@ CtrlActionWhiteList.addWhiteList = function() {
 
 
                 }
-            } ,
+            },
             cancel: {
                 text: AppMain.t("CANCEL", "global"),
                 action:
@@ -391,16 +403,16 @@ CtrlActionWhiteList.addWhiteList = function() {
 
     setTimeout(function () {
         const inputElement = document.getElementById("file");
-        inputElement.addEventListener("change", function() {
+        inputElement.addEventListener("change", function () {
             const uploadElement = this;
 
             const reader = new FileReader();
 
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 CtrlActionWhiteList.export = []; // array of macs
 
                 const csv = e.target.result;
-                if(!csv.includes("\r\n") && !csv.includes("\n")){
+                if (!csv.includes("\r\n") && !csv.includes("\n")) {
                     CtrlActionWhiteList.importAlert(AppMain.t("IMPORT_WHITE_LIST_CSV_ERROR", "WHITE_LIST"));
                     return;
                 }
@@ -408,27 +420,27 @@ CtrlActionWhiteList.addWhiteList = function() {
 
                 let header = allTextLines[0];
                 let startInd = 1;
-                if(allTextLines[0] === "SEP=,"){ //second line is header line
+                if (allTextLines[0] === "SEP=,") { //second line is header line
                     header = allTextLines[1];
                     startInd = 2;
                 }
-                if(!header.includes(",")){
+                if (!header.includes(",")) {
                     CtrlActionWhiteList.importAlert(AppMain.t("IMPORT_WHITE_LIST_CSV_ERROR", "WHITE_LIST"));
                     return;
                 }
-                header = header.split(',');
+                header = header.split(",");
                 //get index of "MAC column"
-                const ind = header.indexOf('"'+AppMain.t("MAC_ADDRESS", "NODES")+ '"');
-                if(ind === -1){
+                const ind = header.indexOf("\"" + AppMain.t("MAC_ADDRESS", "NODES") + "\"");
+                if (ind === -1) {
                     CtrlActionWhiteList.importAlert(AppMain.t("IMPORT_WHITE_LIST_ERROR", "WHITE_LIST"));
                 }
-                for(let index in allTextLines){
-                    if(allTextLines.hasOwnProperty(index)){
-                        if(parseInt(index) < startInd)
+                for (let index in allTextLines) {
+                    if (allTextLines.hasOwnProperty(index)) {
+                        if (parseInt(index) < startInd)
                             continue;
                         const line = allTextLines[index];
-                        if(line !== "")
-                            CtrlActionWhiteList.export.push(line.split(',')[ind].replace("\"","").replace("\"",""));
+                        if (line !== "")
+                            CtrlActionWhiteList.export.push(line.split(",")[ind].replace("\"", "").replace("\"", ""));
                     }
                 }
             };
@@ -437,11 +449,11 @@ CtrlActionWhiteList.addWhiteList = function() {
             $("#file-name").html(uploadElement.files[0].name);
             $(".file-selected").show();
         }, false);
-    },200);
+    }, 200);
 };
 
 
-CtrlActionWhiteList.__exportWhiteList = function() {
+CtrlActionWhiteList.__exportWhiteList = function () {
     let csv = "";
     let isNotSelected = true;
     let inputC = $("input:checked");
@@ -450,18 +462,17 @@ CtrlActionWhiteList.__exportWhiteList = function() {
     if (inputC.length > 0) {
         csv = "SEP=,\r\n";
         // csv += '"' + AppMain.t("#") + '",';
-        csv += '"' + AppMain.t("MAC_ADDRESS", "WHITE_LIST") + '",';
-        csv += '"' + AppMain.t("IP_ADDRESS", "WHITE_LIST") + '",';
-        csv += '\r\n';
+        csv += "\"" + AppMain.t("MAC_ADDRESS", "WHITE_LIST") + "\",";
+        csv += "\"" + AppMain.t("IP_ADDRESS", "WHITE_LIST") + "\",";
+        csv += "\r\n";
 
         inputC.each(function (i, elm) {
             const element = $(elm);
             if (element.hasClass("selectNode")) {
                 isNotSelected = false;
-                // csv += '"' + element.attr("data-node-id") + '",';
-                csv += '"' + element.attr("data-node-mac") + '",';
-                csv += '"' + element.attr("data-node-ip") + '"';
-                csv += '\r\n';
+                csv += "\"" + element.attr("data-node-mac") + "\",";
+                csv += "\"" + element.attr("data-node-ip") + "\"";
+                csv += "\r\n";
             }
         });
     }
@@ -473,12 +484,12 @@ CtrlActionWhiteList.__exportWhiteList = function() {
     AppMain.dialog("CSV_CREATED_WHITE", "success");
 
     const download = require("./vendor/download.js");
-    download("data:text/csv;charset=utf-8;base64," + btoa(csv), build.device + "_WhiteList_" + moment().format('YYYY-MM-DD-HH-mm-ss') + ".csv", "text/csv");
+    download("data:text/csv;charset=utf-8;base64," + btoa(csv), build.device + "_WhiteList_" + moment().format("YYYY-MM-DD-HH-mm-ss") + ".csv", "text/csv");
 };
 
 
-CtrlActionWhiteList.importWhiteList = function() {
-    let html= "<table class=\"mdl-data-table mdl-js-data-table\" style=\"width: 100%\">\n    " +
+CtrlActionWhiteList.importWhiteList = function () {
+    let html = "<table class=\"mdl-data-table mdl-js-data-table\" style=\"width: 100%\">\n    " +
         "<tr>" +
         "  \n        <td class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("UPLOAD_FILE", "WHITE_LIST") + "</td>" +
         "  \n        <td>" +
@@ -498,13 +509,13 @@ CtrlActionWhiteList.importWhiteList = function() {
         useBootstrap: false,
         theme: "material",
         buttons: {
-            confirm:{
+            confirm: {
                 text: AppMain.t("IMPORT", "global"),
                 action: function () {
-                    if($("#file-selected").is(":visible")){
+                    if ($("#file-selected").is(":visible")) {
                         CtrlActionWhiteList.__exportNodeListArr();
                         return true;
-                    }else{
+                    } else {
                         $.alert({
                             useBootstrap: false,
                             theme: "material",
@@ -512,14 +523,14 @@ CtrlActionWhiteList.importWhiteList = function() {
                             content: AppMain.t("IMPORT_WHITE_LIST_SELECT_FILE", "WHITE_LIST"),
                             buttons: {
                                 confirm: {
-                                    text: AppMain.t("OK", "global"),
+                                    text: AppMain.t("OK", "global")
                                 }
                             }
                         });
                         return false;
                     }
                 }
-            } ,
+            },
             cancel: {
                 text: AppMain.t("CANCEL", "global"),
                 action:
@@ -533,7 +544,7 @@ CtrlActionWhiteList.importWhiteList = function() {
 };
 
 
-CtrlActionWhiteList.importAlert =function(content){
+CtrlActionWhiteList.importAlert = function (content) {
     $.alert({
         useBootstrap: false,
         theme: "material",
@@ -541,7 +552,7 @@ CtrlActionWhiteList.importAlert =function(content){
         content: content,
         buttons: {
             confirm: {
-                text: AppMain.t("OK", "global"),
+                text: AppMain.t("OK", "global")
             }
         }
     });
@@ -552,33 +563,33 @@ CtrlActionWhiteList.importAlert =function(content){
 };
 
 
-CtrlActionWhiteList.htmlTooltips = function(_this, nodes, whiteList) {
+CtrlActionWhiteList.htmlTooltips = function (_this, nodes, whiteList) {
     let html = "";
 
-    let i=1;
-    $.each(nodes, function(){
-        html += "<div class='mdl-tooltip' data-mdl-for='remove-"+ i + "'>" + AppMain.t("REMOVE", "global") + " </div>";
+    let i = 1;
+    $.each(nodes, function () {
+        html += "<div class='mdl-tooltip' data-mdl-for='remove-" + i + "'>" + AppMain.t("REMOVE", "global") + " </div>";
         i++;
     });
-    $.each(whiteList, function(){
-        html += "<div class='mdl-tooltip' data-mdl-for='remove-"+ i + "'>" + AppMain.t("REMOVE", "global") + "</div>";
+    $.each(whiteList, function () {
+        html += "<div class='mdl-tooltip' data-mdl-for='remove-" + i + "'>" + AppMain.t("REMOVE", "global") + "</div>";
         i++;
     });
 
     return html;
 };
 
-CtrlActionWhiteList.deleteWhiteList = function(){
+CtrlActionWhiteList.deleteWhiteList = function () {
     const inputChecked = $("input:checked");
     let isEmpty = true;
     if (inputChecked.length > 0) {
-        inputChecked.each(function(i, elm){
+        inputChecked.each(function (i, elm) {
             const element = $(elm);
-            if(element.hasClass("selectNode")) {
+            if (element.hasClass("selectNode")) {
                 isEmpty = false;
                 const mac = element.attr("data-node-mac");
                 const ind = CtrlActionWhiteList.whiteListArr.indexOf(mac);
-                if(ind !== -1){
+                if (ind !== -1) {
                     CtrlActionWhiteList.whiteListArr.splice(ind, 1);
                 }
             }
@@ -587,17 +598,17 @@ CtrlActionWhiteList.deleteWhiteList = function(){
 
     if (isEmpty) {
         AppMain.dialog("DELETE_WHITELIST", "default");
-    }else{
+    } else {
         let whitelistArr = this.whiteListArr.slice();
         CtrlActionWhiteList.setWhiteList(whitelistArr);
     }
 };
 
-CtrlActionWhiteList.init = function() {
+CtrlActionWhiteList.init = function () {
     this.controller.attachEvent("onBeforeExecute", this.onBeforeExecute);
-    this.controller.attachEvent("onAfterExecute", this.onAfterExecute);    
+    this.controller.attachEvent("onAfterExecute", this.onAfterExecute);
 };
-CtrlActionWhiteList.onBeforeExecute = function() {
+CtrlActionWhiteList.onBeforeExecute = function () {
     // $(".main-canvas").removeClass("main-canvas-attached-devices");
 };
 
