@@ -119,7 +119,7 @@ module.exports.AppController = function () {
 
     const controllers = ["Default", "Nodes", "PLCNeighbor", "PLCRouting", "WhiteList", "Events", "EventsSettings", "WANModem",
             "WANEthernet", "NANPlc", "NANRs", "LANEthernet", "TaskManager", "GroupTable", "MonitoringManager", "PLCdiagnostics",
-            "Network", "SystemSettings", "SystemSettingsExport", "SystemUsers", "SystemUpgrade", "SystemReboot", "SystemInformation",
+            "Network", "SystemSettings", "SystemSettingsExport", "SystemUsers", "SystemUsersRole", "SystemUpgrade", "SystemReboot", "SystemInformation",
             "Login"];
 
     function getControllerActionComponent(action) {
