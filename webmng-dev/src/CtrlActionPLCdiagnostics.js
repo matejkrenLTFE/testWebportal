@@ -1,11 +1,19 @@
 /**
  * @class CtrlActionPLCdiagnostics Controller action using IControllerAction interface.
  */
-var modulecontrolleraction = require("./IControllerAction");
-var CtrlActionPLCdiagnostics = Object.create(new modulecontrolleraction.IControllerAction);
+
+/* global AppMain, $, defined */
+/* jshint maxstatements: false */
+/* jslint browser:true, node:true*/
+/* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
+const modulecontrolleraction = require("./IControllerAction");
+let CtrlActionPLCdiagnostics = Object.create(new modulecontrolleraction.IControllerAction());
 
 CtrlActionPLCdiagnostics.formId = "PLCdiagnosticsForm";
-CtrlActionPLCdiagnostics.exec = function(e) {
+CtrlActionPLCdiagnostics.exec = function () {
+    "use strict";
+
     this.view.setTitle("PLC_DIAGNOSTICS");
 
     this.view.render(this.controller.action, {
@@ -24,19 +32,22 @@ CtrlActionPLCdiagnostics.exec = function(e) {
     });
 };
 
-CtrlActionPLCdiagnostics.setParams = function(e) {
-    const form = $( "#" + CtrlActionPLCdiagnostics.formId );
+CtrlActionPLCdiagnostics.setParams = function () {
+    "use strict";
+
+    const form = $("#" + CtrlActionPLCdiagnostics.formId);
     let data = form.serialize();
     data = form.deserialize(data);
-    if(!defined(data["time-stamp"])){
-        data["time-stamp"] = "0"
+    if (!defined(data["time-stamp"])) {
+        data["time-stamp"] = "0";
     }
 
-    const response = AppMain.ws().exec("PlcSnifferSet", data).getResponse();
-    if(defined(response.PlcSnifferSetResponse) && response.PlcSnifferSetResponse.toString() === "OK")
-        AppMain.dialog( "SUCC_UPDATED", "success" );
-    else
-        AppMain.dialog( "Error occurred: " + response.SetParametersResponse.toString(), "error" );
+    const response = AppMain.ws().exec("PlcSnifferSet", data).getResponse(false);
+    if (defined(response.PlcSnifferSetResponse) && response.PlcSnifferSetResponse.toString() === "OK") {
+        AppMain.dialog("SUCC_UPDATED", "success");
+    } else {
+        AppMain.dialog("Error occurred: " + response.SetParametersResponse.toString(), "error");
+    }
     AppMain.html.updateElements([".mdl-button"]);
 };
 

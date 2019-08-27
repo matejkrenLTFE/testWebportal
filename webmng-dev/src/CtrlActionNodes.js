@@ -127,7 +127,7 @@ CtrlActionNodes.exec = function () {
 
     const ctx2 = document.getElementById("chart_attached").getContext("2d");
 
-    new Chart(ctx2, {
+    Chart(ctx2, {
         type: "doughnut",
         data: data,
         options: {
@@ -298,11 +298,13 @@ CtrlActionNodes.buildNodeListHTML = function (nodes) {
         list.htmlNodes += "<td class='ack-timestamp cursor-default'>" + lastSuccTime + "</td>";
 
         list.htmlNodes += "<td  class='cursor-default'>";
-        list.htmlNodes += "<i id='ping_" + i + "'  data-rbac=\"nodes.ping\" class=\"material-icons cursor-pointer\" data-bind-event=\"click\" data-bind-method=\"CtrlActionNodes.ping\" data-node-mac='" + node["mac-address"] + "'>import_export</i>";
+        list.htmlNodes += "<i id='ping_" + i + "'  data-rbac=\"nodes.ping\" class=\"material-icons cursor-pointer\" data-bind-event=\"click\" " +
+                "data-bind-method=\"CtrlActionNodes.ping\" data-node-mac='" + node["mac-address"] + "'>import_export</i>";
 
         list.htmlTooltips += "<div class=\"mdl-tooltip\" data-mdl-for=\"ping_" + i + "\">" + AppMain.t("PING", "NODES") + "</div>";
 
-        list.htmlNodes += "<i id='kickOff_" + i + "' data-rbac=\"nodes.kickoff\" class=\"material-icons cursor-pointer\" data-bind-event=\"click\" data-bind-method=\"CtrlActionNodes.kickOffNode\" data-node-mac='" + node["mac-address"] + "'>clear</i>";
+        list.htmlNodes += "<i id='kickOff_" + i + "' data-rbac=\"nodes.kickoff\" class=\"material-icons cursor-pointer\" data-bind-event=\"click\" " +
+                "data-bind-method=\"CtrlActionNodes.kickOffNode\" data-node-mac='" + node["mac-address"] + "'>clear</i>";
 
         list.htmlTooltips += "<div class=\"mdl-tooltip\" data-mdl-for=\"kickOff_" + i + "\">" + AppMain.t("KICK_OFF", "NODES") + "</div>";
 
