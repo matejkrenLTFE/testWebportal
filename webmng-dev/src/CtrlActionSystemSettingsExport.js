@@ -150,10 +150,12 @@ CtrlActionSystemSettingsExport.exportParams = function () {
 
         // DCMNG & CTRDM are considered the same parameters group
         // if ether is selected enable both.
+        /*eslint-disable camelcase*/
         if (defined(formData.export_dcmng) || defined(formData.export_cntr)) {
             formData.export_dcmng = "on";
             formData.export_cntr = "on";
         }
+        /*eslint-enable camelcase*/
         $.each(params.GetParametersResponse, function (cat, value) {
             if (defined(formData["export_" + cat])) {
                 exportCategories[exportCategories.length] = defined(expNameMap[cat])

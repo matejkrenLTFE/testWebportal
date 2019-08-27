@@ -45,10 +45,11 @@ CtrlActionDefault.exec = function () {
     if (defined(generalInfo.system.Battery_level)) {
         generalInfo.system.Battery_level = CtrlActionDefault.batteryChargeLevelStr(generalInfo.system.Battery_level);
     }
-
+    /*eslint-disable camelcase*/
     if (defined(generalInfo.system.FW_library_version)) {
         generalInfo.system.FW_library_version = generalInfo.system.FW_library_version.split(" ")[0];
     }
+    /*eslint-enable camelcase*/
 
     // Prepate counters
     const cnt = AppMain.ws().exec("GetCounters", undefined).getResponse(false);

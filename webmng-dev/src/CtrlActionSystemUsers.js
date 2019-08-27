@@ -167,24 +167,22 @@ CtrlActionSystemUsers.addNewUser = function (username) {
                         }
                         user.role = $("#role-select").val();
                         return CtrlActionSystemUsers.saveUser("add", user);
-                    } else {
-                        user.username = username;
-                        user.oldPassword = $("input[name='password-old']").val();
-                        user.password = $("input[name='password']").val();
-                        if (user.password === "") {
-                            CtrlActionSystemUsers.importAlert(AppMain.t("PASSWORD_TITLE_ERROR", "SYS_USER_MNG"),
-                                    AppMain.t("USER_NO_PASSWORD", "global"));
-                            return false;
-                        }
-                        user.passwordRepeat = $("input[name='password-repeat']").val();
-                        if (user.password !== user.passwordRepeat) {
-                            CtrlActionSystemUsers.importAlert(AppMain.t("PASSWORD_TITLE_ERROR", "SYS_USER_MNG"),
-                                    AppMain.t("PASSWORD_ERROR", "SYS_USER_MNG"));
-                            return false;
-                        }
-                        return CtrlActionSystemUsers.saveUser("change", user);
                     }
-
+                    user.username = username;
+                    user.oldPassword = $("input[name='password-old']").val();
+                    user.password = $("input[name='password']").val();
+                    if (user.password === "") {
+                        CtrlActionSystemUsers.importAlert(AppMain.t("PASSWORD_TITLE_ERROR", "SYS_USER_MNG"),
+                                AppMain.t("USER_NO_PASSWORD", "global"));
+                        return false;
+                    }
+                    user.passwordRepeat = $("input[name='password-repeat']").val();
+                    if (user.password !== user.passwordRepeat) {
+                        CtrlActionSystemUsers.importAlert(AppMain.t("PASSWORD_TITLE_ERROR", "SYS_USER_MNG"),
+                                AppMain.t("PASSWORD_ERROR", "SYS_USER_MNG"));
+                        return false;
+                    }
+                    return CtrlActionSystemUsers.saveUser("change", user);
                 }
             },
             cancel: {

@@ -46,7 +46,9 @@ CtrlActionSystemInformation.exec = function () {
             productionDate: AppMain.t("PRODUCTION_DATE", "SYS_INFO"),
             webPortal: AppMain.t("WEBPORTAL_VER", "SYS_INFO"),
             imageVersion: AppMain.t("IMG_VER", "SYS_INFO"),
+            /*eslint-disable camelcase*/
             U_Boot: AppMain.t("U_BOOT", "SYS_INFO"),
+            /*eslint-enable camelcase*/
             plcInfo: AppMain.t("G3PLC_MOD_VER", "SYS_INFO"),
             modemType: AppMain.t("MODEM_TYPE", "SYS_SETTINGS"),
             version: AppMain.t("VERSION", "SYS_SETTINGS")

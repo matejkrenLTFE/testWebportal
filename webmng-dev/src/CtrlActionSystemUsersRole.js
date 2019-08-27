@@ -178,7 +178,8 @@ CtrlActionSystemUsersRole.htmlRoleTable = function (rolePermissions) {
 
     // Webservice access level config
     tableBody += "<tr>";
-    tableBody += "<td style='background-color:#eee' class='mdl-cell--left'><b>WEB SERVICE</b></td><td style='background-color:#eee' ></td><td style='background-color:#eee'></td><td style='background-color:#eee'></td>";
+    tableBody += "<td style='background-color:#eee' class='mdl-cell--left'><b>WEB SERVICE</b></td><td style='background-color:#eee' >" +
+            "</td><td style='background-color:#eee'></td><td style='background-color:#eee'></td>";
     tableBody += "</tr>";
 
     let accessLevelSelect = AppMain.html.formElementSelect("access-level", [

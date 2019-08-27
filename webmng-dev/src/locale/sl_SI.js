@@ -1,7 +1,7 @@
 /* jshint maxstatements: false */
 /* jslint browser:true, node:true*/
 /* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
-
+/*eslint-disable camelcase*/
 const sl_SI = {
     "Dashboard": "Nadzorna plošča",
     "Nodes": "Števci",
@@ -30,3 +30,4 @@ const sl_SI = {
     }
 };
 module.exports = sl_SI;
+/*eslint-enable camelcase*/

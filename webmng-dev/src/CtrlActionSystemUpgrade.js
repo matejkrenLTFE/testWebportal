@@ -163,11 +163,11 @@ CtrlActionSystemUpgrade.readFileChunks = function (file, callback) {
             offset += evt.target.result.length;
             callback(evt.target.result, file); // callback for handling read chunk
         } else {
-            console.log("Read error: " + evt.target.error);
+            dmp("Read error: " + evt.target.error);
             return;
         }
         if (offset >= fileSize) {
-            console.log("Done reading file");
+            dmp("Done reading file");
             return;
         }
 

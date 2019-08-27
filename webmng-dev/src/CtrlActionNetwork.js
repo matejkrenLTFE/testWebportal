@@ -28,7 +28,7 @@ CtrlActionNetwork.exec = function () {
     try {
         routing = AppMain.ws().exec("PlcRoutingTableGet", undefined).getResponse(false);
     } catch (e) {
-        console.log("err: PlcRoutingTableGet" + e.toString());
+        dmp("err: PlcRoutingTableGet" + e.toString());
     }
 
     let nodes = AppMain.ws().exec("GetNodeList", {"with-data": true}).getResponse(false);

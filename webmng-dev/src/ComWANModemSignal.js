@@ -213,6 +213,7 @@ ComWANModemSignal.getConnectionStatus = function (params) {
             status.icon2Style = "";
         }
     }
+    /*eslint-disable camelcase*/
     params.GSM_Status_txt = status.txt;
     params.GSM_Status_icon1 = status.icon1;
     params.GSM_Status_icon1Tooltip = status.icon1Tooltip;
@@ -220,5 +221,6 @@ ComWANModemSignal.getConnectionStatus = function (params) {
     params.GSM_Status_icon2 = status.icon2;
     params.GSM_Status_icon2Tooltip = status.icon2Tooltip;
     params.GSM_Status_icon2Style = status.icon2Style;
+    /*eslint-enable camelcase*/
 };
 module.exports.ComWANModemSignal = ComWANModemSignal;

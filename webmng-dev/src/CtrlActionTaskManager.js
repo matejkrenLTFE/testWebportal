@@ -355,9 +355,8 @@ CtrlActionTaskManager.transformInstanceId = function (instance) {
             instance = instance.substr(2);
         }
         return rez;
-    } else {
-        return instance;
     }
+    return instance;
 };
 
 /**
@@ -1760,15 +1759,14 @@ CtrlActionTaskManager.addJobGroup = function (jobObj) {
                         CtrlActionTaskManager.importAlert(AppMain.t("GROUPS_ERR_TITLE_TXT", "TASK_MANAGER"),
                                 AppMain.t("GROUPS_SELECT_ERROR", "TASK_MANAGER"));
                         return false;
-                    } else {
-                        jobObj.devices = [];
-                        if (jobObj.jobType === "notification") {
-                            CtrlActionTaskManager.addResourceRest(jobObj);
-                        } else {
-                            CtrlActionTaskManager.addJobFinal(jobObj);
-                        }
-                        return true;
                     }
+                    jobObj.devices = [];
+                    if (jobObj.jobType === "notification") {
+                        CtrlActionTaskManager.addResourceRest(jobObj);
+                    } else {
+                        CtrlActionTaskManager.addJobFinal(jobObj);
+                    }
+                    return true;
                 }
             },
             cancel: {
@@ -2361,9 +2359,8 @@ CtrlActionTaskManager.updateAttrs = function (jobObj) {
                 });
             });
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
     return true;
 };

@@ -502,9 +502,8 @@ CtrlActionMonitoringManager.getParams = function () {
 
     if (defined(cnt.GetCountersResponse.counter)) {
         return cnt.GetCountersResponse.counter;
-    } else {
-        return [];
     }
+    return [];
 };
 
 CtrlActionMonitoringManager.updateProfileType = function () {

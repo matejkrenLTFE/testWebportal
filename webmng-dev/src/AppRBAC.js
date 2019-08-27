@@ -80,13 +80,13 @@ module.exports.AppRBAC = function () {
             lan: ["enable", "dhcp", "ip-config-ip", "ip-config-net-mask", "ip-config-gateway", "actions", "button-export", "button-apply"],
             plcDiagnostics: ["actions"],
             settings: ["hostname", "ntp-server", "ntp-sync-interval", "reboot", "actions", "button-apply", "button-sync-time", "push-retries", "push-timeout"],
-            firmware_upgrade: ["upgrade"],
-            settings_import_export: ["import", "export", "export_local_ethernet", "export_modem", "export_ethernet", "export_plc",
+            "firmware_upgrade": ["upgrade"],
+            "settings_import_export": ["import", "export", "export_local_ethernet", "export_modem", "export_ethernet", "export_plc",
                     "export_rs485", "export_system", "export_application", "export_gwpd", "export_macd", "export_csmd", "factory_defaults"],
             users: ["actions", "button-add-user", "button-remove-user", "button-change-password"],
             /*users_roles: ["actions"],
             certificate: ["actions", "import", "generate"],*/
-            system_info: ["linux-version", "firmware-library-version", "application-package", "image-version", "webservice", "apache-version",
+            "system_info": ["linux-version", "firmware-library-version", "application-package", "image-version", "webservice", "apache-version",
                     "production-date", "webportal-version", "G3PLC-modem-version"],
             taskManager: ["refresh", "add", "delete", "edit", "export"],
             groupsTable: ["refresh", "add", "delete", "export", "edit", "push-dest"]
