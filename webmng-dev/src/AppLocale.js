@@ -58,7 +58,7 @@ module.exports.AppLocale = function (loc) {
      */
     this.loadTranslations = function () {
         languages.forEach(function (language) {  // protect dynamic require
-            translationStrings[language] = require("./locale/" + `${language}`);
+            translationStrings[language] = require("./locale/" + language); // eslint-disable-line security/detect-non-literal-require
         });
     };
 
