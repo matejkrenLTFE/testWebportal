@@ -227,6 +227,9 @@ CtrlActionWANEthernet.enableInterface = function (enabled, useDHCP) {
     if (AppMain.user.getRBACpermissionElement("wan2", "ip-config-ipv6-addr")) {
         $("input[type='text'][name='ip-config-ipv6-addr']").removeAttr("disabled");
     }
+    if (AppMain.user.getRBACpermissionElement("wan2", "ipv6-netmask")) {
+        $("input[type='text'][name='ip-config-ipv6-subnet-prefix-len']").removeAttr("disabled");
+    }
 };
 
 CtrlActionWANEthernet.setParams = function () {
