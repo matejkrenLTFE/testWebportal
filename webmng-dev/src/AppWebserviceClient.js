@@ -267,8 +267,8 @@ module.exports.AppWebserviceClient = function () {
      */
     this.getResponse = function (rawResp) {
         // Create method response cache
-        if (!defined(_cache[_lastMethodExec])) {
-            _cache[_lastMethodExec] = null;
+        if (!defined(_cache[`${_lastMethodExec}`])) {
+            _cache[`${_lastMethodExec}`] = null;
         }
         dmp("Executed method: " + _lastMethodExec);
 

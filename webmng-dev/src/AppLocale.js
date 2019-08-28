@@ -70,7 +70,7 @@ module.exports.AppLocale = function (loc) {
         }
         return defined(translationStrings[`${_locale}`])
             ? translationStrings[`${_locale}`]
-            : {};
+            : {name: "en_US"};
     };
 
     /**

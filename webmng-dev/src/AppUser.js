@@ -70,7 +70,7 @@ module.exports.AppUser = function () {
      */
     this.getRBACpermissionElement = function (category, param) {
         const rbac = this.getRBACMap();
-        return !(defined(rbac[category]) && defined(rbac[category][param])
-                && (rbac[category][param].toLowerCase() === "h" || rbac[category][param].toLowerCase() === "r"));
+        return !(defined(rbac[`${category}`]) && defined(rbac[`${category}`][`${param}`])
+                && (rbac[`${category}`][`${param}`].toLowerCase() === "h" || rbac[`${category}`][`${param}`].toLowerCase() === "r"));
     };
 };

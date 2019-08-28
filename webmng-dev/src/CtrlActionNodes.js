@@ -747,8 +747,8 @@ CtrlActionNodes.getNodeStateString = function (stateName) {
         "METER-LOST": AppMain.t("METER_LOST", "NODES"),
         "METER-ACTIVE": AppMain.t("METER_ACTIVE", "NODES")
     };
-    return defined(nodeStates[stateName])
-        ? nodeStates[stateName]
+    return defined(nodeStates[`${stateName}`])
+        ? nodeStates[`${stateName}`]
         : "";
 };
 

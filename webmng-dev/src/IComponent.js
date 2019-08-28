@@ -35,11 +35,11 @@ module.exports.IComponent = function () {
      */
     this.data = function (name, value) {
         if (defined(name) && defined(value)) {
-            dataPom[name] = value;
+            dataPom[`${name}`] = value;
         }
         if (defined(name)) {
-            return defined(dataPom[name])
-                ? dataPom[name]
+            return defined(dataPom[`${name}`])
+                ? dataPom[`${name}`]
                 : null;
         }
         return dataPom;

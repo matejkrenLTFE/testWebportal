@@ -453,7 +453,7 @@ CtrlActionWhiteList.addWhiteList = function () {
                         return;
                     }
                     if (line !== "") {
-                        CtrlActionWhiteList.export.push(line.split(",")[ind].replace("\"", "").replace("\"", ""));
+                        CtrlActionWhiteList.export.push(line.split(",")[`${ind}`].replace("\"", "").replace("\"", ""));
                     }
                 });
             };

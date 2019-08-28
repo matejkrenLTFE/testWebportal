@@ -2224,7 +2224,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
                 jOd2.on("change", function () {
                     if (jOd2.val() !== "0") {
                         const newValPos = parseInt(jOd2.val(), 10) - 1;
-                        CtrlActionTaskManager.selectCosemHelper(objectList.get[newValPos]);
+                        CtrlActionTaskManager.selectCosemHelper(objectList.get[`${newValPos}`]);
                     }
                 });
                 if (jobObj.jobService === "time-sync") {
@@ -2637,7 +2637,7 @@ CtrlActionTaskManager.addAttrHtml = function (classID, instaID, attrID, accessFr
         devHtml += "<td colspan='2'>" + AppMain.t("MAX_TIME_DIFF", "TASK_MANAGER") + ": " + maxDiff + " <br/> "
                 + AppMain.t("MIN_TIME_DIFF", "TASK_MANAGER") + ": " + minDiff + "</td>";
     } else if (vType.length) {
-        devHtml += "<td colspan='2'>" + CtrlActionTaskManager.typeSelector[varType] + "(" + varValue + ")</td>";
+        devHtml += "<td colspan='2'>" + CtrlActionTaskManager.typeSelector[`${varType}`] + "(" + varValue + ")</td>";
     } else {
         devHtml += "<td></td>";
     }
@@ -2736,30 +2736,30 @@ CtrlActionTaskManager.getResourceJson = function (resource, isEdit) {
 
 
     const xmlMainEl = "mes:Payload";
-    addJson[xmlMainEl] = {};
-    addJson[xmlMainEl]["mes:DeviceAccess"] = {};
+    addJson[`${xmlMainEl}`] = {};
+    addJson[`${xmlMainEl}`]["mes:DeviceAccess"] = {};
 
     if (isEdit) {
         addJson["mes:Request"] = {};
         addJson["mes:Request"]["mes:ID"] = resource.ID.toString();
-        addJson[xmlMainEl]["mes:DeviceAccess"]._ID = resource.ID.toString();
+        addJson[`${xmlMainEl}`]["mes:DeviceAccess"]._ID = resource.ID.toString();
     }
 
     if (!isEdit) {
         if (resource.devices && resource.devices.length > 0) {
-            addJson[xmlMainEl]["mes:DeviceAccess"]["dev:DevicesReferenceList"] = {};
-            addJson[xmlMainEl]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:DeviceReference"] = [];
+            addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:DevicesReferenceList"] = {};
+            addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:DeviceReference"] = [];
             $.each(resource.devices, function (i, elm) {
-                addJson[xmlMainEl]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:DeviceReference"].push({
+                addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:DeviceReference"].push({
                     "_DeviceID": elm
                 });
             });
         } else {
             if (resource.groups && resource.groups.length > 0) {
-                addJson[xmlMainEl]["mes:DeviceAccess"]["dev:DevicesReferenceList"] = {};
-                addJson[xmlMainEl]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:GroupReference"] = [];
+                addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:DevicesReferenceList"] = {};
+                addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:GroupReference"] = [];
                 $.each(resource.groups, function (i, elm) {
-                    addJson[xmlMainEl]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:GroupReference"].push({
+                    addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:GroupReference"].push({
                         "_GroupID": elm
                     });
                 });
@@ -2767,8 +2767,8 @@ CtrlActionTaskManager.getResourceJson = function (resource, isEdit) {
         }
 
         if (resource.jobType !== "notification") {  //cosem access list
-            addJson[xmlMainEl]["mes:DeviceAccess"]["dev:CosemAccessList"] = {};
-            addJson[xmlMainEl]["mes:DeviceAccess"]["dev:CosemAccessList"]["dev:CosemAccess"] = [];
+            addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:CosemAccessList"] = {};
+            addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:CosemAccessList"]["dev:CosemAccess"] = [];
             $.each(resource.attrs, function (i, elm) {
                 let obj;
                 if (resource.jobService === "time-sync") {
@@ -2789,7 +2789,7 @@ CtrlActionTaskManager.getResourceJson = function (resource, isEdit) {
                     if (elm.cMaxDiff) {
                         obj["dev:CosemAccessDescriptor"]["dev:CosemTimeSync"]["dev:max-time-diff"] = elm.cMaxDiff;
                     }
-                    addJson[xmlMainEl]["mes:DeviceAccess"]["dev:CosemAccessList"]["dev:CosemAccess"].push(obj);
+                    addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:CosemAccessList"]["dev:CosemAccess"].push(obj);
 
                 } else {
                     obj = {};
@@ -2899,7 +2899,7 @@ CtrlActionTaskManager.getResourceJson = function (resource, isEdit) {
                             }
                         }
                     }
-                    addJson[xmlMainEl]["mes:DeviceAccess"]["dev:CosemAccessList"]["dev:CosemAccess"].push(obj);
+                    addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:CosemAccessList"]["dev:CosemAccess"].push(obj);
                 }
 
             });
@@ -2907,31 +2907,31 @@ CtrlActionTaskManager.getResourceJson = function (resource, isEdit) {
     }
 
     if (defined(resource.Priority)) {
-        addJson[xmlMainEl]["mes:DeviceAccess"]["dev:Priority"] = resource.Priority;
+        addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:Priority"] = resource.Priority;
     }
 
     if (resource.Expires && resource.Expires !== "") {
-        addJson[xmlMainEl]["mes:DeviceAccess"]["dev:Expires"] = resource.Expires;
+        addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:Expires"] = resource.Expires;
     }
 
     if (resource.NotOlderThan && resource.NotOlderThan !== "") {
-        addJson[xmlMainEl]["mes:DeviceAccess"]["dev:NotOlderThan"] = resource.NotOlderThan;
+        addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:NotOlderThan"] = resource.NotOlderThan;
     }
 
     if (resource.AcceptDataNotification && resource.AcceptDataNotification !== "") {
-        addJson[xmlMainEl]["mes:DeviceAccess"]["dev:AcceptDataNotification"] = resource.AcceptDataNotification;
+        addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:AcceptDataNotification"] = resource.AcceptDataNotification;
     }
 
     if (resource.Activates && resource.Activates !== "") {
-        addJson[xmlMainEl]["mes:DeviceAccess"]["dev:Activates"] = resource.Activates;
+        addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:Activates"] = resource.Activates;
     }
 
     if (resource.RepeatingInterval && resource.RepeatingInterval !== "") {
-        addJson[xmlMainEl]["mes:DeviceAccess"]["dev:RepeatingInterval"] = resource.RepeatingInterval;
+        addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:RepeatingInterval"] = resource.RepeatingInterval;
     }
 
     if (resource.Duration && resource.Duration !== "") {
-        addJson[xmlMainEl]["mes:DeviceAccess"]["dev:Duration"] = resource.Duration;
+        addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:Duration"] = resource.Duration;
     }
 
     return addJson;

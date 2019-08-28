@@ -381,7 +381,7 @@ module.exports.AppView = function () {
             ? processed
             : true;
         if (processed) {
-            return (this.cachePom[viewName] !== undefined);
+            return (this.cachePom[`${viewName}`] !== undefined);
         }
         return (this.cachePom["_" + viewName] !== undefined);
     };
