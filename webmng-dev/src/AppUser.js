@@ -24,15 +24,12 @@ module.exports.AppUser = function () {
         if (_userData === null) {
             _userData = JSON.parse(localStorage.getItem("userData"));
         }
-        if (_userData === null) {
-            return null;
-        }
 
         if (!defined(name)) {
             return _userData;
         }
 
-        return defined(_userData[`${name}`])
+        return (defined(_userData) && defined(_userData[`${name}`]))
             ? _userData[`${name}`]
             : null;
     };

@@ -36,7 +36,7 @@ CtrlActionWhiteList.exec = function () {
     }).getResponse(false);
 
     this.params = AppMain.ws().exec("GetParameters", {"plc": ""}).getResponse(false);
-    this.params = defined(this.params.GetParametersResponse.plc)
+    this.params = (defined(this.params) && defined(this.params.GetParametersResponse) && defined(this.params.GetParametersResponse.plc))
         ? this.params.GetParametersResponse.plc
         : {};
     let list = {};
@@ -54,7 +54,7 @@ CtrlActionWhiteList.exec = function () {
         this.params["white-list"]["mac-address"] = [this.params["white-list"]["mac-address"]];
     }
     this.whiteListArr = [];
-    if (this.params && this.params["white-list"] && this.params["white-list"]["mac-address"]) {
+    if (this.params["white-list"] && this.params["white-list"]["mac-address"]) {
         $.each(this.params["white-list"]["mac-address"], function (index, node) {
             CtrlActionWhiteList.whiteListArr.push(node);
         });
@@ -257,11 +257,7 @@ CtrlActionWhiteList.useWhiteList = function () {
     const client = AppMain.ws();
     client.xmlSetElement("plc");
     client.xmlSetParam("use-white-list", true); //this is now always true
-    if (enabled) {
-        client.xmlSetParam("acl-auto-add-mode", enabled);
-    } else {
-        client.xmlSetParam("acl-auto-add-mode", enabled);
-    }
+    client.xmlSetParam("acl-auto-add-mode", enabled);
     const p = client.xmlGetStructure();
     const response = client.exec("SetParameters", p).getResponse(false);
 
