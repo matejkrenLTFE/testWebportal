@@ -2593,54 +2593,148 @@ CtrlActionTaskManager.addAttrPress = function () {
         varType = vType.val();
         varValue = $("#variable-value").val();
     }
-
-    CtrlActionTaskManager.addAttrHtml(classID, instaID, attrID, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
-            relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
+    CtrlActionTaskManager.addAttrHtml({
+        classID: classID,
+        instaID: instaID,
+        attrID: attrID,
+        accessFrom: accessFrom,
+        accessFromTXT: accessFromTXT,
+        accessTo: accessTo,
+        accessToTXT: accessToTXT,
+        maxDiff: maxDiff,
+        minDiff: minDiff,
+        relAccessFrom: relAccessFrom,
+        relAccessTo: relAccessTo,
+        varType: varType,
+        varValue: varValue,
+        descTXT: descTXT,
+        instaIDshort: instaIDshort,
+        vType: vType
+    });
     if (classID === 4 && attrID === 2) {
-        CtrlActionTaskManager.addAttrHtml(classID, instaID, 4, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
-                relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
-        CtrlActionTaskManager.addAttrHtml(classID, instaID, 5, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
-                relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
+        CtrlActionTaskManager.addAttrHtml({
+            classID: classID,
+            instaID: instaID,
+            attrID: 4,
+            accessFrom: accessFrom,
+            accessFromTXT: accessFromTXT,
+            accessTo: accessTo,
+            accessToTXT: accessToTXT,
+            maxDiff: maxDiff,
+            minDiff: minDiff,
+            relAccessFrom: relAccessFrom,
+            relAccessTo: relAccessTo,
+            varType: varType,
+            varValue: varValue,
+            descTXT: descTXT,
+            instaIDshort: instaIDshort,
+            vType: vType
+        });
+        CtrlActionTaskManager.addAttrHtml({
+            classID: classID,
+            instaID: instaID,
+            attrID: 5,
+            accessFrom: accessFrom,
+            accessFromTXT: accessFromTXT,
+            accessTo: accessTo,
+            accessToTXT: accessToTXT,
+            maxDiff: maxDiff,
+            minDiff: minDiff,
+            relAccessFrom: relAccessFrom,
+            relAccessTo: relAccessTo,
+            varType: varType,
+            varValue: varValue,
+            descTXT: descTXT,
+            instaIDshort: instaIDshort,
+            vType: vType
+        });
     }
     if (classID === 5 && attrID === 2) {
-        CtrlActionTaskManager.addAttrHtml(classID, instaID, 5, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
-                relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
+        CtrlActionTaskManager.addAttrHtml({
+            classID: classID,
+            instaID: instaID,
+            attrID: 5,
+            accessFrom: accessFrom,
+            accessFromTXT: accessFromTXT,
+            accessTo: accessTo,
+            accessToTXT: accessToTXT,
+            maxDiff: maxDiff,
+            minDiff: minDiff,
+            relAccessFrom: relAccessFrom,
+            relAccessTo: relAccessTo,
+            varType: varType,
+            varValue: varValue,
+            descTXT: descTXT,
+            instaIDshort: instaIDshort,
+            vType: vType
+        });
     }
     if (classID === 5 && attrID === 3) {
-        CtrlActionTaskManager.addAttrHtml(classID, instaID, 5, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
-                relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
-        CtrlActionTaskManager.addAttrHtml(classID, instaID, 6, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
-                relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType);
+        CtrlActionTaskManager.addAttrHtml({
+            classID: classID,
+            instaID: instaID,
+            attrID: 5,
+            accessFrom: accessFrom,
+            accessFromTXT: accessFromTXT,
+            accessTo: accessTo,
+            accessToTXT: accessToTXT,
+            maxDiff: maxDiff,
+            minDiff: minDiff,
+            relAccessFrom: relAccessFrom,
+            relAccessTo: relAccessTo,
+            varType: varType,
+            varValue: varValue,
+            descTXT: descTXT,
+            instaIDshort: instaIDshort,
+            vType: vType
+        });
+        CtrlActionTaskManager.addAttrHtml({
+            classID: classID,
+            instaID: instaID,
+            attrID: 6,
+            accessFrom: accessFrom,
+            accessFromTXT: accessFromTXT,
+            accessTo: accessTo,
+            accessToTXT: accessToTXT,
+            maxDiff: maxDiff,
+            minDiff: minDiff,
+            relAccessFrom: relAccessFrom,
+            relAccessTo: relAccessTo,
+            varType: varType,
+            varValue: varValue,
+            descTXT: descTXT,
+            instaIDshort: instaIDshort,
+            vType: vType
+        });
     }
     return true;
 };
 
-CtrlActionTaskManager.addAttrHtml = function (classID, instaID, attrID, accessFrom, accessFromTXT, accessTo, accessToTXT, maxDiff, minDiff,
-        relAccessFrom, relAccessTo, varType, varValue, descTXT, instaIDshort, vType) {
+CtrlActionTaskManager.addAttrHtml = function (attrObj) {
     "use strict";
 
     let devHtml = "<tr>" +
-            "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-class='" + classID + "' " +
-            "data-node-instance='" + instaID + "' data-node-attr='" + attrID + "' " +
-            "data-node-access-from='" + accessFrom + "' data-node-access-to='" + accessTo + "' data-node-max-diff='" + maxDiff + "'" +
-            " data-node-min-diff='" + minDiff + "' data-node-rel-access-from='" + relAccessFrom + "'" +
-            " data-node-rel-access-to='" + relAccessTo + "'" +
-            " data-node-var-type='" + varType + "'" +
-            " data-node-var-value='" + varValue + "' checked/></td>" +
-            "<td>" + descTXT + "</td>" +
-            "<td>" + classID + "</td>" +
-            "<td>" + instaIDshort + "</td>" +
-            "<td>" + attrID + "</td>";
-    if ((accessFrom && accessFrom !== "") || (accessTo && accessTo !== "")) {
-        devHtml += "<td colspan='2'>" + AppMain.t("ACCESS_SELECTION_FROM", "TASK_MANAGER") + ": " + accessFromTXT + " <br/> "
-                + AppMain.t("ACCESS_SELECTION_TO", "TASK_MANAGER") + ": " + accessToTXT + "</td>";
-    } else if (relAccessFrom && relAccessFrom !== "") {
-        devHtml += "<td colspan='2'>" + CtrlActionTaskManager.relativeSelector[`${relAccessFrom}`] + "</td>";
-    } else if ((maxDiff !== "") || (minDiff !== "")) {
-        devHtml += "<td colspan='2'>" + AppMain.t("MAX_TIME_DIFF", "TASK_MANAGER") + ": " + maxDiff + " <br/> "
-                + AppMain.t("MIN_TIME_DIFF", "TASK_MANAGER") + ": " + minDiff + "</td>";
-    } else if (vType.length) {
-        devHtml += "<td colspan='2'>" + CtrlActionTaskManager.typeSelector[`${varType}`] + "(" + varValue + ")</td>";
+            "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-class='" + attrObj.classID + "' " +
+            "data-node-instance='" + attrObj.instaID + "' data-node-attr='" + attrObj.attrID + "' " +
+            "data-node-access-from='" + attrObj.accessFrom + "' data-node-access-to='" + attrObj.accessTo + "' data-node-max-diff='" + attrObj.maxDiff + "'" +
+            " data-node-min-diff='" + attrObj.minDiff + "' data-node-rel-access-from='" + attrObj.relAccessFrom + "'" +
+            " data-node-rel-access-to='" + attrObj.relAccessTo + "'" +
+            " data-node-var-type='" + attrObj.varType + "'" +
+            " data-node-var-value='" + attrObj.varValue + "' checked/></td>" +
+            "<td>" + attrObj.descTXT + "</td>" +
+            "<td>" + attrObj.classID + "</td>" +
+            "<td>" + attrObj.instaIDshort + "</td>" +
+            "<td>" + attrObj.attrID + "</td>";
+    if ((attrObj.accessFrom && attrObj.accessFrom !== "") || (attrObj.accessTo && attrObj.accessTo !== "")) {
+        devHtml += "<td colspan='2'>" + AppMain.t("ACCESS_SELECTION_FROM", "TASK_MANAGER") + ": " + attrObj.accessFromTXT + " <br/> "
+                + AppMain.t("ACCESS_SELECTION_TO", "TASK_MANAGER") + ": " + attrObj.accessToTXT + "</td>";
+    } else if (attrObj.relAccessFrom && attrObj.relAccessFrom !== "") {
+        devHtml += "<td colspan='2'>" + CtrlActionTaskManager.relativeSelector[`${attrObj.relAccessFrom}`] + "</td>";
+    } else if ((attrObj.maxDiff !== "") || (attrObj.minDiff !== "")) {
+        devHtml += "<td colspan='2'>" + AppMain.t("MAX_TIME_DIFF", "TASK_MANAGER") + ": " + attrObj.maxDiff + " <br/> "
+                + AppMain.t("MIN_TIME_DIFF", "TASK_MANAGER") + ": " + attrObj.minDiff + "</td>";
+    } else if (attrObj.vType.length) {
+        devHtml += "<td colspan='2'>" + CtrlActionTaskManager.typeSelector[`${attrObj.varType}`] + "(" + attrObj.varValue + ")</td>";
     } else {
         devHtml += "<td></td>";
     }
