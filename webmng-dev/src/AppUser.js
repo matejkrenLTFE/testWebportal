@@ -32,8 +32,8 @@ module.exports.AppUser = function () {
             return _userData;
         }
 
-        return defined(_userData[name])
-            ? _userData[name]
+        return defined(_userData[`${name}`])
+            ? _userData[`${name}`]
             : null;
     };
 

@@ -76,7 +76,7 @@ CtrlActionNANPlc.exportParams = function () {
         $.each(response.GetParametersResponse.plc, function (index, value) {
             if (Object.prototype.toString.call(value) === "[object Object]") {
                 let key = Object.keys(value)[0];
-                if (Object.prototype.toString.call(value[key]) === "[object Array]") {
+                if (Object.prototype.toString.call(value[`${key}`]) === "[object Array]") {
                     $.each(value, function (secIndex, secValue) {
                         xml += "<" + index + ">";
                         secValue.forEach(function (param) {

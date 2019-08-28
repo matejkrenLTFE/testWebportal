@@ -552,12 +552,12 @@ CtrlActionNetwork.addEdge = function (source, target, type, edgeDistanceType) {
         });
         CtrlActionNetwork.edgesTmp.push(source + "_" + target);
     } else { //do not add link, just increase linkCount to indicate more connections going through
-        CtrlActionNetwork.edges[edgeInd].data.linkCount += 1;
-        if (type < CtrlActionNetwork.edges[edgeInd].data.type) {
-            CtrlActionNetwork.edges[edgeInd].data.type = type;
+        CtrlActionNetwork.edges[`${edgeInd}`].data.linkCount += 1;
+        if (type < CtrlActionNetwork.edges[`${edgeInd}`].data.type) {
+            CtrlActionNetwork.edges[`${edgeInd}`].data.type = type;
         }
-        if (CtrlActionNetwork.edges[edgeInd].data.edgeDistanceType === 2 || CtrlActionNetwork.edges[edgeInd].data.edgeDistanceType === 4) {
-            CtrlActionNetwork.edges[edgeInd].data.edgeDistanceType = edgeDistanceType;
+        if (CtrlActionNetwork.edges[`${edgeInd}`].data.edgeDistanceType === 2 || CtrlActionNetwork.edges[`${edgeInd}`].data.edgeDistanceType === 4) {
+            CtrlActionNetwork.edges[`${edgeInd}`].data.edgeDistanceType = edgeDistanceType;
         }
     }
 };

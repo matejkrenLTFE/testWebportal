@@ -284,7 +284,7 @@ module.exports.AppWebserviceClient = function () {
             }
 
             AppMain.log(jsonResponse.Envelope.Body);
-            _cache[_lastMethodExec] = jsonResponse.Envelope.Body;
+            _cache[`${_lastMethodExec}`] = jsonResponse.Envelope.Body;
             return jsonResponse.Envelope.Body;
         }
     };
@@ -295,8 +295,8 @@ module.exports.AppWebserviceClient = function () {
      * @param {Object} params
      */
     this.getResponseCache = function (methodName, params) {
-        return defined(_cache[methodName])
-            ? _cache[methodName]
+        return defined(_cache[`${methodName}`])
+            ? _cache[`${methodName}`]
             : this.exec(methodName, params).getResponse(false);
     };
 

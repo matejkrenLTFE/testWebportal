@@ -1662,7 +1662,7 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
                         return;
                     }
                     if (line !== "") {
-                        CtrlActionTaskManager.addTitle(line.split(",")[ind]
+                        CtrlActionTaskManager.addTitle(line.split(",")[`${ind}`]
                             .replace("\"", "").replace("\"", ""));
                     }
                 });
@@ -2164,7 +2164,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
         jOd.on("change", function () {
             if (jOd.val() !== "0") {
                 const newValPos = parseInt(jOd.val(), 10) - 1;
-                CtrlActionTaskManager.selectCosemHelper(objectList.get[newValPos]);
+                CtrlActionTaskManager.selectCosemHelper(objectList.get[`${newValPos}`]);
             }
         });
         const jS = $("#job-service");
@@ -3011,7 +3011,7 @@ CtrlActionTaskManager.arrangeNodeCosemStat = function (nodesCosemStat) {
     });
     if (nodesTitle.length > 0) {
         $.each(nodesTitle, function (index, title) {
-            CtrlActionTaskManager.nodesTitleObj[title] = title;
+            CtrlActionTaskManager.nodesTitleObj[`${title}`] = title;
         });
     }
     this.nodesTitle = nodesTitle;

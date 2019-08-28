@@ -604,7 +604,7 @@ CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
                 }
                 allTextLines.forEach(function (value, index) {
                     if (index >= startInd) {
-                        const line = allTextLines[index];
+                        const line = allTextLines[`${index}`];
                         if (line !== "") {
                             CtrlActionGroupTable.addTitle(line.split(",")[`${ind}`]
                                 .replace("\"", "").replace("\"", ""));
@@ -740,7 +740,7 @@ CtrlActionGroupTable.arrangeNodeCosemStat = function (nodesCosemStat) {
     });
     if (nodesTitle.length > 0) {
         $.each(nodesTitle, function (index, title) {
-            CtrlActionGroupTable.nodesTitleObj[title] = title;
+            CtrlActionGroupTable.nodesTitleObj[`${title}`] = title;
         });
     }
     this.nodesTitle = nodesTitle;

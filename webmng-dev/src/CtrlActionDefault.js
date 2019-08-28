@@ -66,7 +66,7 @@ CtrlActionDefault.exec = function () {
                 //cntValue = moment.unix( uptimeTimestamp ).format( "HH:mm:ss.SSS" );
                 cntValue = uptimeFormat(cntValue);
             }
-            counters[index] = cntValue;
+            counters[`${index}`] = cntValue;
         });
     }
 

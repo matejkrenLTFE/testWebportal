@@ -239,11 +239,11 @@ module.exports.AppView = function () {
                 });
             }
             // Bind default controller method
-            if (_this.controller[methodName] !== undefined) {
+            if (_this.controller[`${methodName}`] !== undefined) {
                 $(element).on(element.getAttribute("data-bind-event"), function (e) {
                     e.stopImmediatePropagation();
                     e.preventDefault();
-                    _this.controller[methodName]({event: e, target: element});
+                    _this.controller[`${methodName}`]({event: e, target: element});
                     return false;
                 });
             }
@@ -302,7 +302,7 @@ module.exports.AppView = function () {
         if (viewContent !== undefined) {
             viewContent = _processTemplate(this, viewContent, placeholderData);
             // Cache processed view template
-            this.cachePom[viewName] = viewContent;
+            this.cachePom[`${viewName}`] = viewContent;
         } else {
             throw "View template not found: " + viewTemplateName;
         }
