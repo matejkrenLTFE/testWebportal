@@ -339,7 +339,7 @@ global.AppMain = function (conf) {
         }
         return (_routes[routeName] === "/")
             ? this.getProtocol() + window.location.hostname
-            : this.getProtocol() + window.location.hostname + _routes[routeName];
+            : this.getProtocol() + window.location.hostname + _routes[`${routeName}`];
     };
 
     // /**
@@ -402,8 +402,8 @@ global.AppMain = function (conf) {
      */
     this.localization = function (paramName, selectLocale) {
         const params = this.locale.localization(selectLocale);
-        return defined(params[paramName])
-            ? params[paramName]
+        return defined(params[`${paramName}`])
+            ? params[`${paramName}`]
             : params;
     };
 
@@ -437,7 +437,7 @@ global.AppMain = function (conf) {
      * Set custom global component.
      */
     this.setComponent = function (name, component) {
-        _components[name] = component;
+        _components[`${name}`] = component;
     };
 
     /**

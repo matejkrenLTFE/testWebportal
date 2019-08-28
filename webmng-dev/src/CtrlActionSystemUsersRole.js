@@ -151,15 +151,15 @@ CtrlActionSystemUsersRole.htmlRoleTable = function (rolePermissions) {
 
         value.forEach(function (valueRbac) {
             let permission = {};
-            if (defined(rbacPermissions[category])) {
+            if (defined(rbacPermissions[`${category}`])) {
                 permission = {
-                    fullControl: (!defined(rbacPermissions[category][valueRbac]) || rbacPermissions[category][valueRbac] === "*")
+                    fullControl: (!defined(rbacPermissions[`${category}`][`${valueRbac}`]) || rbacPermissions[`${category}`][`${valueRbac}`] === "*")
                         ? "checked"
                         : "",
-                    read: (defined(rbacPermissions[category][valueRbac]) && rbacPermissions[category][valueRbac] === "r")
+                    read: (defined(rbacPermissions[`${category}`][`${valueRbac}`]) && rbacPermissions[`${category}`][`${valueRbac}`] === "r")
                         ? "checked"
                         : "",
-                    disabled: (defined(rbacPermissions[category][valueRbac]) && rbacPermissions[category][valueRbac] === "h")
+                    disabled: (defined(rbacPermissions[`${category}`][`${valueRbac}`]) && rbacPermissions[`${category}`][`${valueRbac}`] === "h")
                         ? "checked"
                         : ""
                 };

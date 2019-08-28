@@ -606,7 +606,7 @@ CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
                     if (index >= startInd) {
                         const line = allTextLines[index];
                         if (line !== "") {
-                            CtrlActionGroupTable.addTitle(line.split(",")[ind]
+                            CtrlActionGroupTable.addTitle(line.split(",")[`${ind}`]
                                 .replace("\"", "").replace("\"", ""));
                         }
                     }

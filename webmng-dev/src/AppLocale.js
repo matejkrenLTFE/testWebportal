@@ -58,7 +58,7 @@ module.exports.AppLocale = function (loc) {
      */
     this.loadTranslations = function () {
         languages.forEach(function (language) {  // protect dynamic require
-            translationStrings[language] = require("./locale/" + language); // eslint-disable-line security/detect-non-literal-require
+            translationStrings[`${language}`] = require("./locale/" + language); // eslint-disable-line security/detect-non-literal-require
         });
     };
 
@@ -68,8 +68,8 @@ module.exports.AppLocale = function (loc) {
         if (Object.keys(translationStrings).length === 0 && translationStrings.constructor === Object) {
             this.loadTranslations();
         }
-        return defined(translationStrings[_locale])
-            ? translationStrings[_locale]
+        return defined(translationStrings[`${_locale}`])
+            ? translationStrings[`${_locale}`]
             : {};
     };
 
@@ -83,15 +83,15 @@ module.exports.AppLocale = function (loc) {
         let context = contextPom || "global";
         const langStrings = this.getLanguageStrings();
         if (context === "global") {
-            if (defined(langStrings[context]) && defined(langStrings[context][string])) {
-                string = langStrings[context][string];
+            if (defined(langStrings[`${context}`]) && defined(langStrings[`${context}`][`${string}`])) {
+                string = langStrings[`${context}`][`${string}`];
             } else {
-                string = defined(langStrings[string])
-                    ? langStrings[string]
+                string = defined(langStrings[`${string}`])
+                    ? langStrings[`${string}`]
                     : string;
             }
         } else {
-            string = (defined(langStrings[context]) && defined(langStrings[context][string]))
+            string = (defined(langStrings[`${context}`]) && defined(langStrings[`${context}`][`${string}`]))
                 ? langStrings[`${context}`][`${string}`]
                 : string;
         }
