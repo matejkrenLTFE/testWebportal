@@ -24,11 +24,9 @@ module.exports.AppUser = function () {
         if (_userData === null) {
             _userData = JSON.parse(localStorage.getItem("userData"));
         }
-
         if (!defined(name)) {
             return _userData;
         }
-
         return (defined(_userData) && defined(_userData[`${name}`]))
             ? _userData[`${name}`]
             : null;
