@@ -395,7 +395,7 @@ CtrlActionMonitoringManager.drawGraphSetUp = function () {
         profileCategory = cntWan.toLowerCase();
     }
     const profileType = $("#profile-type").val();
-    const profileTypeTranslate = this.translateObj[profileType];
+    const profileTypeTranslate = this.translateObj[`${profileType}`];
 
     const counters = this.getParams();
     this.contersForExport = counters;

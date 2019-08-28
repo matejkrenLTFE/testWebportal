@@ -1485,8 +1485,11 @@ CtrlActionTaskManager.addTitle = function (deviceTitle) {
             "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + deviceTitle + "' checked/></td>" +
             "<td>" + deviceTitle + "</td>" +
             "</tr>";
-
-    $("table#devices-table > tbody > tr:first").before(devHtml);
+    if ($("table#devices-table > tbody > tr").length !== 0) {
+        $("table#devices-table > tbody > tr:first").before(devHtml);
+    } else {
+        $("table#devices-table > tbody").html(devHtml);
+    }
     setTimeout(function () {
         $("#add-" + r).fadeIn(200).fadeOut(200).fadeIn(200).fadeOut(200).fadeIn(200);
     }, 200);
@@ -1527,7 +1530,7 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
             "</tr>" +
             "</thead><tbody>";
 
-    if (this.nodesTitle.length > 0) {
+    if (this.nodesTitle && this.nodesTitle.length > 0) {
         $.each(this.nodesTitle, function (index, title) {
             if (title.toString() !== "[object Object]") {
                 allHtml += "<tr>" +

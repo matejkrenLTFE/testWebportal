@@ -364,7 +364,7 @@ module.exports.AppView = function () {
      */
     this.renderFromCache = function (viewName) {
         const viewContent = this.cached(viewName, undefined)
-            ? this.cachePom[viewName]
+            ? this.cachePom[`${viewName}`]
             : null;
         if (viewContent) {
             this.appendToCanvas(viewContent);
