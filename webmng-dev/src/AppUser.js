@@ -21,9 +21,7 @@ module.exports.AppUser = function () {
      * Get user data.
      */
     this.getUserData = function (name) {
-        if (_userData === null) {
-            _userData = JSON.parse(localStorage.getItem("userData"));
-        }
+        _userData = this.getUserDataPom();
         if (!defined(name)) {
             return _userData;
         }
@@ -37,6 +35,15 @@ module.exports.AppUser = function () {
      */
     this.setUserData = function (data) {
         localStorage.setItem("userData", JSON.stringify(data));
+    };
+    /**
+     * Get user data data object.
+     */
+    this.getUserDataPom = function () {
+        if (_userData === null) {
+            _userData = JSON.parse(localStorage.getItem("userData"));
+        }
+        return _userData;
     };
 
     /**
