@@ -119,8 +119,8 @@ module.exports.AppRBAC = function () {
             "SystemFirewallManager": "system-firewall-manager",
             "SystemInformation": "system-information"
         };
-        return (defined(map[actionName]))
-            ? map[actionName]
+        return (defined(map[`${actionName}`]))
+            ? map[`${actionName}`]
             : actionName.toLowerCase();
     };
 

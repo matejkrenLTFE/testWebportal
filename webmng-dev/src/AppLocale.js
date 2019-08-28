@@ -68,9 +68,12 @@ module.exports.AppLocale = function (loc) {
         if (Object.keys(translationStrings).length === 0 && translationStrings.constructor === Object) {
             this.loadTranslations();
         }
+        const defaultLang = {
+            name: "en_US"
+        };
         return defined(translationStrings[`${_locale}`])
             ? translationStrings[`${_locale}`]
-            : {name: "en_US"};
+            : defaultLang;
     };
 
     /**

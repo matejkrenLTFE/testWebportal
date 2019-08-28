@@ -58,8 +58,8 @@ ComWANModemSignal.getSignalLevel = function (signal) {
     "use strict";
     let level = null;
     signal = parseInt(signal, 10);
-    if (defined(ComWANModemSignal.ranges[signal])) {
-        level = ComWANModemSignal.ranges[signal];
+    if (defined(ComWANModemSignal.ranges[`${signal}`])) {
+        level = ComWANModemSignal.ranges[`${signal}`];
     } else {
         $.each(ComWANModemSignal.ranges, function (index, item) {
             const range = index.split("-");

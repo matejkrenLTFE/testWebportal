@@ -401,7 +401,7 @@ CtrlActionMonitoringManager.drawGraphSetUp = function () {
     this.contersForExport = counters;
     this.setCounters(counters, profileCategory, profileType);
 
-    let chartType = this.typeObj[profileType] === "COUNTER"
+    let chartType = this.typeObj[`${profileType}`] === "COUNTER"
         ? "line"
         : "bar";
     if (!this.firstTime) {
@@ -409,8 +409,8 @@ CtrlActionMonitoringManager.drawGraphSetUp = function () {
     }
     this.firstTime = false;
 
-    const units = defined(this.unitsObj[profileType])
-        ? " (" + this.unitsObj[profileType] + ")"
+    const units = defined(this.unitsObj[`${profileType}`])
+        ? " (" + this.unitsObj[`${profileType}`] + ")"
         : "";
 
     let chartData = {
