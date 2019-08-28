@@ -43,7 +43,7 @@ CtrlActionSystemSettings.exec = function () {
     }
     let timezoneObj = {};
     $.each(timezones, function (index, timezone) {
-        timezoneObj[timezone] = timezone;
+        timezoneObj[`${timezone}`] = timezone;
     });
 
     let intervalOpt = {

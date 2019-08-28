@@ -385,8 +385,8 @@ CtrlActionMonitoringManager.drawGraphSetUp = function () {
     $("#view-option").show();
 
     let profileCategory = $("#profile-category").val();
-    const color = defined(this.categoryToColor[profileCategory])
-        ? this.categoryToColor[profileCategory]
+    const color = defined(this.categoryToColor[`${profileCategory}`])
+        ? this.categoryToColor[`${profileCategory}`]
         : "rgb(255, 172, 171)";
 
     profileCategory = profileCategory.toLowerCase();
@@ -466,7 +466,7 @@ CtrlActionMonitoringManager.setCounters = function (counters, profileCategory, p
     this.bodyHTML = "";
     const self = this;
     counters.forEach(function (val, index) {
-        if (self.typeObj[profileType] === "COUNTER" && index === 0) {
+        if (self.typeObj[`${profileType}`] === "COUNTER" && index === 0) {
             return;
         }
         self.chartLabels.push(moment(val["time-stamp"]).format(AppMain.localization("DATETIME_FORMAT")));
@@ -544,7 +544,7 @@ CtrlActionMonitoringManager.export = function () {
         profileCategory = cntWan.toLowerCase();
     }
     const profileType = $("#profile-type").val();
-    const profileTypeTranslate = this.translateObj[profileType];
+    const profileTypeTranslate = this.translateObj[`${profileType}`];
 
     if (this.contersForExport.length === 0) {
         this.contersForExport = this.getParams();

@@ -2632,7 +2632,7 @@ CtrlActionTaskManager.addAttrHtml = function (classID, instaID, attrID, accessFr
         devHtml += "<td colspan='2'>" + AppMain.t("ACCESS_SELECTION_FROM", "TASK_MANAGER") + ": " + accessFromTXT + " <br/> "
                 + AppMain.t("ACCESS_SELECTION_TO", "TASK_MANAGER") + ": " + accessToTXT + "</td>";
     } else if (relAccessFrom && relAccessFrom !== "") {
-        devHtml += "<td colspan='2'>" + CtrlActionTaskManager.relativeSelector[relAccessFrom] + "</td>";
+        devHtml += "<td colspan='2'>" + CtrlActionTaskManager.relativeSelector[`${relAccessFrom}`] + "</td>";
     } else if ((maxDiff !== "") || (minDiff !== "")) {
         devHtml += "<td colspan='2'>" + AppMain.t("MAX_TIME_DIFF", "TASK_MANAGER") + ": " + maxDiff + " <br/> "
                 + AppMain.t("MIN_TIME_DIFF", "TASK_MANAGER") + ": " + minDiff + "</td>";

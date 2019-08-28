@@ -28,7 +28,7 @@ module.exports.AppRBAC = function () {
             if (rbacSelector.length > 1) {
                 const rbacCategory = rbacSelector[0];
                 const rbacParam = rbacSelector[1];
-                if (defined(rbac[rbacCategory]) && defined(rbac[rbacCategory][rbacParam]) && rbac[rbacCategory][rbacParam].toLowerCase() === "h") {
+                if (defined(rbac[`${rbacCategory}`]) && defined(rbac[`${rbacCategory}`][`${rbacParam}`]) && rbac[`${rbacCategory}`][`${rbacParam}`].toLowerCase() === "h") {
                     const rbacSelectorReplace = "data-rbac=\"" + rbacCategory + "." + rbacParam + "\"";
                     content = content.replace(new RegExp(rbacSelectorReplace, "gi"), rbacSelectorReplace + " style=\"display:none;\" "); // eslint-disable-line security/detect-non-literal-regexp
                 }
@@ -43,7 +43,7 @@ module.exports.AppRBAC = function () {
             if (rbacSelector.length > 1) {
                 const rbacCategory = rbacSelector[0];
                 const rbacParam = rbacSelector[1];
-                if (defined(rbac[rbacCategory]) && defined(rbac[rbacCategory][rbacParam])
+                if (defined(rbac[`${rbacCategory}`]) && defined(rbac[`${rbacCategory}`][`${rbacParam}`])
                         && (rbac[`${rbacCategory}`][`${rbacParam}`].toLowerCase() === "r" || rbac[`${rbacCategory}`][`${rbacParam}`].toLowerCase() === "h")) {
                     const rbacSelectorReplace = "data-rbac-element=\"" + rbacCategory + "." + rbacParam + "\"";
                     content = content.replace(new RegExp(rbacSelectorReplace, "gi"), rbacSelectorReplace + " disabled "); // eslint-disable-line security/detect-non-literal-regexp

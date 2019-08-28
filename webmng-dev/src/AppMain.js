@@ -381,8 +381,7 @@ global.AppMain = function (conf) {
         if (defined(this[`${componentName}`])) {
             return this[`${componentName}`];
         }
-        const str = "AppMain: call to non-existing component " + componentName;
-        throw str;
+        return null;
     };
 
     /**

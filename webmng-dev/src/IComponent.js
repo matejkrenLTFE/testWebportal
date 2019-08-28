@@ -51,7 +51,7 @@ module.exports.IComponent = function () {
      */
     this.initData = function (data) {
         $.each(data, function (key, value) {
-            dataPom[key] = value;
+            dataPom[`${key}`] = value;
         });
     };
 };

@@ -267,14 +267,14 @@ CtrlActionNetwork.buildNodesAndLinks = function (routing) {
             });
         } else {
             if (destAddInd !== nextHopAddInd) {
-                CtrlActionNetwork.nodes[nextHopAddInd].data.busyness += 1;
+                CtrlActionNetwork.nodes[`${nextHopAddInd}`].data.busyness += 1;
             }
         }
         // add pathRouting
         if (parseInt(route["hop-count"], 10) === 1) {
-            CtrlActionNetwork.nodes[destAddInd].data.pathRouting = [0, destAddInd];
+            CtrlActionNetwork.nodes[`${destAddInd}`].data.pathRouting = [0, destAddInd];
         } else {
-            CtrlActionNetwork.nodes[destAddInd].data.pathRouting = [0, nextHopAddInd, destAddInd];
+            CtrlActionNetwork.nodes[`${destAddInd}`].data.pathRouting = [0, nextHopAddInd, destAddInd];
         }
 
         if (parseInt(route["hop-count"], 10) === 1) { //link from DC to destAdd
@@ -587,7 +587,7 @@ CtrlActionNetwork.checkForExistingData = function (nodes) {
                 const nodeInd = CtrlActionNetwork.nodesTmp.indexOf(shortAddress);
 
                 if (nodeInd !== -1) {
-                    const cvNode = CtrlActionNetwork.nodes[nodeInd];
+                    const cvNode = CtrlActionNetwork.nodes[`${nodeInd}`];
 
                     //first remove existing path
                     let pathRouting = cvNode.data.pathRouting;
