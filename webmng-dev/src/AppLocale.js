@@ -68,10 +68,10 @@ module.exports.AppLocale = function (loc) {
         const _locale = selectLocale || locale;
         // Reload translation strings
         this.loadTranslations();
-
+        const emptyLang = {nameLang: ""};
         return defined(translationStrings[`${_locale}`])
             ? translationStrings[`${_locale}`]
-            : {nameLang: {}};
+            : emptyLang;
     };
 
     const getLangStr = function (string, langStrings) {

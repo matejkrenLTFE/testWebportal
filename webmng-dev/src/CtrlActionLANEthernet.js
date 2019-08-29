@@ -137,6 +137,26 @@ CtrlActionLANEthernet.useDHCP = function () {
     CtrlActionLANEthernet.setParams();
 };
 
+const processEnabledInterface = function () {
+    "use strict";
+
+    $("[name='enable']").val(true);
+    $("#" + CtrlActionLANEthernet.formId).css({"color": "#000"});
+    $("tr#FormActions > td").show();
+    //tukaj še pride RBAC preverjanje
+    if (AppMain.user.getRBACpermissionElement("lan", "ip-config-ip")) {
+        $("input[type='text'][name='ip-config-ip']").removeAttr("disabled");
+    }
+    if (AppMain.user.getRBACpermissionElement("lan", "ip-config-net-mask")) {
+        $("input[type='text'][name='ip-config-net-mask']").removeAttr("disabled");
+    }
+    if (AppMain.user.getRBACpermissionElement("lan", "ip-config-gateway")) {
+        $("input[type='text'][name='ip-config-gateway']").removeAttr("disabled");
+    }
+    $("input[type='checkbox'][name='dhcp-server']").removeAttr("disabled");
+    $("label.mdl-switch[for='dhcp-server']").removeClass("is-disabled");
+};
+
 /**
  * Show interface as enabled/disabled (grayed out).
  * @param {Boolean} enabled
@@ -148,31 +168,40 @@ CtrlActionLANEthernet.enableInterface = function (enabled) {
         $("#" + CtrlActionLANEthernet.formId).css({"color": "#e5e5e5"});
         $("tr#FormActions > td").hide();
         $("input[type='text'], input[type='password']").attr("disabled", "disabled");
-        $("input[type='checkbox']").each(function (i, elm) {
+        $("input[type='checkbox']").each(function (ignore, elm) {
             if (elm.id !== "enable") {
                 $(elm).attr("disabled", "disabled");
             }
         });
         $("label.mdl-switch").addClass("is-disabled");
-        AppMain.html.updateElements([".mdl-js-switch"]);
     } else {
-        $("[name='enable']").val(true);
-        $("#" + CtrlActionLANEthernet.formId).css({"color": "#000"});
-        $("tr#FormActions > td").show();
-        //tukaj še pride RBAC preverjanje
-        if (AppMain.user.getRBACpermissionElement("lan", "ip-config-ip")) {
-            $("input[type='text'][name='ip-config-ip']").removeAttr("disabled");
-        }
-        if (AppMain.user.getRBACpermissionElement("lan", "ip-config-net-mask")) {
-            $("input[type='text'][name='ip-config-net-mask']").removeAttr("disabled");
-        }
-        if (AppMain.user.getRBACpermissionElement("lan", "ip-config-gateway")) {
-            $("input[type='text'][name='ip-config-gateway']").removeAttr("disabled");
-        }
-        $("input[type='checkbox'][name='dhcp-server']").removeAttr("disabled");
-        $("label.mdl-switch[for='dhcp-server']").removeClass("is-disabled");
+        processEnabledInterface();
 
-        AppMain.html.updateElements([".mdl-js-switch"]);
+    }
+    AppMain.html.updateElements([".mdl-js-switch"]);
+};
+
+const processSetParamsError = function (ipStr, maskStr, gwStr, re) {
+    "use strict";
+
+    if (!ipStr.match(re)) {
+        AppMain.dialog("PLEASE_ENTER_CORR", "warning", [AppMain.t("IP_ADDRESS", "LAN_LOCAL_ETHERNET")]);
+    }
+    if (!maskStr.match(re)) {
+        AppMain.dialog("PLEASE_ENTER_CORR", "warning", [AppMain.t("SUBNET_MASK", "LAN_LOCAL_ETHERNET")]);
+    }
+    if (!gwStr.match(re)) {
+        AppMain.dialog("PLEASE_ENTER_CORR", "warning", [AppMain.t("DEFAULT_GATEWAY", "LAN_LOCAL_ETHERNET")]);
+    }
+};
+
+const setParamsRest = function (data) {
+    "use strict";
+    let response = AppMain.ws().exec("SetParameters", {"iloc": data}).getResponse(false);
+    if (defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK") {
+        AppMain.dialog("SUCC_UPDATED", "success");
+    } else {
+        AppMain.dialog("Error occurred: " + response.SetParametersResponse.toString(), "error");
     }
 };
 
@@ -190,22 +219,9 @@ CtrlActionLANEthernet.setParams = function () {
         dmp("FormData");
         dmp(data);
 
-        let response = AppMain.ws().exec("SetParameters", {"iloc": data}).getResponse(false);
-        if (defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK") {
-            AppMain.dialog("SUCC_UPDATED", "success");
-        } else {
-            AppMain.dialog("Error occurred: " + response.SetParametersResponse.toString(), "error");
-        }
+        setParamsRest(data);
     } else {
-        if (!ipStr.match(re)) {
-            AppMain.dialog("PLEASE_ENTER_CORR", "warning", [AppMain.t("IP_ADDRESS", "LAN_LOCAL_ETHERNET")]);
-        }
-        if (!maskStr.match(re)) {
-            AppMain.dialog("PLEASE_ENTER_CORR", "warning", [AppMain.t("SUBNET_MASK", "LAN_LOCAL_ETHERNET")]);
-        }
-        if (!gwStr.match(re)) {
-            AppMain.dialog("PLEASE_ENTER_CORR", "warning", [AppMain.t("DEFAULT_GATEWAY", "LAN_LOCAL_ETHERNET")]);
-        }
+        processSetParamsError(ipStr, maskStr, gwStr, re);
     }
     AppMain.html.updateElements([".mdl-button"]);
 };
