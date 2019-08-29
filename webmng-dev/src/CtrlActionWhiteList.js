@@ -12,50 +12,56 @@ const CtrlActionWhiteList = Object.create(new modulecontrolleraction.IController
 const moment = require("moment");
 const build = require("../build.info");
 
+const getNodes = function () {
+    "use strict";
+    let nodes = AppMain.ws().exec("GetNodeList", {"with-data": true}).getResponse(false);
+    nodes = (Object.prototype.toString.call(nodes.GetNodeListResponse.node) === "[object Array]")
+        ? nodes.GetNodeListResponse.node
+        : nodes.GetNodeListResponse;
+    if (nodes.__prefix !== undefined) {
+        delete nodes.__prefix;
+    }
+    return nodes;
+};
+const fixForWhiteListLength = function (params) {
+    "use strict";
+    if (params["white-list"] !== undefined && typeof params["white-list"]["mac-address"] === "string") {
+        params["white-list"]["mac-address"] = [this.params["white-list"]["mac-address"]];
+    }
+    return params;
+};
+
+const getParams = function () {
+    "use strict";
+    let params = AppMain.ws().exec("GetParameters", {"plc": ""}).getResponse(false);
+    params = (defined(params) && defined(params.GetParametersResponse) && defined(params.GetParametersResponse.plc))
+        ? params.GetParametersResponse.plc
+        : {};
+    return fixForWhiteListLength(params);
+};
+
 CtrlActionWhiteList.exec = function () {
     "use strict";
 
     this.view.setTitle("WHITE_LIST");
 
-    if (this.view.cached("WhiteList#WhiteList")) {
-        this.view.renderFromCache("WhiteList#WhiteList");
-    } else {
-        this.view.renderEmpty("WhiteList#WhiteList", {
-            labels: {
-                title: AppMain.t("WHITE_LIST_MNG", "WHITE_LIST"),
-                description: ""
-            },
-            htmlNodes: "---",
-            totalNodes: 0,
-            activeNodes: 0
-        }, true);
-    }
+    this.view.renderEmpty("WhiteList#WhiteList", {
+        labels: {
+            title: AppMain.t("WHITE_LIST_MNG", "WHITE_LIST"),
+            description: ""
+        },
+        htmlNodes: "---",
+        totalNodes: 0,
+        activeNodes: 0
+    }, true);
 
-    this.nodes = AppMain.ws().exec("GetNodeList", {
-        "with-data": true
-    }).getResponse(false);
-
-    this.params = AppMain.ws().exec("GetParameters", {"plc": ""}).getResponse(false);
-    this.params = (defined(this.params) && defined(this.params.GetParametersResponse) && defined(this.params.GetParametersResponse.plc))
-        ? this.params.GetParametersResponse.plc
-        : {};
+    this.nodes = getNodes();
+    this.params = getParams();
     let list = {};
     let tooltipHtml = "";
-
-    this.nodes = (Object.prototype.toString.call(this.nodes.GetNodeListResponse.node) === "[object Array]")
-        ? this.nodes.GetNodeListResponse.node
-        : this.nodes.GetNodeListResponse;
-    if (this.nodes.__prefix !== undefined) {
-        delete this.nodes.__prefix;
-    }
-
-    //fix for white list length of 1
-    if (this.params["white-list"] !== undefined && typeof this.params["white-list"]["mac-address"] === "string") {
-        this.params["white-list"]["mac-address"] = [this.params["white-list"]["mac-address"]];
-    }
     this.whiteListArr = [];
     if (this.params["white-list"] && this.params["white-list"]["mac-address"]) {
-        $.each(this.params["white-list"]["mac-address"], function (index, node) {
+        $.each(this.params["white-list"]["mac-address"], function (ignore, node) {
             CtrlActionWhiteList.whiteListArr.push(node);
         });
         list = this.buildNodeListHTML(this.nodes, this.params["white-list"]["mac-address"]);
@@ -120,7 +126,7 @@ CtrlActionWhiteList.buildNodeListHTML = function (nodes, whiteList) {
     let list = {totalNodes: 0, htmlNodes: ""};
 
     let i = 1;
-    $.each(nodes, function (index, node) {
+    $.each(nodes, function (ignore, node) {
         const ind = whiteList.indexOf(node["mac-address"]);
         if (ind !== -1) { // node is in white list
             whiteList.splice(ind, 1);
@@ -139,7 +145,7 @@ CtrlActionWhiteList.buildNodeListHTML = function (nodes, whiteList) {
     });
 
     //display the rest of white list, those have unknown IP
-    $.each(whiteList, function (index, node) {
+    $.each(whiteList, function (ignore, node) {
         list.htmlNodes += "<tr>";
         list.htmlNodes += "<td class='mdl-data-table__cell--non-numeric checkbox-col'>" +
                 "<input type='checkbox' name='selectNode' class='selectNode' " +
@@ -166,7 +172,7 @@ CtrlActionWhiteList.setWhiteList = function (arr) {
     const client = AppMain.ws();
     client.xmlSetElement("plc");
     client.xmlSetElement("white-list");
-    $(arr).each(function (index, mac) {
+    $(arr).each(function (ignore, mac) {
         client.xmlSetParam("mac-address", mac);
     });
     const p = client.xmlGetStructure();
@@ -270,10 +276,59 @@ CtrlActionWhiteList.useWhiteList = function () {
     AppMain.html.updateElements(["#macinput", ".mdl-js-switch"]);
 };
 
+const processInputMac = function () {
+    "use strict";
+    const mac1 = $("input[name='mac1']").val();
+    const mac2 = $("input[name='mac2']").val();
+    const mac3 = $("input[name='mac3']").val();
+    const mac4 = $("input[name='mac4']").val();
+    const mac5 = $("input[name='mac5']").val();
+    const mac6 = $("input[name='mac6']").val();
+    const mac7 = $("input[name='mac7']").val();
+    const mac8 = $("input[name='mac8']").val();
+    if (mac1.length === 2 && mac2.length === 2 && mac3.length === 2 && mac4.length === 2
+            && mac5.length === 2 && mac6.length === 2 && mac7.length === 2 && mac8.length === 2) {
+        CtrlActionWhiteList.exportNodeList(mac1 + ":" + mac2 + ":" + mac3 + ":" + mac4 + ":" + mac5 + ":" + mac6 + ":" + mac7 + ":" + mac8);
+        return true;
+    }
+    $.alert({
+        title: AppMain.t("ERROR", "global"),
+        content: AppMain.t("WHITE_LIST_ADD_ERR", "WHITE_LIST"),
+        useBootstrap: false,
+        theme: "material",
+        buttons: {
+            confirm: {
+                text: AppMain.t("OK", "global")
+            }
+        }
+    });
+    return false;
+};
+
+const processInputFile = function () {
+    "use strict";
+    if ($("#file-selected").is(":visible")) {
+        CtrlActionWhiteList.exportNodeListArr();
+        return true;
+    }
+    $.alert({
+        useBootstrap: false,
+        theme: "material",
+        title: AppMain.t("IMPORT_WHITE_LIST_TXT", "WHITE_LIST"),
+        content: AppMain.t("IMPORT_WHITE_LIST_SELECT_FILE", "WHITE_LIST"),
+        buttons: {
+            confirm: {
+                text: AppMain.t("OK", "global")
+            }
+        }
+    });
+    return false;
+};
+
 CtrlActionWhiteList.addWhiteList = function () {
     "use strict";
     let selObj = {};
-    $.each(this.nodes, function (index, node) {
+    $.each(this.nodes, function (ignore, node) {
         selObj["'" + node["mac-address"] + "'"] = node["mac-address"];
     });
     const selectHTML = AppMain.html.formElementSelect("add-from-attached", selObj, {
@@ -354,52 +409,11 @@ CtrlActionWhiteList.addWhiteList = function () {
                         return true;
                     }
                     if (radio === "input-mac") {  // add from attached
-                        const mac1 = $("input[name='mac1']").val();
-                        const mac2 = $("input[name='mac2']").val();
-                        const mac3 = $("input[name='mac3']").val();
-                        const mac4 = $("input[name='mac4']").val();
-                        const mac5 = $("input[name='mac5']").val();
-                        const mac6 = $("input[name='mac6']").val();
-                        const mac7 = $("input[name='mac7']").val();
-                        const mac8 = $("input[name='mac8']").val();
-                        if (mac1.length === 2 && mac2.length === 2 && mac3.length === 2 && mac4.length === 2
-                                && mac5.length === 2 && mac6.length === 2 && mac7.length === 2 && mac8.length === 2) {
-                            CtrlActionWhiteList.exportNodeList(mac1 + ":" + mac2 + ":" + mac3 + ":" + mac4 + ":" + mac5 + ":" + mac6 + ":" + mac7 + ":" + mac8);
-                            return true;
-                        }
-                        $.alert({
-                            title: AppMain.t("ERROR", "global"),
-                            content: AppMain.t("WHITE_LIST_ADD_ERR", "WHITE_LIST"),
-                            useBootstrap: false,
-                            theme: "material",
-                            buttons: {
-                                confirm: {
-                                    text: AppMain.t("OK", "global")
-                                }
-                            }
-                        });
-                        return false;
+                        return processInputMac();
                     }
                     if (radio === "input-import") {  // add from attached
-                        if ($("#file-selected").is(":visible")) {
-                            CtrlActionWhiteList.exportNodeListArr();
-                            return true;
-                        }
-                        $.alert({
-                            useBootstrap: false,
-                            theme: "material",
-                            title: AppMain.t("IMPORT_WHITE_LIST_TXT", "WHITE_LIST"),
-                            content: AppMain.t("IMPORT_WHITE_LIST_SELECT_FILE", "WHITE_LIST"),
-                            buttons: {
-                                confirm: {
-                                    text: AppMain.t("OK", "global")
-                                }
-                            }
-                        });
-                        return false;
+                        return processInputFile();
                     }
-
-
                 }
             },
             cancel: {
@@ -476,7 +490,7 @@ CtrlActionWhiteList.exportWhiteList = function () {
         csv += "\"" + AppMain.t("IP_ADDRESS", "WHITE_LIST") + "\",";
         csv += "\r\n";
 
-        inputC.each(function (i, elm) {
+        inputC.each(function (ignore, elm) {
             const element = $(elm);
             if (element.hasClass("selectNode")) {
                 isNotSelected = false;
@@ -596,7 +610,7 @@ CtrlActionWhiteList.deleteWhiteList = function () {
     const inputChecked = $("input:checked");
     let isEmpty = true;
     if (inputChecked.length > 0) {
-        inputChecked.each(function (i, elm) {
+        inputChecked.each(function (ignore, elm) {
             const element = $(elm);
             if (element.hasClass("selectNode")) {
                 isEmpty = false;

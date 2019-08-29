@@ -1,6 +1,35 @@
+/* global defined */
 /* jshint maxstatements: false */
 /* jslint browser:true, node:true*/
 /* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
+
+const backgroundColorMap = {
+    "G3PLC-NODE-JOINED": "#009E00",
+    "G3PLC-NODE-ROUTE-DISCOVERED": "#009E00",
+    "G3PLC-NODE-ACTIVE": "#009E00",
+    "G3PLC-NODE-NOT-AVAILABLE": "rgb(249, 168, 7)",
+    "G3PLC-NODE-LOST": "rgb(255, 0, 0)"
+};
+
+const borderColorMap = {
+    "G3PLC-NODE-JOINED": "#003300",
+    "G3PLC-NODE-ROUTE-DISCOVERED": "#003300",
+    "G3PLC-NODE-ACTIVE": "#003300",
+    "G3PLC-NODE-NOT-AVAILABLE": "#634303",
+    "G3PLC-NODE-LOST": "rgb(100, 0, 0)"
+};
+
+const getBorderWidth = function (busyness) {
+    "use strict";
+    if (busyness <= 5) {
+        return 2;
+    }
+    if (busyness <= 10) {
+        return 4;
+    }
+    return 7;
+};
+
 const cyStyle = [
     {
         selector: "node",
@@ -9,18 +38,10 @@ const cyStyle = [
             "width": 35,
             "background-color": function (node) {
                 "use strict";
-                switch (node.data("nodeState")) {
-                case "G3PLC-NODE-JOINED":
-                case "G3PLC-NODE-ROUTE-DISCOVERED":
-                case "G3PLC-NODE-ACTIVE":
-                    return "#009E00";
-                case "G3PLC-NODE-NOT-AVAILABLE":
-                    return "rgb(249, 168, 7)";
-                case "G3PLC-NODE-LOST":
-                    return "rgb(255, 0, 0)";
-                default:
-                    return "#999";
+                if (defined(backgroundColorMap[node.data("nodeState")])) {
+                    return backgroundColorMap[node.data("nodeState")];
                 }
+                return "#999";
             },
             "content": "data(name)",
             "font-size": "12px",
@@ -34,28 +55,14 @@ const cyStyle = [
                 if (Number.isNaN(busyness) || busyness === 0) {
                     return 0;
                 }
-                if (busyness <= 5) {
-                    return 2;
-                }
-                if (busyness <= 10) {
-                    return 4;
-                }
-                return 7;
+                return getBorderWidth(busyness);
             },
             "border-color": function (node) {
                 "use strict";
-                switch (node.data("nodeState")) {
-                case "G3PLC-NODE-JOINED":
-                case "G3PLC-NODE-ROUTE-DISCOVERED":
-                case "G3PLC-NODE-ACTIVE":
-                    return "#003300";
-                case "G3PLC-NODE-NOT-AVAILABLE":
-                    return "#634303";
-                case "G3PLC-NODE-LOST":
-                    return "rgb(100, 0, 0)";
-                default:
-                    return "#999";
+                if (defined(borderColorMap[node.data("nodeState")])) {
+                    return borderColorMap[node.data("nodeState")];
                 }
+                return "#999";
             },
             "overlay-padding": "6px",
             "z-index": "10"
