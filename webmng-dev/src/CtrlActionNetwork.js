@@ -1,7 +1,7 @@
 /**
  * @class CtrlActionNetwork Controller action using IControllerAction interface.
  */
-/* global AppMain, $, defined, dmp */
+/* global AppMain, $, dmp */
 /* jshint maxstatements: false */
 /* jslint browser:true, node:true*/
 /* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
@@ -30,21 +30,8 @@ CtrlActionNetwork.exec = function () {
     } catch (e) {
         dmp("err: PlcRoutingTableGet" + e.toString());
     }
-
-    let nodes = AppMain.ws().exec("GetNodeList", {"with-data": true}).getResponse(false);
-    nodes = (nodes && nodes.GetNodeListResponse && Object.prototype.toString.call(nodes.GetNodeListResponse.node) === "[object Array]")
-        ? nodes.GetNodeListResponse.node
-        : nodes.GetNodeListResponse;
-    if (nodes.__prefix !== undefined) {
-        delete nodes.__prefix;
-    }
-
-    const nodesCosemStat = AppMain.wsMes().exec("CosemDeviceStatisticRequest", undefined).getResponse(false);
-    if (nodesCosemStat && nodesCosemStat.GetCosemDeviceStatisticResponse &&
-            nodesCosemStat.GetCosemDeviceStatisticResponse["cosem-device-statistics"]) {
-        nodes = this.arrangeNodes(nodes, nodesCosemStat.GetCosemDeviceStatisticResponse["cosem-device-statistics"]);
-    }
-
+    this.nodesData = this.getNodeCosemStatistics();
+    let nodes = this.getNodesObject(this.nodesData);
     let htmlNodes = this.buildNodeListHTML(nodes);
 
     this.view.render("Network#ViewNetwork", {
@@ -189,20 +176,12 @@ CtrlActionNetwork.buildNodeListHTML = function (nodes) {
     "use strict";
     let htmlNodes = "";
 
-    $.each(nodes, function (index, node) {
-        let shortAddress = "";
-        let shortAddressPom = "";
-        if (node["ip-address"]) {
-            const arr = node["ip-address"].split(":");
-            shortAddress = arr[arr.length - 1].toUpperCase();
-            shortAddressPom = parseInt(arr[arr.length - 1].toUpperCase(), 16);
-            if (shortAddress.length % 2 === 1) {
-                shortAddress = "0" + shortAddress;
-            }
-        }
+    $.each(nodes, function (ignore, node) {
+        const shortAddObj = this.calculateNodeShortAddress(node);
 
-        htmlNodes += "<tr class='node-" + shortAddress + "' data-bind-event='click' data-bind-method='CtrlActionNetwork.getNodeInfo' data-node='" + shortAddress + "'>";
-        htmlNodes += "<td class='short-address' class='cursor-default' data-sort-value='" + shortAddressPom + "'>" + shortAddress + "</td>";
+        htmlNodes += "<tr class='node-" + shortAddObj.shortAddress + "' data-bind-event='click' " +
+                "data-bind-method='CtrlActionNetwork.getNodeInfo' data-node='" + shortAddObj.shortAddress + "'>";
+        htmlNodes += "<td class='short-address' class='cursor-default' data-sort-value='" + shortAddObj.shortAddressPom + "'>" + shortAddObj.shortAddress + "</td>";
         htmlNodes += "<td class='node-title' class='cursor-default'>" + (node["node-title"] !== undefined
             ? node["node-title"]
             : "---") + "</td>";
@@ -566,16 +545,12 @@ CtrlActionNetwork.checkForExistingData = function (nodes) {
     "use strict";
     $.each(nodes, function (index, node) {
         if (node["ip-address"]) {
-            let ip = node["ip-address"].split(":");
-            let shortAddress = ip[ip.length - 1].toUpperCase();
-            if (shortAddress.length % 2 !== 0) {
-                shortAddress = "0" + shortAddress;
-            }
+            const shortAddObj = this.calculateNodeShortAddress(node);
             let nodeTitle = "";
             if (CtrlActionNetwork.nodesData[node["mac-address"]] && CtrlActionNetwork.nodesData[node["mac-address"]]["meter-id"]) {
                 nodeTitle = CtrlActionNetwork.nodesData[node["mac-address"]]["meter-id"].toString();
             }
-            CtrlActionNetwork.nodesInfo[`${shortAddress}`] = {
+            CtrlActionNetwork.nodesInfo[`${shortAddObj.shortAddress}`] = {
                 ipAddress: node["ip-address"],
                 macAddress: node["mac-address"],
                 nodeState: node["node-state"],
@@ -584,7 +559,7 @@ CtrlActionNetwork.checkForExistingData = function (nodes) {
 
             if (node["path-discover-data"]) {
 
-                const nodeInd = CtrlActionNetwork.nodesTmp.indexOf(shortAddress);
+                const nodeInd = CtrlActionNetwork.nodesTmp.indexOf(shortAddObj.shortAddress);
 
                 if (nodeInd !== -1) {
                     const cvNode = CtrlActionNetwork.nodes[`${nodeInd}`];
@@ -604,7 +579,7 @@ CtrlActionNetwork.checkForExistingData = function (nodes) {
                     let pathArr = [0];
                     let startInd = 0;
                     let nodeData = node["path-discover-data"]["node-data"];
-                    $.each(nodeData, function (index, n) {
+                    $.each(nodeData, function (ignore, n) {
                         let toAddress = parseInt(n.address).toString(16).toUpperCase();
                         if (toAddress.length % 2 !== 0) {
                             toAddress = "0" + toAddress;
@@ -849,56 +824,6 @@ CtrlActionNetwork.updatePLCtooltip = function (nodeIndex) {
             "</p>";
     const tt = $("#discover_tooltip");
     tt.html(sliderHtml);
-};
-
-CtrlActionNetwork.arrangeNodes = function (nodes, nodesCosemStat) {
-    "use strict";
-    let nodesObj = {};
-    if (nodesCosemStat.length === undefined) {
-        nodesCosemStat = [nodesCosemStat];
-    }
-    $.each(nodesCosemStat, function (index, nodeStat) {
-        nodesObj[nodeStat["mac-address"].toString()] = nodeStat;
-    });
-    CtrlActionNetwork.nodesData = nodesObj;
-
-    $.each(nodes, function (index, node) {
-        if (nodesObj[node["mac-address"]]) {
-            node["node-title"] = (nodesObj[node["mac-address"]]["meter-id"] && nodesObj[node["mac-address"]]["meter-id"].toString() !== "[object Object]")
-                ? nodesObj[node["mac-address"]]["meter-id"].toString()
-                : "---";
-            node["node-commissioned"] = nodesObj[node["mac-address"]].commissioned
-                ? nodesObj[node["mac-address"]].commissioned.toString()
-                : "";
-            node["node-last-comm"] = nodesObj[node["mac-address"]]["last-successful-communication"]
-                ? nodesObj[node["mac-address"]]["last-successful-communication"].toString()
-                : "";
-            node["dc-state"] = defined(nodesObj[node["mac-address"]]["meter-state"])
-                ? nodesObj[node["mac-address"]]["meter-state"].toString()
-                : "";
-            const succ = parseInt(nodesObj[node["mac-address"]]["successful-communications"], 10);
-            const unsucc = parseInt(nodesObj[node["mac-address"]]["unsuccessful-communications"], 10);
-            node["success-rate"] = (!Number.isNaN(succ) && !Number.isNaN(unsucc) && succ + unsucc !== 0)
-                ? parseInt((succ / (succ + unsucc)) * 100, 10)
-                : 100;
-            node["successful-communications"] = nodesObj[node["mac-address"]]["successful-communications"];
-            if (nodesObj[node["mac-address"]]["last-successful-communication"] && nodesObj[node["mac-address"]]["last-successful-communication"].toString() !== "0") {
-                node["last-successful-communication"] = moment(nodesObj[node["mac-address"]]["last-successful-communication"].toString()).format(AppMain.localization("DATETIME_FORMAT"));
-            } else {
-                node["last-successful-communication"] = "";
-            }
-            node["unsuccessful-communications"] = nodesObj[node["mac-address"]]["unsuccessful-communications"];
-            if (nodesObj[node["mac-address"]]["last-unsuccessful-communication"] && nodesObj[node["mac-address"]]["last-unsuccessful-communication"].toString() !== "0") {
-                node["last-unsuccessful-communication"] = moment(nodesObj[node["mac-address"]]["last-unsuccessful-communication"].toString()).format(AppMain.localization("DATETIME_FORMAT"));
-            } else {
-                node["last-unsuccessful-communication"] = "";
-            }
-            node["security-counter"] = defined(nodesObj[node["mac-address"]]["security-counter"])
-                ? nodesObj[node["mac-address"]]["security-counter"]
-                : "---";
-        }
-    });
-    return nodes;
 };
 
 CtrlActionNetwork.expand = function () {

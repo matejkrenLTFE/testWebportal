@@ -27,22 +27,8 @@ CtrlActionNodes.exec = function () {
         activeNodes: 0
     }, true);
 
-    let nodes = AppMain.ws().exec("GetNodeList", {"with-data": true}).getResponse(false);
-
-    nodes = (nodes && nodes.GetNodeListResponse && Object.prototype.toString.call(nodes.GetNodeListResponse.node) === "[object Array]")
-        ? nodes.GetNodeListResponse.node
-        : nodes.GetNodeListResponse;
-    if (nodes.__prefix !== undefined) {
-        delete nodes.__prefix;
-    }
-
-    const nodesCosemStat = AppMain.wsMes().exec("CosemDeviceStatisticRequest", undefined).getResponse(false);
-    this.nodesCosemStat = {};
-    if (nodesCosemStat && nodesCosemStat.GetCosemDeviceStatisticResponse &&
-            nodesCosemStat.GetCosemDeviceStatisticResponse["cosem-device-statistics"]) {
-        nodes = this.arrangeNodes(nodes, nodesCosemStat.GetCosemDeviceStatisticResponse["cosem-device-statistics"]);
-    }
-
+    this.nodesCosemStat = this.getNodeCosemStatistics();
+    let nodes = this.getNodesObject(this.nodesCosemStat);
     let list = this.buildNodeListHTML(nodes);
     const totalDC = list.joinedNodes + list.commissionedNodes + list.activeNodes + list.notActiveNodes + list.lostNodes;
 
@@ -161,6 +147,183 @@ CtrlActionNodes.exec = function () {
     AppMain.html.updateAllElements();
 };
 
+const defineLastRxTimestamp = function (node) {
+    "use strict";
+    return defined(node["device-last-rx-timestamp"])
+        ? node["device-last-rx-timestamp"]
+        : "---";
+};
+const defineLastRxTimestampMoment = function (node) {
+    "use strict";
+    return (node["device-last-rx-timestamp"] && node["device-last-rx-timestamp"] !== "0" && node["device-last-rx-timestamp"] !== 0)
+        ? moment(node["device-last-rx-timestamp"]).format(AppMain.localization("DATETIME_FORMAT"))
+        : "---";
+};
+const defineLastTxAckTimestamp = function (node) {
+    "use strict";
+    return (node["device-last-tx-ack-timestamp"] && node["device-last-tx-ack-timestamp"] !== "0" && node["device-last-tx-ack-timestamp"] !== 0)
+        ? node["device-last-tx-ack-timestamp"]
+        : "---";
+};
+const defineLastTxAckTimestampMoment = function (node) {
+    "use strict";
+    return (node["device-last-tx-ack-timestamp"] && node["device-last-tx-ack-timestamp"] !== "0" && node["device-last-tx-ack-timestamp"] !== 0)
+        ? moment(node["device-last-tx-ack-timestamp"]).format(AppMain.localization("DATETIME_FORMAT"))
+        : "---";
+};
+const defineTxNoAckTimestamp = function (node) {
+    "use strict";
+    return (node["device-last-tx-no-ack-timestamp"] && node["device-last-tx-no-ack-timestamp"] !== "0" && node["device-last-tx-no-ack-timestamp"] !== 0)
+        ? node["device-last-tx-no-ack-timestamp"]
+        : "---";
+};
+const defineTxNoAckTimestampMoment = function (node) {
+    "use strict";
+    return (node["device-last-tx-no-ack-timestamp"] && node["device-last-tx-no-ack-timestamp"] !== "0" && node["device-last-tx-no-ack-timestamp"] !== 0)
+        ? moment(node["device-last-tx-no-ack-timestamp"]).format(AppMain.localization("DATETIME_FORMAT"))
+        : "---";
+};
+const defineDeviceJoined = function (node) {
+    "use strict";
+    return (node["device-joined"] && node["device-joined"] !== "0" && node["device-joined"] !== 0)
+        ? moment(node["device-joined"]).format(AppMain.localization("DATETIME_FORMAT"))
+        : "---";
+};
+const defineDeviceJoinedExport = function (deviceJoined) {
+    "use strict";
+    return (deviceJoined !== "---"
+        ? moment(deviceJoined).toISOString()
+        : deviceJoined);
+};
+const defineDeviceCommissioningTime = function (node) {
+    "use strict";
+    return (node["node-commissioned"] && node["node-commissioned"] !== "0" && node["node-commissioned"] !== 0)
+        ? moment(node["node-commissioned"]).format(AppMain.localization("DATETIME_FORMAT"))
+        : "---";
+};
+const defineDeviceCommissioningTimeExport = function (commissioningTime) {
+    "use strict";
+    return (commissioningTime !== "---"
+        ? moment(commissioningTime).toISOString()
+        : commissioningTime);
+};
+const defineDeviceLastSuccTime = function (node) {
+    "use strict";
+    return (node["node-last-comm"] && node["node-last-comm"] !== "0" && node["node-last-comm"] !== "---" && node["node-last-comm"] !== 0)
+        ? moment(node["node-last-comm"]).format(AppMain.localization("DATETIME_FORMAT"))
+        : "---";
+};
+const defineDeviceLastSuccTimeExport = function (lastSuccTime) {
+    "use strict";
+    return (lastSuccTime !== "---"
+        ? moment(lastSuccTime).toISOString()
+        : lastSuccTime);
+};
+const defineDeviceTitleTxt = function (node) {
+    "use strict";
+    return (node["node-title"] !== undefined
+        ? node["node-title"]
+        : "---");
+};
+const defineDeviceDcStateTxt = function (node) {
+    "use strict";
+    return (node["node-title"] !== undefined
+        ? CtrlActionNodes.getNodeStateString(node["dc-state"])
+        : "---");
+};
+const defineDeviceSuccCommTxt = function (node) {
+    "use strict";
+    return (node["node-title"] !== undefined
+        ? node["successful-communications"]
+        : "---");
+};
+const defineDeviceUnSuccCommTxt = function (node) {
+    "use strict";
+    return (node["node-title"] !== undefined
+        ? node["unsuccessful-communications"]
+        : "---");
+};
+const defineDeviceUnSuccCommTimeTxt = function (node) {
+    "use strict";
+    return (node["node-title"] !== undefined
+        ? moment(node["last-unsuccessful-communication"].toString()).toISOString()
+        : "---");
+};
+const defineDeviceSuccCommTimeTxt = function (node) {
+    "use strict";
+    return (node["node-title"] !== undefined
+        ? moment(node["last-successful-communication"].toString()).toISOString()
+        : "---");
+};
+const defineDeviceSecurityCounterTxt = function (node) {
+    "use strict";
+    return (node["node-title"] !== undefined
+        ? node["security-counter"]
+        : "---");
+};
+const defineDeviceSuccessRateTxt = function (node) {
+    "use strict";
+    return (node["success-rate"] !== undefined
+        ? node["success-rate"] + "%"
+        : "---");
+};
+const defineStatusChipHtml = function (node) {
+    "use strict";
+    return ((node["node-title"] !== undefined && node["node-title"] !== "---")
+        ? "<span class='mdl-chip " + node["dc-state"] + "'><span class='mdl-chip__text dc-state'>" + CtrlActionNodes.getNodeStateString(node["dc-state"]) + "</span></span>"
+        : "<span class='mdl-chip METER-JOINED'><span class='mdl-chip__text dc-state'>" + CtrlActionNodes.getNodeStateString("METER-JOINED") + "</span></span>");
+};
+const defineSuccessRateHtml = function (node) {
+    "use strict";
+    return (node["success-rate"] !== undefined
+        ? node["success-rate"]
+        : "0") + "'>" + (node["success-rate"] !== undefined
+        ? node["success-rate"] + "%"
+        : "---");
+};
+// const defineDeviceSuccessRate = function (node) {
+//     "use strict";
+//     let successRate = (node["tx-ack-packets"] > 0)
+//         ? Math.ceil((parseInt(node["tx-ack-packets"], 10) / (parseInt(node["tx-ack-packets"], 10) + parseInt(node["tx-no-ack-packets"], 10))) * 100)
+//         : 0;
+//     if (Number.isNaN(successRate)) {
+//         return 0;
+//     }
+//     return successRate;
+// };
+CtrlActionNodes.updateStatusCountersSecond = function (dcState, list) {
+    "use strict";
+    if (dcState === "METER-NO-KEYS") {
+        list.notActiveNodes += 1;
+    }
+    if (dcState === "METER-WRONG-KEYS") {
+        list.notActiveNodes += 1;
+    }
+    if (dcState === "METER-LOST") {
+        list.lostNodes += 1;
+    }
+};
+CtrlActionNodes.updateStatusCountersThird = function (dcState, list) {
+    "use strict";
+    if (dcState === "METER-ACTIVE") {
+        list.activeNodes += 1;
+    }
+    if (dcState === "METER-NOT-AVAILABLE") {
+        list.notActiveNodes += 1;
+    }
+};
+
+CtrlActionNodes.updateStatusCounters = function (dcState, list) {
+    "use strict";
+    if (dcState === "METER-JOINED" || dcState === "") {
+        list.joinedNodes += 1;
+    }
+    if (dcState === "METER-COMMISSIONED") {
+        list.commissionedNodes += 1;
+    }
+    CtrlActionNodes.updateStatusCountersSecond(dcState, list);
+    CtrlActionNodes.updateStatusCountersThird(dcState, list);
+};
 /**
  * Build HTML nodes table.
  * @return {Object} {htmlNodes, totalNodes}
@@ -179,167 +342,113 @@ CtrlActionNodes.buildNodeListHTML = function (nodes) {
         lostNodes: 0
     };
 
-    let successRate = 0;
     let i = 1;
-    $.each(nodes, function (index, node) {
-        let shortAddress = "";
-        if (node["ip-address"]) {
-            const arr = node["ip-address"].split(":");
-            shortAddress = arr[arr.length - 1].toUpperCase();
-            if (shortAddress.length % 2 === 1) {
-                shortAddress = "0" + shortAddress;
-            }
-        }
-        let deviceLastRxTimestamp = "---";
-        if (node["device-last-rx-timestamp"]) {
-            deviceLastRxTimestamp = node["device-last-rx-timestamp"];
-        }
-        let deviceLastTxAckTimestamp = "---";
-        if (node["device-last-tx-ack-timestamp"] && node["device-last-tx-ack-timestamp"] !== "0" && node["device-last-tx-ack-timestamp"] !== 0) {
-            deviceLastTxAckTimestamp = node["device-last-tx-ack-timestamp"];
-        }
-        let deviceLastTxNoAckTimestamp = "---";
-        if (node["device-last-tx-no-ack-timestamp"] && node["device-last-tx-no-ack-timestamp"] !== "0" && node["device-last-tx-no-ack-timestamp"] !== 0) {
-            deviceLastTxNoAckTimestamp = node["device-last-tx-no-ack-timestamp"];
-        }
-        let deviceJoined = "---";
-        if (node["device-joined"] && node["device-joined"] !== "0" && node["device-joined"] !== 0) {
-            deviceJoined = moment(node["device-joined"]).format(AppMain.localization("DATETIME_FORMAT"));
-        }
-        let commissioningTime = "---";
-        if (node["node-commissioned"] && node["node-commissioned"] !== "0" && node["node-commissioned"] !== 0) {
-            commissioningTime = moment(node["node-commissioned"]).format(AppMain.localization("DATETIME_FORMAT"));
-        }
+    const self = this;
+    $.each(nodes, function (ignore, node) {
+        const shortAddObj = self.calculateNodeShortAddress(node);
+        let deviceLastRxTimestamp = defineLastRxTimestamp(node);
+        let deviceLastTxAckTimestamp = defineLastTxAckTimestamp(node);
+        let deviceLastTxNoAckTimestamp = defineTxNoAckTimestamp(node);
+        let deviceJoined = defineDeviceJoined(node);
+        let commissioningTime = defineDeviceCommissioningTime(node);
+        let lastSuccTime = defineDeviceLastSuccTime(node);
+        let nodeTitle = defineDeviceTitleTxt(node);
 
-
-        let lastSuccTime = "---";
-        if (node["node-last-comm"] && node["node-last-comm"] !== "0" && node["node-last-comm"] !== "---" && node["node-last-comm"] !== 0) {
-            lastSuccTime = moment(node["node-last-comm"]).format(AppMain.localization("DATETIME_FORMAT"));
-        }
-
-        successRate = (node["tx-ack-packets"] > 0)
-            ? Math.ceil((parseInt(node["tx-ack-packets"], 10) / (parseInt(node["tx-ack-packets"], 10) + parseInt(node["tx-no-ack-packets"], 10))) * 100)
-            : 0;
-        if (Number.isNaN(successRate)) {
-            successRate = 0;
-        }
         list.htmlNodes += "<tr>";
-
         list.htmlNodes += "<td class='checkbox-col cursor-default'><input type='checkbox' name='selectNode' class='selectNode cursor-pointer' data-node-mac='" + node["mac-address"] +
                 "' data-node-ip-address='" + node["ip-address"] + "' " +
-                "data-node-device-joined='" + (deviceJoined !== "---"
-            ? moment(deviceJoined).toISOString()
-            : deviceJoined) +
-                "' data-node-number='" + i + "' " +
-                "data-node-rx-packets='" + node["rx-packets"] + "' data-node-tx-packets='" + node["tx-ack-packets"] +
-                "'" + " data-device-last-tx-ack-timestamp='" + deviceLastTxAckTimestamp +
-                "'" + " data-node-rx-link-quality='" + node["rx-link-quality"] +
-                "'" + " data-node-short='" + shortAddress +
-                "'" + " data-node-commissioned='" + (commissioningTime !== "---"
-            ? moment(commissioningTime).toISOString()
-            : commissioningTime) +
-                "'" + " data-node-succ-comm='" + (lastSuccTime !== "---"
-            ? moment(lastSuccTime).toISOString()
-            : lastSuccTime) +
-                "'" + " data-node-tx-ack-packets='" + node["tx-ack-packets"] +
-                "'" + " data-node-tx-no-ack-packets='" + node["tx-no-ack-packets"] +
-                "'" + " data-device-last-rx-timestamp='" + deviceLastRxTimestamp +
-                "'" + " data-node-title='" + (node["node-title"] !== undefined
-            ? node["node-title"]
-            : "---") +
-                "'" + " data-node-dc-state='" + (node["node-title"] !== undefined
-            ? CtrlActionNodes.getNodeStateString(node["dc-state"])
-            : "---") +
-                "'" + " data-node-state='" + CtrlActionNodes.getNodeStateString(node["node-state"]) +
-                "'" + " data-node-successful-communications='" + (node["node-title"] !== undefined
-            ? node["successful-communications"]
-            : "---") +
-                "'" + " data-node-last-successful-communication='" + (node["node-title"] !== undefined
-            ? moment(node["last-successful-communication"].toString()).toISOString()
-            : "---") +
-                "'" + " data-node-unsuccessful-communications='" + (node["node-title"] !== undefined
-            ? node["unsuccessful-communications"]
-            : "---") +
-                "'" + " data-node-last-unsuccessful-communication='" + (node["node-title"] !== undefined
-            ? moment(node["last-unsuccessful-communication"].toString()).toISOString()
-            : "---") +
-                "'" + " data-node-security-counter='" + (node["node-title"] !== undefined
-            ? node["security-counter"]
-            : "---") +
-                "'" + " data-node-success-rate='" + (node["success-rate"] !== undefined
-            ? node["success-rate"] + "%"
-            : "---") +
+                "data-node-device-joined='" + defineDeviceJoinedExport(deviceJoined) +
+                "' data-node-number='" + i + "' data-node-rx-packets='" + node["rx-packets"] + "' data-node-tx-packets='" +
+                node["tx-ack-packets"] + "'" + " data-device-last-tx-ack-timestamp='" + deviceLastTxAckTimestamp +
+                "'" + " data-node-rx-link-quality='" + node["rx-link-quality"] + "'" + " data-node-short='" + shortAddObj.shortAddress +
+                "'" + " data-node-commissioned='" + defineDeviceCommissioningTimeExport(commissioningTime) + "'" + " data-node-succ-comm='" +
+                defineDeviceLastSuccTimeExport + "'" + " data-node-tx-ack-packets='" + node["tx-ack-packets"] + "'" + " data-node-tx-no-ack-packets='" +
+                node["tx-no-ack-packets"] + "'" + " data-device-last-rx-timestamp='" + deviceLastRxTimestamp + "'" + " data-node-title='" +
+                nodeTitle + "'" + " data-node-dc-state='" + defineDeviceDcStateTxt(node) + "'" + " data-node-state='" + CtrlActionNodes.getNodeStateString(node["node-state"]) +
+                "'" + " data-node-successful-communications='" + defineDeviceSuccCommTxt + "'" + " data-node-last-successful-communication='" + defineDeviceSuccCommTimeTxt(node) +
+                "'" + " data-node-unsuccessful-communications='" + defineDeviceUnSuccCommTxt(node) + "'" +
+                " data-node-last-unsuccessful-communication='" + defineDeviceUnSuccCommTimeTxt(node) + "'" + " data-node-security-counter='" +
+                defineDeviceSecurityCounterTxt(node) + "'" + " data-node-success-rate='" + defineDeviceSuccessRateTxt(node) +
                 "'" + " data-device-last-tx-no-ack-timestamp='" + deviceLastTxNoAckTimestamp + "' /></td>";
 
-        list.htmlNodes += "<td class='short-address' class='cursor-default'>" + shortAddress + "</td>";
+        list.htmlNodes += "<td class='short-address' class='cursor-default'>" + shortAddObj.shortAddress + "</td>";
         list.htmlNodes += "<td class='mac-address' data-bind-event='click' data-bind-method='CtrlActionNodes.getNodeInfo' " +
                 " data-node-mac='" + node["mac-address"] + "'>" + node["mac-address"] + "</td>";
         list.htmlNodes += "<td class='node-title' data-bind-event='click' " +
-                "data-bind-method='CtrlActionNodes.getNodeInfoTitle' data-node-mac='" + node["mac-address"] + "'>" +
-                (node["node-title"] !== undefined
-            ? node["node-title"]
-            : "---") + "</td>";
-
-        list.htmlNodes += "<td class='cursor-default'>" + ((node["node-title"] !== undefined && node["node-title"] !== "---")
-            ? "<span class='mdl-chip " + node["dc-state"] + "'><span class='mdl-chip__text dc-state'>" + CtrlActionNodes.getNodeStateString(node["dc-state"]) + "</span></span>"
-            : "<span class='mdl-chip METER-JOINED'><span class='mdl-chip__text dc-state'>" + CtrlActionNodes.getNodeStateString("METER-JOINED") + "</span></span>")
-                + "</td>";
-
+                "data-bind-method='CtrlActionNodes.getNodeInfoTitle' data-node-mac='" + node["mac-address"] + "'>" + defineDeviceTitleTxt(node) + "</td>";
+        list.htmlNodes += "<td class='cursor-default'>" + defineStatusChipHtml(node) + "</td>";
         list.htmlNodes += "<td class='cursor-default'><span class='mdl-chip " + node["node-state"] + "'><span class='mdl-chip__text node-state'>" +
                 CtrlActionNodes.getNodeStateString(node["node-state"]) + "<span></span></td>";
-
-        list.htmlNodes += "<td class='success-rate cursor-default' data-sort-value='" + (node["success-rate"] !== undefined
-            ? node["success-rate"]
-            : "0") + "'>" + (node["success-rate"] !== undefined
-            ? node["success-rate"] + "%"
-            : "---") + "</td>";
-
+        list.htmlNodes += "<td class='success-rate cursor-default' data-sort-value='" + defineSuccessRateHtml(node) + "</td>";
         list.htmlNodes += "<td class='device-joined cursor-default'>" + commissioningTime + "</td>";
-
         list.htmlNodes += "<td class='ack-timestamp cursor-default'>" + lastSuccTime + "</td>";
-
         list.htmlNodes += "<td  class='cursor-default'>";
         list.htmlNodes += "<i id='ping_" + i + "'  data-rbac=\"nodes.ping\" class=\"material-icons cursor-pointer\" data-bind-event=\"click\" " +
                 "data-bind-method=\"CtrlActionNodes.ping\" data-node-mac='" + node["mac-address"] + "'>import_export</i>";
-
         list.htmlTooltips += "<div class=\"mdl-tooltip\" data-mdl-for=\"ping_" + i + "\">" + AppMain.t("PING", "NODES") + "</div>";
-
         list.htmlNodes += "<i id='kickOff_" + i + "' data-rbac=\"nodes.kickoff\" class=\"material-icons cursor-pointer\" data-bind-event=\"click\" " +
                 "data-bind-method=\"CtrlActionNodes.kickOffNode\" data-node-mac='" + node["mac-address"] + "'>clear</i>";
-
         list.htmlTooltips += "<div class=\"mdl-tooltip\" data-mdl-for=\"kickOff_" + i + "\">" + AppMain.t("KICK_OFF", "NODES") + "</div>";
-
         list.htmlNodes += "</td>";
         list.htmlNodes += "</tr>";
         i += 1;
         list.totalNodes += 1;
-        switch (node["dc-state"]) {
-        case "METER-JOINED":
-        case "":
-            list.joinedNodes += 1;
-            break;
-        case "METER-COMMISSIONED":
-            list.commissionedNodes += 1;
-            break;
-        case "METER-NO-KEYS":
-            list.notActiveNodes += 1;
-            break;
-        case "METER-WRONG-KEYS":
-            list.notActiveNodes += 1;
-            break;
-        case "METER-LOST":
-            list.lostNodes += 1;
-            break;
-        case "METER-ACTIVE":
-            list.activeNodes += 1;
-            break;
-        case "METER-NOT-AVAILABLE":
-            list.notActiveNodes += 1;
-            break;
-        }
+        CtrlActionNodes.updateStatusCounters(node["dc-state"], list);
     });
 
     return list;
+};
+
+CtrlActionNodes.getNodeInfoHtml = function ($this, nodeInfo, randomId) {
+    "use strict";
+    const node = nodeInfo.GetNodeListResponse.node;
+    let deviceJoined = defineDeviceJoined(node);
+    $this.attr("data-opened", 1);
+    $this.attr("data-rid", randomId);
+
+    let html = "<tr class='nodeListShowDetails id_" + randomId + "'>";
+    html += "<td colspan='3'>" + AppMain.t("IP_ADDRESS", "NODES") + "</td>";
+    html += "<td colspan='2'>" + node["ip-address"] + "</td><td></td>";
+    html += "<td colspan='2'>" + AppMain.t("TX_NO_ACK_PACKETS", "NODES") + "</td>";
+    html += "<td>" + node["tx-no-ack-packets"] + "</td><td></td>";
+    html += "</tr>";
+    html += "<tr class='nodeListShowDetails id_" + randomId + "'>";
+    html += "<td colspan='3'>" + AppMain.t("RX_PACKETS", "NODES") + "</td>";
+    html += "<td colspan='2'>" + node["rx-packets"] + "</td><td></td>";
+    html += "<td colspan='2'>" + AppMain.t("DEV_LAST_RX_TIMESTAMP", "NODES") + "</td>";
+    html += "<td>" + defineLastRxTimestampMoment(node) + "</td><td></td>";
+    html += "</tr>";
+    html += "<tr class='nodeListShowDetails id_" + randomId + "'>";
+    html += "<td colspan='3'>" + AppMain.t("RX_LINK_QUALITY", "NODES") + "</td>";
+    html += "<td colspan='2'>" + node["rx-link-quality"] + "</td><td></td>";
+    html += "<td colspan='2'>" + AppMain.t("DEV_LAST_TX_TIMESTAMP", "NODES") + "</td>";
+    html += "<td>" + defineLastTxAckTimestampMoment(node) + "</td><td></td>";
+    html += "</tr>";
+    html += "<tr class='nodeListShowDetails id_" + randomId + "'>";
+    html += "<td colspan='3'>" + AppMain.t("TX_ACK_PACKETS", "NODES") + "</td>";
+    html += "<td colspan='2'>" + node["tx-ack-packets"] + "</td><td></td>";
+    html += "<td colspan='2'>" + AppMain.t("DEV_LAST_TX_NO_TIMESTAMP", "NODES") + "</td>";
+    html += "<td>" + defineTxNoAckTimestampMoment(node) + "</td><td></td>";
+    html += "</tr>";
+    html += "<tr class='nodeListShowDetails id_" + randomId + "'>";
+    html += "<td colspan='3'>" + AppMain.t("JOIN_TIME", "NODES") + "</td>";
+    html += "<td colspan='2'>" + deviceJoined + "</td><td></td>";
+    html += "<td colspan='2'>" + "</td>";
+    html += "<td>" + "</td><td></td>";
+    html += "</tr>";
+    return html;
+};
+
+const updateDataOpened = function ($this) {
+    "use strict";
+    if ($this.attr("data-opened") === "1") {
+        $this.attr("data-opened", 0);
+        $("table tr.nodeListShowDetails.id_" + $this.attr("data-rid")).remove();
+        return;
+    }
+    $("table tr td[data-opened]").attr("data-opened", "0");
+    $("table tr.nodeListShowDetails.id_MAC_R_EXT").remove();
+    $("table tr.nodeListShowDetails.id_TITLE_R_EXT").remove();
 };
 
 CtrlActionNodes.getNodeInfo = function (e) {
@@ -347,17 +456,7 @@ CtrlActionNodes.getNodeInfo = function (e) {
 
     let $this = $(e.target);
     const randomId = "MAC_R_EXT";
-
-    if ($this.attr("data-opened") === "1") {
-        $this.attr("data-opened", 0);
-        $("table tr.nodeListShowDetails.id_" + $this.attr("data-rid")).remove();
-        return;
-    }
-
-    $("table tr td[data-opened]").attr("data-opened", "0");
-    $("table tr.nodeListShowDetails.id_MAC_R_EXT").remove();
-    $("table tr.nodeListShowDetails.id_TITLE_R_EXT").remove();
-
+    updateDataOpened($this);
     let nodeMac = $this.attr("data-node-mac");
     let nodeInfo = AppMain.ws().exec("GetNodeList", {
         "mac-address": nodeMac,
@@ -365,73 +464,7 @@ CtrlActionNodes.getNodeInfo = function (e) {
     }).getResponse(false);
 
     if (defined(nodeInfo.GetNodeListResponse.node)) {
-        const node = nodeInfo.GetNodeListResponse.node;
-
-        let deviceJoined = "---";
-        if (node["device-joined"] && node["device-joined"] !== "0" && node["device-joined"] !== 0) {
-            deviceJoined = moment(node["device-joined"]).format(AppMain.localization("DATETIME_FORMAT"));
-        }
-
-        // $this.parent().find(".ack-timestamp").html(lastComm);
-        $this.attr("data-opened", 1);
-        $this.attr("data-rid", randomId);
-
-        let html = "<tr class='nodeListShowDetails id_" + randomId + "'>";
-
-
-        html += "<td colspan='3'>" + AppMain.t("IP_ADDRESS", "NODES") + "</td>";
-        html += "<td colspan='2'>" + node["ip-address"] + "</td><td></td>";
-
-        html += "<td colspan='2'>" + AppMain.t("TX_NO_ACK_PACKETS", "NODES") + "</td>";
-        html += "<td>" + node["tx-no-ack-packets"] + "</td><td></td>";
-        html += "</tr>";
-
-        html += "<tr class='nodeListShowDetails id_" + randomId + "'>";
-
-        html += "<td colspan='3'>" + AppMain.t("RX_PACKETS", "NODES") + "</td>";
-        html += "<td colspan='2'>" + node["rx-packets"] + "</td><td></td>";
-
-
-        html += "<td colspan='2'>" + AppMain.t("DEV_LAST_RX_TIMESTAMP", "NODES") + "</td>";
-        if (node["device-last-rx-timestamp"] && node["device-last-rx-timestamp"] !== "0" && node["device-last-rx-timestamp"] !== 0) {
-            html += "<td>" + moment(node["device-last-rx-timestamp"]).format(AppMain.localization("DATETIME_FORMAT")) + "</td><td></td>";
-        } else {
-            html += "<td>---</td><td></td>";
-        }
-
-        html += "</tr>";
-        html += "<tr class='nodeListShowDetails id_" + randomId + "'>";
-
-        html += "<td colspan='3'>" + AppMain.t("RX_LINK_QUALITY", "NODES") + "</td>";
-        html += "<td colspan='2'>" + node["rx-link-quality"] + "</td><td></td>";
-
-        html += "<td colspan='2'>" + AppMain.t("DEV_LAST_TX_TIMESTAMP", "NODES") + "</td>";
-        if (node["device-last-tx-ack-timestamp"] && node["device-last-tx-ack-timestamp"] !== "0" && node["device-last-tx-ack-timestamp"] !== 0) {
-            html += "<td>" + moment(node["device-last-tx-ack-timestamp"]).format(AppMain.localization("DATETIME_FORMAT")) + "</td><td></td>";
-        } else {
-            html += "<td>---</td><td></td>";
-        }
-
-        html += "</tr>";
-        html += "<tr class='nodeListShowDetails id_" + randomId + "'>";
-
-        html += "<td colspan='3'>" + AppMain.t("TX_ACK_PACKETS", "NODES") + "</td>";
-        html += "<td colspan='2'>" + node["tx-ack-packets"] + "</td><td></td>";
-
-        html += "<td colspan='2'>" + AppMain.t("DEV_LAST_TX_NO_TIMESTAMP", "NODES") + "</td>";
-        if (node["device-last-tx-no-ack-timestamp"] && node["device-last-tx-no-ack-timestamp"] !== "0" && node["device-last-tx-no-ack-timestamp"] !== 0) {
-            html += "<td>" + moment(node["device-last-tx-no-ack-timestamp"]).format(AppMain.localization("DATETIME_FORMAT")) + "</td><td></td>";
-        } else {
-            html += "<td>---</td><td></td>";
-        }
-
-        html += "</tr>";
-        html += "<tr class='nodeListShowDetails id_" + randomId + "'>";
-        html += "<td colspan='3'>" + AppMain.t("JOIN_TIME", "NODES") + "</td>";
-        html += "<td colspan='2'>" + deviceJoined + "</td><td></td>";
-        html += "<td colspan='2'>" + "</td>";
-        html += "<td>" + "</td><td></td>";
-        html += "</tr>";
+        const html = this.getNodeInfoHtml($this, nodeInfo, randomId);
 
         $this.parent().after(html);
     }
@@ -442,15 +475,7 @@ CtrlActionNodes.getNodeInfoTitle = function (e) {
 
     let $this = $(e.target);
     const randomId = "TITLE_R_EXT";
-
-    if ($this.attr("data-opened") === "1") {
-        $this.attr("data-opened", 0);
-        $("table tr.nodeListShowDetails.id_" + $this.attr("data-rid")).remove();
-        return;
-    }
-    $("table tr td[data-opened]").attr("data-opened", "0");
-    $("table tr.nodeListShowDetails.id_MAC_R_EXT").remove();
-    $("table tr.nodeListShowDetails.id_TITLE_R_EXT").remove();
+    updateDataOpened($this);
 
     const nodeMac = $this.attr("data-node-mac");
     if (this.nodesCosemStat[`${nodeMac}`]) {
@@ -523,7 +548,7 @@ CtrlActionNodes.exportNodeList = function () {
         csv += "\"" + AppMain.t("LAST_UNSUCC_COMM_TIME", "NODES") + "\"";
         csv += "\r\n";
 
-        inputC.each(function (i, elm) {
+        inputC.each(function (ignore, elm) {
             const element = $(elm);
             if (element.hasClass("selectNode")) {
                 isNotSelected = false;
@@ -669,60 +694,6 @@ CtrlActionNodes.kickOffNodeMAC = function (nodeMac) {
         AppMain.dialog("KICL_OFF_ERROR", "error");
     }
     return true;
-};
-
-
-CtrlActionNodes.arrangeNodes = function (nodes, nodesCosemStat) {
-    "use strict";
-
-    let nodesObj = {};
-    if (nodesCosemStat.length === undefined) {
-        nodesCosemStat = [nodesCosemStat];
-    }
-    $.each(nodesCosemStat, function (index, nodeStat) {
-        nodesObj[nodeStat["mac-address"].toString()] = nodeStat;
-    });
-
-    this.nodesCosemStat = nodesObj;
-    $.each(nodes, function (index, node) {
-        if (nodesObj[node["mac-address"]]) {
-            node["node-title"] = (nodesObj[node["mac-address"]]["meter-id"] && nodesObj[node["mac-address"]]["meter-id"].toString() !== "[object Object]")
-                ? nodesObj[node["mac-address"]]["meter-id"].toString()
-                : "---";
-            node["node-commissioned"] = nodesObj[node["mac-address"]].commissioned
-                ? nodesObj[node["mac-address"]].commissioned.toString()
-                : "";
-            node["node-last-comm"] = nodesObj[node["mac-address"]]["last-successful-communication"]
-                ? nodesObj[node["mac-address"]]["last-successful-communication"].toString()
-                : "";
-            node["dc-state"] = defined(nodesObj[node["mac-address"]]["meter-state"])
-                ? nodesObj[node["mac-address"]]["meter-state"].toString()
-                : "METER-JOINED";
-            const succ = parseInt(nodesObj[node["mac-address"]]["successful-communications"], 10);
-            const unsucc = parseInt(nodesObj[node["mac-address"]]["unsuccessful-communications"], 10);
-            node["success-rate"] = (!Number.isNaN(succ) && !Number.isNaN(unsucc) && succ + unsucc !== 0)
-                ? parseInt((succ / (succ + unsucc)) * 100, 10)
-                : 100;
-            node["successful-communications"] = nodesObj[node["mac-address"]]["successful-communications"];
-            if (nodesObj[node["mac-address"]]["last-successful-communication"] && nodesObj[node["mac-address"]]["last-successful-communication"].toString() !== "0") {
-                node["last-successful-communication"] = moment(nodesObj[node["mac-address"]]["last-successful-communication"].toString()).format(AppMain.localization("DATETIME_FORMAT"));
-            } else {
-                node["last-successful-communication"] = "";
-            }
-            node["unsuccessful-communications"] = nodesObj[node["mac-address"]]["unsuccessful-communications"];
-            if (nodesObj[node["mac-address"]]["last-unsuccessful-communication"] && nodesObj[node["mac-address"]]["last-unsuccessful-communication"].toString() !== "0") {
-                node["last-unsuccessful-communication"] = moment(nodesObj[node["mac-address"]]["last-unsuccessful-communication"].toString()).format(AppMain.localization("DATETIME_FORMAT"));
-            } else {
-                node["last-unsuccessful-communication"] = "";
-            }
-            node["security-counter"] = defined(nodesObj[node["mac-address"]]["security-counter"])
-                ? nodesObj[node["mac-address"]]["security-counter"]
-                : "---";
-        } else {
-            node["dc-state"] = "METER-JOINED";
-        }
-    });
-    return nodes;
 };
 
 /**

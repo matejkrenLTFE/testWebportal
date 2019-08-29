@@ -207,7 +207,7 @@ module.exports.AppView = function () {
         }
     };
 
-    const checkControllerActionComp = function (_this) {
+    const checkControllerActionComp = function (_this, comp2) {
         return (defined(_this.controller.ctrlActionComp) && defined(_this.controller.ctrlActionComp[comp2[1]]));
     };
 
@@ -215,7 +215,7 @@ module.exports.AppView = function () {
         if (isMethodNameOk(methodName)) {
             const comp2 = methodName.split(".");
 
-            if (checkControllerActionComp(_this)) {
+            if (checkControllerActionComp(_this, comp2)) {
                 $(element).on(element.getAttribute("data-bind-event"), function (e) {
                     e.preventDefault();
                     e.stopImmediatePropagation();

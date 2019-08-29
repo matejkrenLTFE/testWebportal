@@ -255,4 +255,118 @@ module.exports.IControllerAction = function () {
         $("#file-name").html("");
         $(".file-selected").hide();
     };
+
+    this.getNodesObject = function (nodesCosemStat) {
+        let nodes = AppMain.ws().exec("GetNodeList", {"with-data": true}).getResponse(false);
+
+        nodes = (nodes && nodes.GetNodeListResponse && Object.prototype.toString.call(nodes.GetNodeListResponse.node) === "[object Array]")
+            ? nodes.GetNodeListResponse.node
+            : nodes.GetNodeListResponse;
+        if (nodes.__prefix !== undefined) {
+            delete nodes.__prefix;
+        }
+        return this.arrangeNodes(nodes, nodesCosemStat);
+    };
+
+    const isNodesCosemStatDefined = function (nodesCosemStat) {
+        return nodesCosemStat && nodesCosemStat.GetCosemDeviceStatisticResponse && nodesCosemStat.GetCosemDeviceStatisticResponse["cosem-device-statistics"];
+    };
+
+    this.getNodeCosemStatistics = function () {
+        let nodesCosemStat = AppMain.wsMes().exec("CosemDeviceStatisticRequest", undefined).getResponse(false);
+        if (isNodesCosemStatDefined(nodesCosemStat)) {
+            nodesCosemStat = nodesCosemStat.GetCosemDeviceStatisticResponse["cosem-device-statistics"];
+            if (nodesCosemStat.length === undefined) {
+                nodesCosemStat = [nodesCosemStat];
+            }
+        } else {
+            nodesCosemStat = [];
+        }
+        let nodesObj = {};
+        $.each(nodesCosemStat, function (ignore, nodeStat) {
+            nodesObj[nodeStat["mac-address"].toString()] = nodeStat;
+        });
+        return nodesObj;
+    };
+
+    const getNodeTitle = function (nodesObj, node) {
+        return (nodesObj[node["mac-address"]]["meter-id"] && nodesObj[node["mac-address"]]["meter-id"].toString() !== "[object Object]")
+            ? nodesObj[node["mac-address"]]["meter-id"].toString()
+            : "---";
+    };
+    const getNodeCommissioned = function (nodesObj, node) {
+        return nodesObj[node["mac-address"]].commissioned
+            ? nodesObj[node["mac-address"]].commissioned.toString()
+            : "";
+    };
+    const getNodeLastCommTxt = function (nodesObj, node) {
+        return nodesObj[node["mac-address"]]["last-successful-communication"]
+            ? nodesObj[node["mac-address"]]["last-successful-communication"].toString()
+            : "";
+    };
+    const getNodeDcStateTxt = function (nodesObj, node) {
+        return defined(nodesObj[node["mac-address"]]["meter-state"])
+            ? nodesObj[node["mac-address"]]["meter-state"].toString()
+            : "METER-JOINED";
+    };
+    const getNodeSuccessRate = function (nodesObj, node) {
+        const succ = parseInt(nodesObj[node["mac-address"]]["successful-communications"], 10);
+        const unsucc = parseInt(nodesObj[node["mac-address"]]["unsuccessful-communications"], 10);
+        return (!Number.isNaN(succ) && !Number.isNaN(unsucc) && succ + unsucc !== 0)
+            ? parseInt((succ / (succ + unsucc)) * 100, 10)
+            : 100;
+    };
+    const getNodeLastSuccessfulCommTxt = function (nodesObj, node) {
+        if (nodesObj[node["mac-address"]]["last-successful-communication"] && nodesObj[node["mac-address"]]["last-successful-communication"].toString() !== "0") {
+            return moment(nodesObj[node["mac-address"]]["last-successful-communication"].toString()).format(AppMain.localization("DATETIME_FORMAT"));
+        }
+        return "";
+    };
+    const getNodeLastUnsuccessfulCommTxt = function (nodesObj, node) {
+        if (nodesObj[node["mac-address"]]["last-unsuccessful-communication"] && nodesObj[node["mac-address"]]["last-unsuccessful-communication"].toString() !== "0") {
+            return moment(nodesObj[node["mac-address"]]["last-unsuccessful-communication"].toString()).format(AppMain.localization("DATETIME_FORMAT"));
+        }
+        return "";
+    };
+    const getNodeSecurityCounter = function (nodesObj, node) {
+        return defined(nodesObj[node["mac-address"]]["security-counter"])
+            ? nodesObj[node["mac-address"]]["security-counter"]
+            : "---";
+    };
+
+    this.arrangeNodes = function (nodes, nodesObj) {
+
+        $.each(nodes, function (ignore, node) {
+            if (nodesObj[node["mac-address"]]) {
+                node["node-title"] = getNodeTitle(nodesObj, node);
+                node["node-commissioned"] = getNodeCommissioned(nodesObj, node);
+                node["node-last-comm"] = getNodeLastCommTxt(nodesObj, node);
+                node["dc-state"] = getNodeDcStateTxt(nodesObj, node);
+                node["success-rate"] = getNodeSuccessRate(nodesObj, node);
+                node["successful-communications"] = nodesObj[node["mac-address"]]["successful-communications"];
+                node["last-successful-communication"] = getNodeLastSuccessfulCommTxt(nodesObj, node);
+                node["unsuccessful-communications"] = nodesObj[node["mac-address"]]["unsuccessful-communications"];
+                node["last-unsuccessful-communication"] = getNodeLastUnsuccessfulCommTxt(nodesObj, node);
+                node["security-counter"] = getNodeSecurityCounter(nodesObj, node);
+            } else {
+                node["dc-state"] = "METER-JOINED";
+            }
+        });
+        return nodes;
+    };
+    this.calculateNodeShortAddress = function (node) {
+        let obj = {
+            shortAddress: "",
+            shortAddressPom: ""
+        };
+        if (node["ip-address"]) {
+            const arr = node["ip-address"].split(":");
+            obj.shortAddress = arr[arr.length - 1].toUpperCase();
+            obj.shortAddressPom = parseInt(arr[arr.length - 1].toUpperCase(), 16);
+            if (obj.shortAddress.length % 2 === 1) {
+                obj.shortAddress = "0" + obj.shortAddress;
+            }
+        }
+        return obj;
+    };
 };

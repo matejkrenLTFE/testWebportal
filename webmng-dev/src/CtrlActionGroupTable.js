@@ -528,17 +528,7 @@ CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
         $(".selectNode").on("click", function (e) {
             e.stopPropagation();
         });
-        $(".selectAllNodes").on("click", function (e) {
-            e.stopPropagation();
-            const selectNode = $(".selectNode");
-            if (e.target.checked === true) {
-                selectNode.attr("checked", "checked");
-                selectNode.prop("checked", true);
-            } else {
-                selectNode.removeAttr("checked");
-                selectNode.prop("checked", false);
-            }
-        });
+        this.initSelectAll("selectAllNodes");
         prefixPom = $("input[name='group-prefix']");
         if (prefixPom.val() !== "") {
             $(".dynamic-hide").hide();
