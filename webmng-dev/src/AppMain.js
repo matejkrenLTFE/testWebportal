@@ -224,6 +224,53 @@ global.AppMain = function (conf) {
         this.locale.setSupportedLocale(this.supportedLocale);
     };
 
+    this.getActionDefault = function () {
+        const loginUrl = this.getUrl("login") + "/";
+        return (window.location.href === loginUrl || window.location.search === "?logout")
+            ? "Login"
+            : "Default";
+    };
+
+    this.replaceEmptyVarsCheck = function () {
+        return (defined(config.replaceEmptyVars))
+            ? config.replaceEmptyVars
+            : true;
+    };
+
+    this.setMenuListners = function () {
+        setTimeout(function () {
+            // Expand all
+            const exMenu = $("#expandMenu");
+            const colMenu = $("#collapseMenu");
+            exMenu.on("click", function () {
+                $("ul.mdl-navigation__submenu-active").removeClass("mdl-navigation__submenu-active");
+                // Expand all submenus
+                $("ul.list-navigation--sublevel").addClass("mdl-navigation__submenu-active");
+                colMenu.show();
+                exMenu.hide();
+            });
+            // collapse all
+            colMenu.on("click", function () {
+                $("ul.list-navigation--sublevel").removeClass("mdl-navigation__submenu-active");
+                colMenu.hide();
+                exMenu.show();
+            });
+        }, 500);
+    };
+
+    this.afterRunCheck = function (_this) {
+        if (typeof this.afterRun === "function") {
+            this.afterRun(_this);
+        }
+    };
+
+    this.checkCertificate = function () {
+        // user login because of certificate login
+        if (config.authType === AppMain.AUTH_TYPE_CERT) {
+            this.certificateInitUser();
+        }
+    };
+
     this.run = function () {
         this.init();
 
@@ -233,28 +280,20 @@ global.AppMain = function (conf) {
         if (window.location.search === "?logout") {
             window.location = "/";
         }
-
-        const loginUrl = this.getUrl("login") + "/";
         this.controller = new modulecontroller.AppController();
-        this.controller.actionDefault = (window.location.href === loginUrl || window.location.search === "?logout")
-            ? "Login"
-            : "Default";
+        this.controller.actionDefault = this.getActionDefault();
 
         dmp("AppMain.run");
         dmp(this.controller.actionDefault);
 
         this.view = new moduleview.AppView();
         this.view.canvas = ".section.main-canvas";
-        this.view.replaceEmptyVars = (defined(config.replaceEmptyVars))
-            ? config.replaceEmptyVars
-            : true;
+        this.view.replaceEmptyVars = this.replaceEmptyVarsCheck();
         this.view.controller = this.controller;
         this.controller.view = this.view;
 
         // user login because of certificate login
-        if (config.authType === AppMain.AUTH_TYPE_CERT) {
-            this.certificateInitUser();
-        }
+        this.checkCertificate();
 
         dmp("run-app");
         dmp(window.location.hash.substring(1));
@@ -274,30 +313,11 @@ global.AppMain = function (conf) {
             _stateChanged(_this, _this.STATE_ACTION_EXECUTED);
         });
 
-        if (typeof this.afterRun === "function") {
-            this.afterRun(_this);
-        }
+        this.afterRunCheck(_this);
 
         _stateChanged(this, this.STATE_LOADED);
 
-        setTimeout(function () {
-            // Expand all
-            const exMenu = $("#expandMenu");
-            const colMenu = $("#collapseMenu");
-            exMenu.on("click", function () {
-                $("ul.mdl-navigation__submenu-active").removeClass("mdl-navigation__submenu-active");
-                // Expand all submenus
-                $("ul.list-navigation--sublevel").addClass("mdl-navigation__submenu-active");
-                colMenu.show();
-                exMenu.hide();
-            });
-            // collapse all
-            colMenu.on("click", function () {
-                $("ul.list-navigation--sublevel").removeClass("mdl-navigation__submenu-active");
-                colMenu.hide();
-                exMenu.show();
-            });
-        }, 500);
+        this.setMenuListners();
     };
 
     this.loggedIn = function () {
@@ -482,18 +502,21 @@ global.AppMain = function (conf) {
         }).getResponse(false);
 
         if (defined(userData.GetUserDataResponse) && defined(userData.GetUserDataResponse.user) && defined(userData.GetUserDataResponse.role)) {
-            const user = userData.GetUserDataResponse.user;
-            user.role = Json2Xml.xml_str2json("<role>" + userData.GetUserDataResponse.role["user-role"] + "</role>");
-            if (user.role && user.role.role) {
-                user.role = user.role.role;
-            } else {
-                return;
-            }
-            user["access-level"] = userData.GetUserDataResponse.role["access-level"];
-            dmp("USER_DATA");
-            dmp(userData);
-            AppMain.user.setUserData(user);
-            // CtrlActionLogin.controller.userLogin(user);
+            this.certificateInitUserDataUpdate(userData.GetUserDataResponse.user, userData);
         }
+    };
+
+    this.certificateInitUserDataUpdate = function (user, userData) {
+        user.role = Json2Xml.xml_str2json("<role>" + userData.GetUserDataResponse.role["user-role"] + "</role>");
+        if (user.role && user.role.role) {
+            user.role = user.role.role;
+        } else {
+            return;
+        }
+        user["access-level"] = userData.GetUserDataResponse.role["access-level"];
+        dmp("USER_DATA");
+        dmp(userData);
+        AppMain.user.setUserData(user);
+        // CtrlActionLogin.controller.userLogin(user);
     };
 };
