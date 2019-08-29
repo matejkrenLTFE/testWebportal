@@ -24,11 +24,15 @@ CtrlActionEventsSettings.initHesURL = function (selectedEventList) {
         : "";
 };
 
+const isForwardToHesListDefined = function (selectedEventList) {
+    "use strict";
+    return defined(selectedEventList.GetParametersResponse.cntr["forward-to-hes-list"]) && defined(selectedEventList.GetParametersResponse.cntr["forward-to-hes-list"].event);
+};
+
 CtrlActionEventsSettings.updateSelectedEventList = function (selectedEventList) {
     "use strict";
     return (defined(selectedEventList.GetParametersResponse) && defined(selectedEventList.GetParametersResponse.cntr)
-            && defined(selectedEventList.GetParametersResponse.cntr["forward-to-hes-list"]) &&
-            defined(selectedEventList.GetParametersResponse.cntr["forward-to-hes-list"].event))
+            && isForwardToHesListDefined(selectedEventList))
         ? AppMain.ws().getResponseElementAsArray(selectedEventList.GetParametersResponse.cntr["forward-to-hes-list"].event)
         : [];
 };

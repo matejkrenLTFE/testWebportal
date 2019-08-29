@@ -5,7 +5,7 @@
 
 /* global  AppMain, $, defined */
 /* jshint maxstatements: false */
-/* jslint browser:true, node:true*/
+/* jslint browser:true, node:true, unparam: false*/
 /* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
 
 module.exports.AppRBAC = function () {
@@ -26,11 +26,14 @@ module.exports.AppRBAC = function () {
         return content;
     };
 
+    const isDisable = function (rbac, rbacCategory, rbacParam) {
+        return (rbac[`${rbacCategory}`][`${rbacParam}`].toLowerCase() === "r" || rbac[`${rbacCategory}`][`${rbacParam}`].toLowerCase() === "h");
+    };
+
     const rbacDisableElement = function (content, rbac, rbacSelector) {
         const rbacCategory = rbacSelector[0];
         const rbacParam = rbacSelector[1];
-        if (defined(rbac[`${rbacCategory}`]) && defined(rbac[`${rbacCategory}`][`${rbacParam}`])
-                && (rbac[`${rbacCategory}`][`${rbacParam}`].toLowerCase() === "r" || rbac[`${rbacCategory}`][`${rbacParam}`].toLowerCase() === "h")) {
+        if (defined(rbac[`${rbacCategory}`]) && defined(rbac[`${rbacCategory}`][`${rbacParam}`]) && isDisable(rbac, rbacCategory, rbacParam)) {
             const rbacSelectorReplace = "data-rbac-element=\"" + rbacCategory + "." + rbacParam + "\"";
             content = content.replace(new RegExp(rbacSelectorReplace, "gi"), rbacSelectorReplace + " disabled "); // eslint-disable-line security/detect-non-literal-regexp
         }
@@ -43,17 +46,17 @@ module.exports.AppRBAC = function () {
         const $content = $("<span>" + content + "</span>");
 
         const rbacWrapperSelectors = $content.find("[data-rbac]");
-        $.each(rbacWrapperSelectors, function (i, elm) {
+
+        $.each(rbacWrapperSelectors, function (ignore, elm) {
             const $element = $(elm);
             const rbacSelector = $element.attr("data-rbac").split(".");
             if (rbacSelector.length > 1) {
                 content = rbacHideElement(content, rbac, rbacSelector);
             }
         });
-
         // Hide/disable RBAC elements
         const rbacElementSelectors = $content.find("[data-rbac-element]");
-        $.each(rbacElementSelectors, function (i, elm) {
+        $.each(rbacElementSelectors, function (ignore, elm) {
             const $element = $(elm);
             const rbacSelector = $element.attr("data-rbac-element").split(".");
             if (rbacSelector.length > 1) {
