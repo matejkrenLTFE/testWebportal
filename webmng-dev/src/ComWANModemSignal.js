@@ -139,6 +139,66 @@ ComWANModemSignal.getBitStatus = function (statusCode) {
         : "Unknown";
 };
 
+const getConnStatusErr = function (status, statusByteString) {
+    "use strict";
+
+    status.txt = AppMain.t("NOT_REGISTERED", "global");
+    //modem not registered, look for errors
+    if (statusByteString[8] === "1") {
+        status.txt = AppMain.t("SIM_ERROR", "global");
+    } else {
+        if (statusByteString[9] === "1") {
+            status.txt = AppMain.t("PIN_REQ", "global");
+        } else {
+            if (statusByteString[27] === "1") {
+                status.txt = AppMain.t("PUK_REQ", "global");
+            }
+        }
+    }
+    return status;
+};
+
+const getConnStatusSetupMob = function (status, statusByteString, green) {
+    "use strict";
+
+    if (statusByteString[26] === "1") { //3G
+        status.txt = AppMain.t("NETWORK3G", "global");
+        status.icon1 = "N3G" + green;
+        status.icon1Tooltip = AppMain.t("NETWORK3G", "global");
+        // status.icon1Style= ""
+    }
+    if (statusByteString[28] === "1") { //4G
+        status.txt = AppMain.t("NETWORK4G", "global");
+        status.icon1 = "N4G" + green;
+        status.icon1Tooltip = AppMain.t("NETWORK4G", "global");
+        // status.icon1Style= ""
+    }
+    if (statusByteString[16] === "1") {
+        status.icon2 = "roaming";
+        status.icon2Tooltip = AppMain.t("ROAMING", "global");
+        status.icon2Style = "";
+    }
+};
+
+const getConnStatusSetup = function (status, statusByteString) {
+    "use strict";
+
+    status.txt = "";
+    let green = "";
+    if (statusByteString[3] === "1") {
+        green = " green";
+        status.icon1Style = "G3PLC-NODE-ACTIVE";
+    }
+    if (statusByteString[2] === "1") { //2G
+        status.txt = AppMain.t("NETWORK2G", "global");
+        status.icon1 = "N2G" + green;
+        status.icon1Tooltip = AppMain.t("NETWORK2G", "global");
+        // status.icon1Style= ""
+    }
+    status = getConnStatusSetupMob(status, statusByteString, green);
+    return status;
+};
+
 
 ComWANModemSignal.getConnectionStatus = function (params) {
     "use strict";
@@ -169,49 +229,9 @@ ComWANModemSignal.getConnectionStatus = function (params) {
         icon2Style: "display:none;"
     };
     if (statusByteString[0] === "0" && statusByteString[16] === "0") { // Not registered
-        status.txt = AppMain.t("NOT_REGISTERED", "global");
-        //modem not registered, look for errors
-        if (statusByteString[8] === "1") {
-            status.txt = AppMain.t("SIM_ERROR", "global");
-        } else {
-            if (statusByteString[9] === "1") {
-                status.txt = AppMain.t("PIN_REQ", "global");
-            } else {
-                if (statusByteString[27] === "1") {
-                    status.txt = AppMain.t("PUK_REQ", "global");
-                }
-            }
-        }
+        status = getConnStatusErr(status, statusByteString);
     } else { //registered
-        status.txt = "";
-        let green = "";
-        if (statusByteString[3] === "1") {
-            green = " green";
-            status.icon1Style = "G3PLC-NODE-ACTIVE";
-        }
-        if (statusByteString[2] === "1") { //2G
-            status.txt = AppMain.t("NETWORK2G", "global");
-            status.icon1 = "N2G" + green;
-            status.icon1Tooltip = AppMain.t("NETWORK2G", "global");
-            // status.icon1Style= ""
-        }
-        if (statusByteString[26] === "1") { //3G
-            status.txt = AppMain.t("NETWORK3G", "global");
-            status.icon1 = "N3G" + green;
-            status.icon1Tooltip = AppMain.t("NETWORK3G", "global");
-            // status.icon1Style= ""
-        }
-        if (statusByteString[28] === "1") { //4G
-            status.txt = AppMain.t("NETWORK4G", "global");
-            status.icon1 = "N4G" + green;
-            status.icon1Tooltip = AppMain.t("NETWORK4G", "global");
-            // status.icon1Style= ""
-        }
-        if (statusByteString[16] === "1") {
-            status.icon2 = "roaming";
-            status.icon2Tooltip = AppMain.t("ROAMING", "global");
-            status.icon2Style = "";
-        }
+        status = getConnStatusSetup(status, statusByteString);
     }
     /*eslint-disable camelcase*/
     params.GSM_Status_txt = status.txt;
