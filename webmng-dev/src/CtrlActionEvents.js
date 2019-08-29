@@ -20,29 +20,96 @@ const download = require("./vendor/download.js");
  */
 CtrlActionEvents.eventsData = [];
 
+CtrlActionEvents.updateCEventForm = function () {
+    "use strict";
+
+    if (!defined(this.CEventForm)) {
+        this.CEventForm = modulecomeventform.ComEventForm;
+    }
+};
+
+CtrlActionEvents.getAllEventList = function () {
+    "use strict";
+
+    return defined(includesevents.events)
+        ? includesevents.events
+        : [];
+};
+CtrlActionEvents.getTo = function () {
+    "use strict";
+    let to = this.CEventForm.data("dateTo");
+    if (to === "---") {
+        to = moment().add(1, "days").format(AppMain.localization("DATE_FORMAT") + " 00:00:00");
+    }
+    return to;
+};
+
+CtrlActionEvents.getEventsData = function () {
+    "use strict";
+    let data;
+    const to = this.getTo();
+    let response = AppMain.ws().exec("GetEventLog", {
+        "EventTypeSelector": this.CEventForm.data("eventType"),
+        "time-stamp-selector": {
+            "from-time": moment(moment(this.CEventForm.data("dateFrom"), AppMain.localization("DATETIME_FORMAT")).toISOString()).unix(),
+            "to-time": moment(moment(to, AppMain.localization("DATETIME_FORMAT")).toISOString()).unix()
+        }
+    }).getResponse(false);
+    response = response.GetEventLogResponse;
+
+    // Response events must always be array of events
+    if (defined(response) && defined(response.event) && Object.prototype.toString.call(response.event) === "[object Array]") {
+        data = response.event;
+    } else {
+        if (defined(response) && defined(response.event) && defined(response.event.id)) {
+            data = [response.event];
+        } else {
+            data = [];
+        }
+    }
+    return data;
+};
+
+CtrlActionEvents.getSystemTitle = function (item) {
+    "use strict";
+    return (defined(item["system-title"])
+        ? item["system-title"]
+        : "---");
+};
+CtrlActionEvents.getMac = function (item) {
+    "use strict";
+    return (defined(item["mac-address"])
+        ? item["mac-address"]
+        : "---");
+};
+CtrlActionEvents.getMessage = function (item) {
+    "use strict";
+    return (defined(item["ip-address"])
+        ? item["ip-address"] + " "
+        : "") + (defined(item["info-message"])
+        ? item["info-message"]
+        : "---");
+};
+
 CtrlActionEvents.exec = function () {
     "use strict";
 
     this.view.setTitle("EVENTS");
     // Components ref: CEventForm
-    if (!defined(this.CEventForm)) {
-        this.CEventForm = modulecomeventform.ComEventForm;
-    }
+    this.updateCEventForm();
 
     let events = {
         htmlList: "",
         data: {}
     };
 
-    const allEventList = defined(includesevents.events)
-        ? includesevents.events
-        : [];
+    const allEventList = this.getAllEventList();
     this.eventListMap = {};
-    $.each(allEventList, function (i, item) {
+    $.each(allEventList, function (ignore, item) {
         CtrlActionEvents.eventListMap[item.enumeration] = item.severity;
     });
     this.eventListIDMap = {};
-    $.each(allEventList, function (i, item) {
+    $.each(allEventList, function (ignore, item) {
         CtrlActionEvents.eventListIDMap[item.enumeration] = item.id;
     });
 
@@ -64,55 +131,22 @@ CtrlActionEvents.exec = function () {
     });
     this.CEventForm.init();
 
-    let to = this.CEventForm.data("dateTo");
-    if (to === "---") {
-        to = moment().add(1, "days").format(AppMain.localization("DATE_FORMAT") + " 00:00:00");
-    }
-
-    let response = AppMain.ws().exec("GetEventLog", {
-        "EventTypeSelector": this.CEventForm.data("eventType"),
-        "time-stamp-selector": {
-            "from-time": moment(moment(this.CEventForm.data("dateFrom"), AppMain.localization("DATETIME_FORMAT")).toISOString()).unix(),
-            "to-time": moment(moment(to, AppMain.localization("DATETIME_FORMAT")).toISOString()).unix()
-        }
-    }).getResponse(false);
-    response = response.GetEventLogResponse;
-
-    // Response events must always be array of events
-    if (defined(response) && defined(response.event) && Object.prototype.toString.call(response.event) === "[object Array]") {
-        events.data = response.event;
-    } else {
-        if (defined(response) && defined(response.event) && defined(response.event.id)) {
-            events.data = [response.event];
-        } else {
-            events.data = [];
-        }
-    }
-
+    events.data = this.getEventsData();
     // Store events for availability inside action module
     CtrlActionEvents.eventsData = events.data;
     events.data.reverse();
-
     if (events.data.length > 0) {
-        $.each(events.data, function (i, item) {
+        $.each(events.data, function (ignore, item) {
             events.htmlList += "<tr data-bind-event='click' data-bind-method='CtrlActionEvents.getEventCounters' data-event-id='" + item.id + "'>";
             events.htmlList += "<td class='name' style=\"text-align: left!important;\">" + AppMain.t(item.id, "EVENTS") + "</td>";
             events.htmlList += "<td class='id' style=\"text-align: left!important;\">" + CtrlActionEvents.eventListIDMap[item.id] + "</td>";
             events.htmlList += "<td class='severity  triangle-topleft-" + CtrlActionEvents.eventListMap[item.id] + "'" +
                     " style=\"text-align: left!important;\">" + AppMain.t(CtrlActionEvents.eventListMap[item.id], "EVENTS") + "</td>";
             events.htmlList += "<td class='date' style=\"text-align: left!important;\">" + moment(item["time-stamp-iso"]).format(AppMain.localization("DATETIME_FORMAT")) + "</td>";
-            events.htmlList += "<td class='system-title' style=\"text-align: left!important;\">" + (defined(item["system-title"])
-                ? item["system-title"]
-                : "---") + "</td>";
-            events.htmlList += "<td class='mac' style=\"text-align: left!important;\">" + (defined(item["mac-address"])
-                ? item["mac-address"]
-                : "---") + "</td>";
+            events.htmlList += "<td class='system-title' style=\"text-align: left!important;\">" + CtrlActionEvents.getSystemTitle(item) + "</td>";
+            events.htmlList += "<td class='mac' style=\"text-align: left!important;\">" + CtrlActionEvents.getMac(item) + "</td>";
             // events.htmlList += "<td class='ip' style=\"text-align: left!important;\">" + (defined(item["ip-address"]) ? item["ip-address"] : "---") + "</td>";
-            events.htmlList += "<td class='ip' style=\"text-align: left!important;\">" + (defined(item["ip-address"])
-                ? item["ip-address"] + " "
-                : "") + (defined(item["info-message"])
-                ? item["info-message"]
-                : "---") + "</td>";
+            events.htmlList += "<td class='ip' style=\"text-align: left!important;\">" + CtrlActionEvents.getMessage(item) + "</td>";
             events.htmlList += "</tr>";
         });
     } else {
@@ -181,6 +215,51 @@ CtrlActionEvents.getEventCounters = function (e) {
     }
 };
 
+const getEventIdText = function (evt) {
+    "use strict";
+    return (defined(evt.id)
+        ? AppMain.t(evt.id, "EVENTS")
+        : "");
+};
+const getEventIdMapText = function (evt) {
+    "use strict";
+    return (defined(evt.id)
+        ? CtrlActionEvents.eventListIDMap[evt.id]
+        : "");
+};
+const getEventSeverityText = function (evt) {
+    "use strict";
+    return (defined(evt.id)
+        ? AppMain.t(CtrlActionEvents.eventListMap[evt.id], "EVENTS")
+        : "");
+};
+const getEventTimestampText = function (evt) {
+    "use strict";
+    return (defined(evt["time-stamp-iso"])
+        ? evt["time-stamp-iso"]
+        : "");
+};
+const getEventDeviceTitleText = function (evt) {
+    "use strict";
+    return (defined(evt["system-title"])
+        ? evt["system-title"]
+        : "");
+};
+const getEventMacAddText = function (evt) {
+    "use strict";
+    return (defined(evt["mac-address"])
+        ? evt["mac-address"]
+        : "");
+};
+const getEventInfoMsgText = function (evt) {
+    "use strict";
+    return (defined(evt["ip-address"])
+        ? evt["ip-address"] + " "
+        : "") + (defined(evt["info-message"])
+        ? evt["info-message"]
+        : "---");
+};
+
 CtrlActionEvents.exportEventsList = function () {
     "use strict";
 
@@ -196,30 +275,14 @@ CtrlActionEvents.exportEventsList = function () {
         csv += "\"" + AppMain.t("EVT_INFO", "EVENTS") + "\"";
         csv += "\r\n";
 
-        $(CtrlActionEvents.eventsData).each(function (i, evt) {
-            csv += "\"" + (defined(evt.id)
-                ? AppMain.t(evt.id, "EVENTS")
-                : "") + "\",";
-            csv += "\"" + (defined(evt.id)
-                ? CtrlActionEvents.eventListIDMap[evt.id]
-                : "") + "\",";
-            csv += "\"" + (defined(evt.id)
-                ? AppMain.t(CtrlActionEvents.eventListMap[evt.id], "EVENTS")
-                : "") + "\",";
-            csv += "\"" + (defined(evt["time-stamp-iso"])
-                ? evt["time-stamp-iso"]
-                : "") + "\",";
-            csv += "\"" + (defined(evt["system-title"])
-                ? evt["system-title"]
-                : "") + "\",";
-            csv += "\"" + (defined(evt["mac-address"])
-                ? evt["mac-address"]
-                : "") + "\",";
-            csv += "\"" + (defined(evt["ip-address"])
-                ? evt["ip-address"] + " "
-                : "") + (defined(evt["info-message"])
-                ? evt["info-message"]
-                : "---") + "\"";
+        $(CtrlActionEvents.eventsData).each(function (ignore, evt) {
+            csv += "\"" + getEventIdText(evt) + "\",";
+            csv += "\"" + getEventIdMapText(evt) + "\",";
+            csv += "\"" + getEventSeverityText(evt) + "\",";
+            csv += "\"" + getEventTimestampText(evt) + "\",";
+            csv += "\"" + getEventDeviceTitleText(evt) + "\",";
+            csv += "\"" + getEventMacAddText(evt) + "\",";
+            csv += "\"" + getEventInfoMsgText(evt) + "\"";
             csv += "\r\n";
         });
 

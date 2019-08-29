@@ -140,20 +140,34 @@ CtrlActionSystemUsersRole.selectRBACColumn = function (e) {
         }
     }
 };
-
-const getPermisions = function (rbacPermissions, category, valueRbac) {
+const getPermissionPom = function (rbacPermissions, category, valueRbac) {
     "use strict";
+    const fullControl = (rbacPermissions[`${category}`][`${valueRbac}`] === "*")
+        ? "checked"
+        : "";
+    const read = (rbacPermissions[`${category}`][`${valueRbac}`] === "r")
+        ? "checked"
+        : "";
+    const disabledStr = (rbacPermissions[`${category}`][`${valueRbac}`] === "h")
+        ? "checked"
+        : "";
     return {
-        fullControl: (!defined(rbacPermissions[`${category}`][`${valueRbac}`]) || rbacPermissions[`${category}`][`${valueRbac}`] === "*")
-            ? "checked"
-            : "",
-        read: (defined(rbacPermissions[`${category}`][`${valueRbac}`]) && rbacPermissions[`${category}`][`${valueRbac}`] === "r")
-            ? "checked"
-            : "",
-        disabled: (defined(rbacPermissions[`${category}`][`${valueRbac}`]) && rbacPermissions[`${category}`][`${valueRbac}`] === "h")
-            ? "checked"
-            : ""
+        fullControl: fullControl,
+        read: read,
+        disabled: disabledStr
     };
+};
+
+const getPermissions = function (rbacPermissions, category, valueRbac) {
+    "use strict";
+    if (!defined(rbacPermissions[`${category}`][`${valueRbac}`])) {
+        return {
+            fullControl: "",
+            read: "",
+            disabled: ""
+        };
+    }
+    return getPermissionPom(rbacPermissions, category, valueRbac);
 };
 
 CtrlActionSystemUsersRole.htmlRoleTable = function (rolePermissions) {
@@ -182,7 +196,7 @@ CtrlActionSystemUsersRole.htmlRoleTable = function (rolePermissions) {
         value.forEach(function (valueRbac) {
             let permission = {};
             if (defined(rbacPermissions[`${category}`])) {
-                permission = getPermisions(rbacPermissions, category, valueRbac);
+                permission = getPermissions(rbacPermissions, category, valueRbac);
             } else {
                 permission = {fullControl: "checked", read: "", disabled: ""};
             }

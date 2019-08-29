@@ -26,7 +26,7 @@ const getNodes = function () {
 const fixForWhiteListLength = function (params) {
     "use strict";
     if (params["white-list"] !== undefined && typeof params["white-list"]["mac-address"] === "string") {
-        params["white-list"]["mac-address"] = [this.params["white-list"]["mac-address"]];
+        params["white-list"]["mac-address"] = [params["white-list"]["mac-address"]];
     }
     return params;
 };
@@ -276,6 +276,20 @@ CtrlActionWhiteList.useWhiteList = function () {
     AppMain.html.updateElements(["#macinput", ".mdl-js-switch"]);
 };
 
+const isMacOkFirstPart = function (obj) {
+    "use strict";
+    return (obj.mac1.length === 2 && obj.mac2.length === 2 && obj.mac3.length === 2 && obj.mac4.length === 2);
+};
+
+const isMacOkSecondPart = function (obj) {
+    "use strict";
+    return (obj.mac5.length === 2 && obj.mac6.length === 2 && obj.mac7.length === 2 && obj.mac8.length === 2);
+};
+const isMacOk = function (obj) {
+    "use strict";
+    return (isMacOkFirstPart(obj) && isMacOkSecondPart(obj));
+};
+
 const processInputMac = function () {
     "use strict";
     const mac1 = $("input[name='mac1']").val();
@@ -286,8 +300,16 @@ const processInputMac = function () {
     const mac6 = $("input[name='mac6']").val();
     const mac7 = $("input[name='mac7']").val();
     const mac8 = $("input[name='mac8']").val();
-    if (mac1.length === 2 && mac2.length === 2 && mac3.length === 2 && mac4.length === 2
-            && mac5.length === 2 && mac6.length === 2 && mac7.length === 2 && mac8.length === 2) {
+    if (isMacOk({
+        mac1: mac1,
+        mac2: mac2,
+        mac3: mac3,
+        mac4: mac4,
+        mac5: mac5,
+        mac6: mac6,
+        mac7: mac7,
+        mac8: mac8
+    })) {
         CtrlActionWhiteList.exportNodeList(mac1 + ":" + mac2 + ":" + mac3 + ":" + mac4 + ":" + mac5 + ":" + mac6 + ":" + mac7 + ":" + mac8);
         return true;
     }
@@ -323,6 +345,29 @@ const processInputFile = function () {
         }
     });
     return false;
+};
+
+CtrlActionWhiteList.processImportCsv = function (header, allTextLines, startInd) {
+    "use strict";
+
+    if (!header.includes(",")) {
+        CtrlActionWhiteList.importAlert(AppMain.t("IMPORT_WHITE_LIST_CSV_ERROR", "WHITE_LIST"));
+        return;
+    }
+    header = header.split(",");
+    //get index of "MAC column"
+    const ind = header.indexOf("\"" + AppMain.t("MAC_ADDRESS", "NODES") + "\"");
+    if (ind === -1) {
+        CtrlActionWhiteList.importAlert(AppMain.t("IMPORT_WHITE_LIST_ERROR", "WHITE_LIST"));
+    }
+    allTextLines.forEach(function (line, index) {
+        if (index < startInd) {
+            return;
+        }
+        if (line !== "") {
+            CtrlActionWhiteList.export.push(line.split(",")[`${ind}`].replace("\"", "").replace("\"", ""));
+        }
+    });
 };
 
 CtrlActionWhiteList.addWhiteList = function () {
@@ -441,31 +486,13 @@ CtrlActionWhiteList.addWhiteList = function () {
                     return;
                 }
                 const allTextLines = csv.split(/\r\n|\n/);
-
                 let header = allTextLines[0];
                 let startInd = 1;
                 if (allTextLines[0] === "SEP=,") { //second line is header line
                     header = allTextLines[1];
                     startInd = 2;
                 }
-                if (!header.includes(",")) {
-                    CtrlActionWhiteList.importAlert(AppMain.t("IMPORT_WHITE_LIST_CSV_ERROR", "WHITE_LIST"));
-                    return;
-                }
-                header = header.split(",");
-                //get index of "MAC column"
-                const ind = header.indexOf("\"" + AppMain.t("MAC_ADDRESS", "NODES") + "\"");
-                if (ind === -1) {
-                    CtrlActionWhiteList.importAlert(AppMain.t("IMPORT_WHITE_LIST_ERROR", "WHITE_LIST"));
-                }
-                allTextLines.forEach(function (line, index) {
-                    if (index < startInd) {
-                        return;
-                    }
-                    if (line !== "") {
-                        CtrlActionWhiteList.export.push(line.split(",")[`${ind}`].replace("\"", "").replace("\"", ""));
-                    }
-                });
+                return CtrlActionWhiteList.processImportCsv(header, allTextLines, startInd);
             };
             reader.readAsText(uploadElement.files[0]);
             $(".select-file").hide();
