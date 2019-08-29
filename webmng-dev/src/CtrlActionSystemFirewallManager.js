@@ -121,7 +121,7 @@ CtrlActionSystemFirewallManager.buildTableHtml = function () {
 
     let html = "";
     let i = 1;
-    $.each(this.settings.rules, function (index, rule) {
+    $.each(this.settings.rules, function (ignore, rule) {
 
         html += "<tr>";
         html += "<td><i class='material-icons cursor-pointer' data-rbac=\"firewall.remove\" " +
@@ -152,6 +152,31 @@ CtrlActionSystemFirewallManager.showHideAddDialog = function () {
     $(".add-rule-dialog").toggle(500);
 };
 
+CtrlActionSystemFirewallManager.procesAddFwRuleWarning = function (rulePort, ruleProtocol, ruleDirection) {
+    "use strict";
+    if (rulePort === "") {
+        AppMain.dialog("PLEASE_ENTER", "warning", [AppMain.t("RULE_PORT", "SYS_FW_MNG")]);
+    }
+    if (ruleProtocol === "") {
+        AppMain.dialog("PLEASE_ENTER", "warning", [AppMain.t("RULE_PROTOCOL", "SYS_FW_MNG")]);
+    }
+    if (ruleDirection === "") {
+        AppMain.dialog("PLEASE_ENTER", "warning", [AppMain.t("RULE_DIR", "SYS_FW_MNG")]);
+    }
+};
+
+CtrlActionSystemFirewallManager.getNextRuleIndex = function () {
+    "use strict";
+    return this.settings.rules.length > 0
+        ? this.settings.rules[this.settings.rules.length - 1]["id-number"] + 1
+        : 1;
+};
+
+CtrlActionSystemFirewallManager.isRuleOK = function (rulePort, ruleProtocol, ruleDirection) {
+    "use strict";
+    return (rulePort !== "" && ruleProtocol !== "" && ruleDirection !== "");
+};
+
 /**
  * Form element callback for rule adding
  */
@@ -163,10 +188,8 @@ CtrlActionSystemFirewallManager.addFirewallRule = function () {
     let ruleDirection = $("[name='ruleDirection']").val();
     let ruleInterface = $("[name='ruleInterface']").val();
     let ruleDescription = $("[name='ruleDescription']").val();
-    if (rulePort !== "" && ruleProtocol !== "" && ruleDirection !== "") {
-        let ind = this.settings.rules.length > 0
-            ? this.settings.rules[this.settings.rules.length - 1]["id-number"] + 1
-            : 1;
+    if (this.isRuleOK(rulePort, ruleProtocol, ruleDirection)) {
+        let ind = this.getNextRuleIndex();
         this.settings.rules.push({
             "id-number": ind,
             "Port": rulePort,
@@ -180,15 +203,7 @@ CtrlActionSystemFirewallManager.addFirewallRule = function () {
         AppMain.dialog("SUCC_RULE_ADDED", "warning");
         CtrlActionSystemFirewallManager.showHideAddDialog();
     } else {
-        if (rulePort === "") {
-            AppMain.dialog("PLEASE_ENTER", "warning", [AppMain.t("RULE_PORT", "SYS_FW_MNG")]);
-        }
-        if (ruleProtocol === "") {
-            AppMain.dialog("PLEASE_ENTER", "warning", [AppMain.t("RULE_PROTOCOL", "SYS_FW_MNG")]);
-        }
-        if (ruleDirection === "") {
-            AppMain.dialog("PLEASE_ENTER", "warning", [AppMain.t("RULE_DIR", "SYS_FW_MNG")]);
-        }
+        this.procesAddFwRuleWarning(rulePort, ruleProtocol, ruleDirection);
     }
 };
 
@@ -220,7 +235,7 @@ CtrlActionSystemFirewallManager.exportParams = function () {
     client.xmlSetElement("dcmng");
     client.xmlSetElement("firewall-rules");
 
-    $.each(this.settings.rules, function (index, rule) {
+    $.each(this.settings.rules, function (ignore, rule) {
         let value = data["rule" + rule["id-number"]] === "rule" + rule["id-number"];
         let xmlElement = new XMLElement.AppXMLelement();
         xmlElement.xmlSetParam("id-number", rule["id-number"]);
