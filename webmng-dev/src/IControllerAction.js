@@ -1,6 +1,6 @@
 const List = require("list.js");
 const moment = require("moment");
-/* global AppMain */
+/* global AppMain, defined */
 /* jshint maxstatements: false */
 /* jslint browser:true, node:true*/
 /* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
@@ -256,10 +256,13 @@ module.exports.IControllerAction = function () {
         $(".file-selected").hide();
     };
 
+    const isNodesResponseListOk = function (nodes) {
+        return (nodes && nodes.GetNodeListResponse && Object.prototype.toString.call(nodes.GetNodeListResponse.node) === "[object Array]");
+    }
     this.getNodesObject = function (nodesCosemStat) {
         let nodes = AppMain.ws().exec("GetNodeList", {"with-data": true}).getResponse(false);
 
-        nodes = (nodes && nodes.GetNodeListResponse && Object.prototype.toString.call(nodes.GetNodeListResponse.node) === "[object Array]")
+        nodes = isNodesResponseListOk(nodes)
             ? nodes.GetNodeListResponse.node
             : nodes.GetNodeListResponse;
         if (nodes.__prefix !== undefined) {

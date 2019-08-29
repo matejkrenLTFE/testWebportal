@@ -207,9 +207,13 @@ const defineDeviceCommissioningTimeExport = function (commissioningTime) {
         ? moment(commissioningTime).toISOString()
         : commissioningTime);
 };
+const isNodeLastCommOk = function (node) {
+    "use strict";
+    return (node["node-last-comm"] && node["node-last-comm"] !== "0" && node["node-last-comm"] !== "---" && node["node-last-comm"] !== 0);
+};
 const defineDeviceLastSuccTime = function (node) {
     "use strict";
-    return (node["node-last-comm"] && node["node-last-comm"] !== "0" && node["node-last-comm"] !== "---" && node["node-last-comm"] !== 0)
+    return isNodeLastCommOk(node)
         ? moment(node["node-last-comm"]).format(AppMain.localization("DATETIME_FORMAT"))
         : "---";
 };
@@ -254,6 +258,18 @@ const defineDeviceSuccCommTimeTxt = function (node) {
     return (node["node-title"] !== undefined
         ? moment(node["last-successful-communication"].toString()).toISOString()
         : "---");
+};
+const defineDeviceLastSuccCommTimeTxt = function (nodesCosemStat, nodeMac) {
+    "use strict";
+    return (nodesCosemStat[`${nodeMac}`]["last-successful-communication"] && nodesCosemStat[`${nodeMac}`]["last-successful-communication"].toString() !== "0")
+        ? moment(nodesCosemStat[`${nodeMac}`]["last-successful-communication"].toString()).format(AppMain.localization("DATETIME_FORMAT"))
+        : "---";
+};
+const defineDeviceLastUnSuccCommTimeTxt = function (nodesCosemStat, nodeMac) {
+    "use strict";
+    return (nodesCosemStat[`${nodeMac}`]["last-unsuccessful-communication"] && nodesCosemStat[`${nodeMac}`]["last-unsuccessful-communication"].toString() !== "0")
+        ? moment(nodesCosemStat[`${nodeMac}`]["last-unsuccessful-communication"].toString()).format(AppMain.localization("DATETIME_FORMAT"))
+        : "---";
 };
 const defineDeviceSecurityCounterTxt = function (node) {
     "use strict";
@@ -444,11 +460,12 @@ const updateDataOpened = function ($this) {
     if ($this.attr("data-opened") === "1") {
         $this.attr("data-opened", 0);
         $("table tr.nodeListShowDetails.id_" + $this.attr("data-rid")).remove();
-        return;
+        return true;
     }
     $("table tr td[data-opened]").attr("data-opened", "0");
     $("table tr.nodeListShowDetails.id_MAC_R_EXT").remove();
     $("table tr.nodeListShowDetails.id_TITLE_R_EXT").remove();
+    return false;
 };
 
 CtrlActionNodes.getNodeInfo = function (e) {
@@ -456,7 +473,9 @@ CtrlActionNodes.getNodeInfo = function (e) {
 
     let $this = $(e.target);
     const randomId = "MAC_R_EXT";
-    updateDataOpened($this);
+    if (updateDataOpened($this)) {
+        return;
+    }
     let nodeMac = $this.attr("data-node-mac");
     let nodeInfo = AppMain.ws().exec("GetNodeList", {
         "mac-address": nodeMac,
@@ -475,40 +494,26 @@ CtrlActionNodes.getNodeInfoTitle = function (e) {
 
     let $this = $(e.target);
     const randomId = "TITLE_R_EXT";
-    updateDataOpened($this);
+    if (updateDataOpened($this)) {
+        return;
+    }
 
     const nodeMac = $this.attr("data-node-mac");
     if (this.nodesCosemStat[`${nodeMac}`]) {
         $this.attr("data-opened", 1);
         $this.attr("data-rid", randomId);
-
         let html = "<tr class='nodeListShowDetails id_" + randomId + "'>";
-
         html += "<td colspan='3'>" + AppMain.t("SUCCESSFUL_COMMUNICATIONS", "NODES") + "</td>";
         html += "<td colspan='2'>" + this.nodesCosemStat[`${nodeMac}`]["successful-communications"] + "</td><td></td>";
-
         html += "<td colspan='2'>" + AppMain.t("LAST_SUCC_COMM_TIME", "NODES") + "</td>";
-        if (this.nodesCosemStat[`${nodeMac}`]["last-successful-communication"] && this.nodesCosemStat[`${nodeMac}`]["last-successful-communication"].toString() !== "0") {
-            html += "<td>" + moment(this.nodesCosemStat[`${nodeMac}`]["last-successful-communication"].toString()).format(AppMain.localization("DATETIME_FORMAT")) + "</td><td></td>";
-        } else {
-            html += "<td>---</td><td></td>";
-        }
-
+        html += "<td>" + defineDeviceLastSuccCommTimeTxt(this.nodesCosemStat, nodeMac) + "</td><td></td>";
         html += "</tr>";
         html += "<tr class='nodeListShowDetails id_" + randomId + "'>";
-
         html += "<td colspan='3'>" + AppMain.t("UNSUCCESSFUL_COMMUNICATIONS", "NODES") + "</td>";
         html += "<td colspan='2'>" + this.nodesCosemStat[`${nodeMac}`]["unsuccessful-communications"] + "</td><td></td>";
-
         html += "<td colspan='2'>" + AppMain.t("LAST_UNSUCC_COMM_TIME", "NODES") + "</td>";
-        if (this.nodesCosemStat[`${nodeMac}`]["last-unsuccessful-communication"] && this.nodesCosemStat[`${nodeMac}`]["last-unsuccessful-communication"].toString() !== "0") {
-            html += "<td>" + moment(this.nodesCosemStat[`${nodeMac}`]["last-unsuccessful-communication"].toString()).format(AppMain.localization("DATETIME_FORMAT")) + "</td><td></td>";
-        } else {
-            html += "<td>---</td><td></td>";
-        }
-
+        html += "<td>" + defineDeviceLastUnSuccCommTimeTxt(this.nodesCosemStat, nodeMac) + "</td><td></td>";
         html += "</tr>";
-
         $this.parent().after(html);
     }
 };

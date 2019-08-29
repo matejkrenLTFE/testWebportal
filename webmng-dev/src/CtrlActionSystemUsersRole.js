@@ -162,11 +162,12 @@ const getPermissionPom = function (rbacPermissions, category, valueRbac) {
 const getPermissions = function (rbacPermissions, category, valueRbac) {
     "use strict";
     if (!defined(rbacPermissions[`${category}`][`${valueRbac}`])) {
-        return {
+        const obj = {
             fullControl: "",
             read: "",
             disabled: ""
         };
+        return obj;
     }
     return getPermissionPom(rbacPermissions, category, valueRbac);
 };
