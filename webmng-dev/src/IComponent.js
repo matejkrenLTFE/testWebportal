@@ -25,6 +25,12 @@ module.exports.IComponent = function () {
      */
     let dataPom = {};
 
+    this.updateDataPom = function (name, value) {
+        if (defined(name) && defined(value)) {
+            dataPom[`${name}`] = value;
+        }
+    };
+
     /**
      * Set or read component data as "key => value".
      * Important: component data is not persistent and should be used only as temporary storage for
@@ -34,9 +40,7 @@ module.exports.IComponent = function () {
      * @param {Object} value Date value to store.
      */
     this.data = function (name, value) {
-        if (defined(name) && defined(value)) {
-            dataPom[`${name}`] = value;
-        }
+        this.updateDataPom(name, value);
         if (defined(name)) {
             return defined(dataPom[`${name}`])
                 ? dataPom[`${name}`]

@@ -10,23 +10,40 @@ const modulecontrolleraction = require("./IControllerAction");
 let CtrlActionEventsSettings = Object.create(new modulecontrolleraction.IControllerAction());
 const includesevents = require("./includes/events.js");
 
-CtrlActionEventsSettings.exec = function () {
+CtrlActionEventsSettings.initEvents = function () {
     "use strict";
-    this.view.setTitle("ALARM_EVENTS");
-
-    const allEventList = defined(includesevents.events)
+    return defined(includesevents.events)
         ? includesevents.events
         : [];
-    let selectedEventList = AppMain.ws().exec("GetParameters", {"cntr": ""}).getResponse(false);
+};
 
-    const hesUrl = defined(selectedEventList.GetParametersResponse.cntr)
+CtrlActionEventsSettings.initHesURL = function (selectedEventList) {
+    "use strict";
+    return (defined(selectedEventList.GetParametersResponse) && defined(selectedEventList.GetParametersResponse.cntr))
         ? selectedEventList.GetParametersResponse.cntr["alrm-alarm-destination-url"]
         : "";
-    selectedEventList = (defined(selectedEventList.GetParametersResponse) && defined(selectedEventList.GetParametersResponse.cntr)
+};
+
+CtrlActionEventsSettings.updateSelectedEventList = function (selectedEventList) {
+    "use strict";
+    return (defined(selectedEventList.GetParametersResponse) && defined(selectedEventList.GetParametersResponse.cntr)
             && defined(selectedEventList.GetParametersResponse.cntr["forward-to-hes-list"]) &&
             defined(selectedEventList.GetParametersResponse.cntr["forward-to-hes-list"].event))
         ? AppMain.ws().getResponseElementAsArray(selectedEventList.GetParametersResponse.cntr["forward-to-hes-list"].event)
         : [];
+};
+
+CtrlActionEventsSettings.exec = function () {
+    "use strict";
+    this.view.setTitle("ALARM_EVENTS");
+
+    const allEventList = this.initEvents();
+
+    let selectedEventList = AppMain.ws().exec("GetParameters", {"cntr": ""}).getResponse(false);
+
+    const hesUrl = this.initHesURL(selectedEventList);
+
+    selectedEventList = this.updateSelectedEventList(selectedEventList);
 
     this.view.render(this.controller.action, {
         title: AppMain.t("SETTINGS", "ALARM_EVENTS"),
