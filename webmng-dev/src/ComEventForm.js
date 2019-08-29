@@ -13,6 +13,19 @@ let ComEventForm = Object.create(new modulecomponent.IComponent());
 const moment = require("moment");
 
 ComEventForm.totalResults = 0;
+
+ComEventForm.initPomData = function () {
+    "use strict";
+    // Set default data
+    if (this.data("dateFrom") === null) {
+        this.initData({
+            "dateFrom": moment().format(AppMain.localization("DATE_FORMAT") + " 00:00:00"),
+            "dateTo": "---",
+            "eventType": "EVT-STANDARD"
+        });
+    }
+};
+
 ComEventForm.init = function (config) {
     "use strict";
 
@@ -25,16 +38,7 @@ ComEventForm.init = function (config) {
         selectorEventType: "#eventType",
         eventType: "EVT-STANDARD"
     };
-
-    // Set default data
-    if (this.data("dateFrom") === null && this.data("dateFrom") === null) {
-        this.initData({
-            "dateFrom": moment().format(AppMain.localization("DATE_FORMAT") + " 00:00:00"),
-            "dateTo": "---",
-            "eventType": "EVT-STANDARD"
-        });
-    }
-
+    ComEventForm.initPomData();
     //2017-03-30T06:10:03Z
     $(config.selectorFrom).datetimepicker({
         dayOfWeekStart: 1,
