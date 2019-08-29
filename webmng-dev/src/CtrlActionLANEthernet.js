@@ -166,14 +166,7 @@ CtrlActionLANEthernet.enableInterface = function (enabled) {
     if (!enabled) {
         $("[name='enable']").val(false);
         $("#" + CtrlActionLANEthernet.formId).css({"color": "#e5e5e5"});
-        $("tr#FormActions > td").hide();
-        $("input[type='text'], input[type='password']").attr("disabled", "disabled");
-        $("input[type='checkbox']").each(function (ignore, elm) {
-            if (elm.id !== "enable") {
-                $(elm).attr("disabled", "disabled");
-            }
-        });
-        $("label.mdl-switch").addClass("is-disabled");
+        this.processDisabledInterface();
     } else {
         processEnabledInterface();
 

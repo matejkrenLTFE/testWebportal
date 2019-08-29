@@ -249,7 +249,6 @@ module.exports.AppWebserviceClient = function () {
     };
     /**
      * Execute SOAP method call.
-     * @param {String} method SOAP method name.
      * @param {Object} prm Additional method params.
      * @return {Object} AppWS
      */

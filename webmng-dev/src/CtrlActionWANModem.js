@@ -15,18 +15,20 @@ const build = require("../build.info");
 const download = require("./vendor/download.js");
 
 CtrlActionWANModem.formId = "WANModemForm";
-CtrlActionWANModem.exec = function () {
-    "use strict";
 
-    this.view.setTitle("WAN_MODEM");
+CtrlActionWANModem.getParamsRest = function () {
+    "use strict";
 
     let params = AppMain.ws().exec("GetParameters", {"wan1": ""}).getResponse(false);
     params = defined(params.GetParametersResponse.wan1)
         ? params.GetParametersResponse.wan1
         : {};
+    return params;
+};
 
+CtrlActionWANModem.updateParamsWithInfos = function (params) {
+    "use strict";
     const infos = AppMain.ws().getResponseCache("GetInfos", undefined);
-
     if (infos && defined(infos.GetInfosResponse)) {
         infos.GetInfosResponse.info.forEach(function (infoValue) {
             if (infoValue.category === "wan") {
@@ -34,9 +36,19 @@ CtrlActionWANModem.exec = function () {
             }
         });
     }
-    params.Type = (params.Type)
+    return params;
+};
+
+const getParamsType = function (params) {
+    "use strict";
+    return (params.Type)
         ? AppMain.t(params.Type, "WAN_MODEM")
         : "---";
+};
+
+CtrlActionWANModem.updateParamsTranslate = function (params) {
+    "use strict";
+    params.Type = getParamsType(params);
     if (!params.CardID) {
         params.CardID = "---";
     }
@@ -46,8 +58,18 @@ CtrlActionWANModem.exec = function () {
     if (!params.IMEI) {
         params.IMEI = "---";
     }
+    return params;
+};
 
+CtrlActionWANModem.exec = function () {
+    "use strict";
+
+    this.view.setTitle("WAN_MODEM");
+    let params = this.getParamsRest();
+    params = this.updateParamsWithInfos(params);
+    params = this.updateParamsTranslate(params);
     comsignal.ComWANModemSignal.getConnectionStatus(params);
+
     this.view.render(this.controller.action, {
         title: AppMain.t("WAN", "WAN_MODEM"),
         params: params,
@@ -95,20 +117,9 @@ CtrlActionWANModem.exec = function () {
 
     const enabled = params.enable === "true";
     CtrlActionWANModem.enableInterface(enabled);
-
     this.showSignalIndicator(params.GSM_Signal_Level, params);
     AppMain.html.updateElements([".mdl-textfield"]);
-
-    setTimeout(function () {
-        $(".just-number").on("input", function () {
-            const nonNumReg = /[^0-9]/g;
-            $(this).val($(this).val().replace(nonNumReg, ""));
-            const v = parseInt($(this).val(), 10);
-            if (v > 128) {
-                $(this).val("128");
-            }
-        });
-    }, 100);
+    this.justNumberInputCheck();
 };
 
 CtrlActionWANModem.init = function () {
@@ -179,6 +190,25 @@ CtrlActionWANModem.useInterface = function () {
     }
 };
 
+const processEnabledInterface = function () {
+    "use strict";
+    $("[name='enable']").val(true);
+    $("#" + CtrlActionWANModem.formId).css({"color": "#000"});
+    $("tr#FormActions > td").show();
+    // tu noter daj preverjanje rbac!!!!
+    if (AppMain.user.getRBACpermissionElement("wan1", "apn")) {
+        $("input[type='text'][name='apn']").removeAttr("disabled");
+    }
+    if (AppMain.user.getRBACpermissionElement("wan1", "user-name")) {
+        $("input[type='text'][name='user-name']").removeAttr("disabled");
+    }
+    if (AppMain.user.getRBACpermissionElement("wan1", "password")) {
+        $("input[type='password'][name='password']").removeAttr("disabled");
+    }
+    $("input[type='checkbox']").removeAttr("disabled");
+    $("label.mdl-switch").removeClass("is-disabled");
+};
+
 /**
  * Show interface as enabled/disabled (grayed out).
  * @param {Boolean} enabled
@@ -188,33 +218,11 @@ CtrlActionWANModem.enableInterface = function (enabled) {
     if (!enabled) {
         $("[name='enable']").val(false);
         $("#" + CtrlActionWANModem.formId).css({"color": "#e5e5e5"});
-        $("tr#FormActions > td").hide();
-        $("input[type='text'], input[type='password']").attr("disabled", "disabled");
-        $("input[type='checkbox']").each(function (i, elm) {
-            if (elm.id !== "enable") {
-                $(elm).attr("disabled", "disabled");
-            }
-        });
-        $("label.mdl-switch").addClass("is-disabled");
-        AppMain.html.updateElements([".mdl-js-switch"]);
+        this.processDisabledInterface();
     } else {
-        $("[name='enable']").val(true);
-        $("#" + CtrlActionWANModem.formId).css({"color": "#000"});
-        $("tr#FormActions > td").show();
-        // tu noter daj preverjanje rbac!!!!
-        if (AppMain.user.getRBACpermissionElement("wan1", "apn")) {
-            $("input[type='text'][name='apn']").removeAttr("disabled");
-        }
-        if (AppMain.user.getRBACpermissionElement("wan1", "user-name")) {
-            $("input[type='text'][name='user-name']").removeAttr("disabled");
-        }
-        if (AppMain.user.getRBACpermissionElement("wan1", "password")) {
-            $("input[type='password'][name='password']").removeAttr("disabled");
-        }
-        $("input[type='checkbox']").removeAttr("disabled");
-        $("label.mdl-switch").removeClass("is-disabled");
-        AppMain.html.updateElements([".mdl-js-switch"]);
+        processEnabledInterface();
     }
+    AppMain.html.updateElements([".mdl-js-switch"]);
 };
 
 CtrlActionWANModem.showSignalIndicator = function (signal, params) {

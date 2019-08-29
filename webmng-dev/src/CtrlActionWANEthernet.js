@@ -74,16 +74,7 @@ CtrlActionWANEthernet.exec = function () {
     // Show interface as: enabled/disabled
     CtrlActionWANEthernet.enableInterface(params.enable === "true", params["ip-config-client-dhcp"] === "true");
     AppMain.html.updateElements([".mdl-textfield"]);
-    setTimeout(function () {
-        $(".just-number").on("input", function () {
-            const nonNumReg = /[^0-9]/g;
-            $(this).val($(this).val().replace(nonNumReg, ""));
-            const v = parseInt($(this).val(), 10);
-            if (v > 128) {
-                $(this).val("128");
-            }
-        });
-    }, 100);
+    this.justNumberInputCheck();
 };
 
 /**
@@ -143,8 +134,8 @@ CtrlActionWANEthernet.useDHCP = function () {
 
     // Show interface: enabled/disabled
     const switchButton = document.querySelector(".ipConfigClientDhcp").MaterialSwitch;
-
-    let enabled = $("[name='ip-config-client-dhcp']").val() === "true";
+    const dhcpVal = $("[name='ip-config-client-dhcp']").val();
+    let enabled = dhcpVal === "true";
 
     CtrlActionWANEthernet.enableInterface($("[name='enable']").val() === "true", !enabled);
     if (enabled) {
@@ -155,7 +146,7 @@ CtrlActionWANEthernet.useDHCP = function () {
 
     const response = AppMain.ws().exec("SetParameters", {
         "wan2": {
-            "ip-config-client-dhcp": $("[name='ip-config-client-dhcp']").val()
+            "ip-config-client-dhcp": dhcpVal
         }
     }).getResponse(false);
     if (defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK") {
@@ -165,6 +156,49 @@ CtrlActionWANEthernet.useDHCP = function () {
     }
 
     // CtrlActionWANEthernet.setParams();
+};
+
+const processIPv6view = function () {
+    "use strict";
+    if (AppMain.user.getRBACpermissionElement("wan2", "ip-config-ipv6-addr")) {
+        $("input[type='text'][name='ip-config-ipv6-addr']").removeAttr("disabled");
+    }
+    if (AppMain.user.getRBACpermissionElement("wan2", "ipv6-netmask")) {
+        $("input[type='text'][name='ip-config-ipv6-subnet-prefix-len']").removeAttr("disabled");
+    }
+};
+
+const procesDHCPview = function () {
+    "use strict";
+    if (AppMain.user.getRBACpermissionElement("wan2", "dhcp")) {
+        $("input[type='checkbox']").removeAttr("disabled");
+        $("label.mdl-switch").removeClass("is-disabled");
+    }
+};
+
+const processDHCPdisabledDNS = function () {
+    "use strict";
+    if (AppMain.user.getRBACpermissionElement("wan2", "ip-config-dns1")) {
+        $("input[type='text'][name='ip-config-dns1']").removeAttr("disabled");
+    }
+    if (AppMain.user.getRBACpermissionElement("wan2", "ip-config-dns2")) {
+        $("input[type='text'][name='ip-config-dns2']").removeAttr("disabled");
+    }
+    if (AppMain.user.getRBACpermissionElement("wan2", "ip-config-ipv6-addr")) {
+        $("input[type='text'][name='ip-config-ipv6-addr']").removeAttr("disabled");
+    }
+};
+
+const processDHCPdisabled = function () {
+    "use strict";
+    if (AppMain.user.getRBACpermissionElement("wan2", "ip-config-ip")) {
+        $("input[type='text'][name='ip-config-ip']").removeAttr("disabled");
+    }
+    if (AppMain.user.getRBACpermissionElement("wan2", "ip-config-net-mask")) {
+        $("input[type='text'][name='ip-config-net-mask']").removeAttr("disabled");
+    }
+    processDHCPdisabledDNS();
+    $(".dhcp-enabled").css({"color": "#000"});
 };
 
 /**
@@ -179,56 +213,65 @@ CtrlActionWANEthernet.enableInterface = function (enabled, useDHCP) {
         $("[name='enable']").val(false);
         $("#" + CtrlActionWANEthernet.formId).css({"color": "rgb(150, 150, 150)"});
         $(".dhcp-enabled").css({"color": "rgb(150, 150, 150)"});
-        $("tr#FormActions > td").hide();
-        $("input[type='text'], input[type='password']").attr("disabled", "disabled");
-        $("input[type='checkbox']").each(function (i, elm) {
-            if (elm.id !== "enable") {
-                $(elm).attr("disabled", "disabled");
-            }
-        });
-        $("label.mdl-switch").addClass("is-disabled");
+        this.processDisabledInterface();
         AppMain.html.updateElements([".mdl-js-switch"]);
     } else {
         $("[name='enable']").val(true);
         $("[name='ip-config-client-dhcp']").val(useDHCP);
         $("#" + CtrlActionWANEthernet.formId).css({"color": "#000"});
         $("tr#FormActions > td").show();
-        if (AppMain.user.getRBACpermissionElement("wan2", "dhcp")) {
-            $("input[type='checkbox']").removeAttr("disabled");
-            $("label.mdl-switch").removeClass("is-disabled");
-        }
+        procesDHCPview();
         if (useDHCP) {
             $("input[type='text'], input[type='password']").attr("disabled", "disabled");
             $(".is-disabled").removeClass("is-disabled");
             $(".dhcp-enabled").css({"color": "rgb(150, 150, 150)"});
         } else {
-            if (AppMain.user.getRBACpermissionElement("wan2", "ip-config-ip")) {
-                $("input[type='text'][name='ip-config-ip']").removeAttr("disabled");
-            }
-            if (AppMain.user.getRBACpermissionElement("wan2", "ip-config-net-mask")) {
-                $("input[type='text'][name='ip-config-net-mask']").removeAttr("disabled");
-            }
-            if (AppMain.user.getRBACpermissionElement("wan2", "ip-config-dns1")) {
-                $("input[type='text'][name='ip-config-dns1']").removeAttr("disabled");
-            }
-            if (AppMain.user.getRBACpermissionElement("wan2", "ip-config-dns2")) {
-                $("input[type='text'][name='ip-config-dns2']").removeAttr("disabled");
-            }
-            if (AppMain.user.getRBACpermissionElement("wan2", "ip-config-ipv6-addr")) {
-                $("input[type='text'][name='ip-config-ipv6-addr']").removeAttr("disabled");
-            }
-            // $( "input[type='text'], input[type='password']" ).removeAttr("disabled");
-            $(".dhcp-enabled").css({"color": "#000"});
+            processDHCPdisabled();
         }
         setTimeout(function () {
             AppMain.html.updateElements([".mdl-js-switch", ".mdl-textfield"]);
         }, 3000);
     }
-    if (AppMain.user.getRBACpermissionElement("wan2", "ip-config-ipv6-addr")) {
-        $("input[type='text'][name='ip-config-ipv6-addr']").removeAttr("disabled");
+    processIPv6view();
+    AppMain.html.updateAllElements();
+};
+
+const processDNSerror = function (dns1Str, dns2Str, re) {
+    "use strict";
+    if (!dns1Str.match(re)) {
+        AppMain.dialog("Please enter correct DNS server 1.", "warning");
     }
-    if (AppMain.user.getRBACpermissionElement("wan2", "ipv6-netmask")) {
-        $("input[type='text'][name='ip-config-ipv6-subnet-prefix-len']").removeAttr("disabled");
+    if (!dns2Str.match(re)) {
+        AppMain.dialog("Please enter correct DNS server 2.", "warning");
+    }
+};
+
+const processIPV6Error = function (ipV6, reIpV6) {
+    "use strict";
+    if (!(ipV6.match(reIpV6) || ipV6 === "---" || ipV6 === "")) {
+        AppMain.dialog("Please enter correct IPv6 IP address.", "warning");
+    }
+};
+
+const processSetParamsError = function (ipStr, maskStr, dns1Str, dns2Str, ipV6, re, reIpV6) {
+    "use strict";
+    if (!ipStr.match(re)) {
+        AppMain.dialog("Please enter correct IP address.", "warning");
+    }
+    if (!maskStr.match(re)) {
+        AppMain.dialog("Please enter correct Subnet mask.", "warning");
+    }
+    processDNSerror(dns1Str, dns2Str, re);
+    processIPV6Error(ipV6, reIpV6);
+};
+
+CtrlActionWANEthernet.setParamsRest = function (data) {
+    "use strict";
+    const response = AppMain.ws().exec("SetParameters", {"wan2": data}).getResponse(false);
+    if (defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK") {
+        AppMain.dialog("Successfully updated!", "success");
+    } else {
+        AppMain.dialog("Error occurred: " + response.SetParametersResponse.toString(), "error");
     }
 };
 
@@ -255,28 +298,9 @@ CtrlActionWANEthernet.setParams = function () {
         data = form.deserialize(data);
         data["ip-config-ipv6"] = (defined(data["ip-config-ipv6-addr"]) && data["ip-config-ipv6-addr"] !== "");
 
-        const response = AppMain.ws().exec("SetParameters", {"wan2": data}).getResponse(false);
-        if (defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK") {
-            AppMain.dialog("Successfully updated!", "success");
-        } else {
-            AppMain.dialog("Error occurred: " + response.SetParametersResponse.toString(), "error");
-        }
+        CtrlActionWANEthernet.setParamsRest(data);
     } else {
-        if (!ipStr.match(re)) {
-            AppMain.dialog("Please enter correct IP address.", "warning");
-        }
-        if (!maskStr.match(re)) {
-            AppMain.dialog("Please enter correct Subnet mask.", "warning");
-        }
-        if (!dns1Str.match(re)) {
-            AppMain.dialog("Please enter correct DNS server 1.", "warning");
-        }
-        if (!dns2Str.match(re)) {
-            AppMain.dialog("Please enter correct DNS server 2.", "warning");
-        }
-        if (!(ipV6.match(reIpV6) || ipV6 === "---" || ipV6 === "")) {
-            AppMain.dialog("Please enter correct IPv6 IP address.", "warning");
-        }
+        processSetParamsError(ipStr, maskStr, dns1Str, dns2Str, ipV6, re, reIpV6);
     }
     AppMain.html.updateElements([".mdl-button"]);
 };
