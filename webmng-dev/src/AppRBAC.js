@@ -16,6 +16,27 @@ module.exports.AppRBAC = function () {
      */
     this.WS_ACCESS_LEVEL_FULL = 1;
 
+    const rbacHideElement = function (content, rbac, rbacSelector) {
+        const rbacCategory = rbacSelector[0];
+        const rbacParam = rbacSelector[1];
+        if (defined(rbac[`${rbacCategory}`]) && defined(rbac[`${rbacCategory}`][`${rbacParam}`]) && rbac[`${rbacCategory}`][`${rbacParam}`].toLowerCase() === "h") {
+            const rbacSelectorReplace = "data-rbac=\"" + rbacCategory + "." + rbacParam + "\"";
+            content = content.replace(new RegExp(rbacSelectorReplace, "gi"), rbacSelectorReplace + " style=\"display:none;\" "); // eslint-disable-line security/detect-non-literal-regexp
+        }
+        return content;
+    };
+
+    const rbacDisableElement = function (content, rbac, rbacSelector) {
+        const rbacCategory = rbacSelector[0];
+        const rbacParam = rbacSelector[1];
+        if (defined(rbac[`${rbacCategory}`]) && defined(rbac[`${rbacCategory}`][`${rbacParam}`])
+                && (rbac[`${rbacCategory}`][`${rbacParam}`].toLowerCase() === "r" || rbac[`${rbacCategory}`][`${rbacParam}`].toLowerCase() === "h")) {
+            const rbacSelectorReplace = "data-rbac-element=\"" + rbacCategory + "." + rbacParam + "\"";
+            content = content.replace(new RegExp(rbacSelectorReplace, "gi"), rbacSelectorReplace + " disabled "); // eslint-disable-line security/detect-non-literal-regexp
+        }
+        return content;
+    };
+
     this.processViewTemplate = function (content) {
         const rbac = AppMain.user.getRBACMap();
         // Hide param wrapper altogether
@@ -26,12 +47,7 @@ module.exports.AppRBAC = function () {
             const $element = $(elm);
             const rbacSelector = $element.attr("data-rbac").split(".");
             if (rbacSelector.length > 1) {
-                const rbacCategory = rbacSelector[0];
-                const rbacParam = rbacSelector[1];
-                if (defined(rbac[`${rbacCategory}`]) && defined(rbac[`${rbacCategory}`][`${rbacParam}`]) && rbac[`${rbacCategory}`][`${rbacParam}`].toLowerCase() === "h") {
-                    const rbacSelectorReplace = "data-rbac=\"" + rbacCategory + "." + rbacParam + "\"";
-                    content = content.replace(new RegExp(rbacSelectorReplace, "gi"), rbacSelectorReplace + " style=\"display:none;\" "); // eslint-disable-line security/detect-non-literal-regexp
-                }
+                content = rbacHideElement(content, rbac, rbacSelector);
             }
         });
 
@@ -41,13 +57,7 @@ module.exports.AppRBAC = function () {
             const $element = $(elm);
             const rbacSelector = $element.attr("data-rbac-element").split(".");
             if (rbacSelector.length > 1) {
-                const rbacCategory = rbacSelector[0];
-                const rbacParam = rbacSelector[1];
-                if (defined(rbac[`${rbacCategory}`]) && defined(rbac[`${rbacCategory}`][`${rbacParam}`])
-                        && (rbac[`${rbacCategory}`][`${rbacParam}`].toLowerCase() === "r" || rbac[`${rbacCategory}`][`${rbacParam}`].toLowerCase() === "h")) {
-                    const rbacSelectorReplace = "data-rbac-element=\"" + rbacCategory + "." + rbacParam + "\"";
-                    content = content.replace(new RegExp(rbacSelectorReplace, "gi"), rbacSelectorReplace + " disabled "); // eslint-disable-line security/detect-non-literal-regexp
-                }
+                content = rbacDisableElement(content, rbac, rbacSelector);
             }
         });
         return content;

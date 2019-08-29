@@ -110,6 +110,38 @@ MaterialSelect.prototype.change = function (value) {
     this.updateClassesPom();
 };
 
+MaterialSelect.prototype.initMaxRows = function () {
+    "use strict";
+    this.maxRows = parseInt(this.inputPom.getAttribute(
+        this.ConstantPom.MAX_ROWS_ATTRIBUTE
+    ), 10);
+    if (Number.isNaN(this.maxRows)) {
+        this.maxRows = this.ConstantPom.NO_MAX_ROWS;
+    }
+};
+
+MaterialSelect.prototype.initPom = function () {
+    "use strict";
+    if (this.inputPom.hasAttribute(this.ConstantPom.MAX_ROWS_ATTRIBUTE)) {
+        this.initMaxRows();
+    }
+
+    this.boundUpdateClassesHandler = this.updateClassesPom.bind(this);
+    this.boundFocusHandler = this.onFocusPom.bind(this);
+    this.boundBlurHandler = this.onBlurPom.bind(this);
+    this.inputPom.addEventListener("input", this.boundUpdateClassesHandler);
+    this.inputPom.addEventListener("focus", this.boundFocusHandler);
+    this.inputPom.addEventListener("blur", this.boundBlurHandler);
+
+    if (this.maxRows !== this.ConstantPom.NO_MAX_ROWS) {
+        this.boundKeyDownHandler = this.onKeyDownPom.bind(this);
+        this.inputPom.addEventListener("keydown", this.boundKeyDownHandler);
+    }
+
+    this.updateClassesPom();
+    this.elementPom.classList.add(this.CssClassesPom.IS_UPGRADED);
+};
+
 MaterialSelect.prototype.init = function () {
     "use strict";
 
@@ -118,29 +150,7 @@ MaterialSelect.prototype.init = function () {
         this.inputPom = this.elementPom.querySelector("." + this.CssClassesPom.INPUT);
 
         if (this.inputPom) {
-            if (this.inputPom.hasAttribute(this.ConstantPom.MAX_ROWS_ATTRIBUTE)) {
-                this.maxRows = parseInt(this.inputPom.getAttribute(
-                    this.ConstantPom.MAX_ROWS_ATTRIBUTE
-                ), 10);
-                if (Number.isNaN(this.maxRows)) {
-                    this.maxRows = this.ConstantPom.NO_MAX_ROWS;
-                }
-            }
-
-            this.boundUpdateClassesHandler = this.updateClassesPom.bind(this);
-            this.boundFocusHandler = this.onFocusPom.bind(this);
-            this.boundBlurHandler = this.onBlurPom.bind(this);
-            this.inputPom.addEventListener("input", this.boundUpdateClassesHandler);
-            this.inputPom.addEventListener("focus", this.boundFocusHandler);
-            this.inputPom.addEventListener("blur", this.boundBlurHandler);
-
-            if (this.maxRows !== this.ConstantPom.NO_MAX_ROWS) {
-                this.boundKeyDownHandler = this.onKeyDownPom.bind(this);
-                this.inputPom.addEventListener("keydown", this.boundKeyDownHandler);
-            }
-
-            this.updateClassesPom();
-            this.elementPom.classList.add(this.CssClassesPom.IS_UPGRADED);
+            this.initPom();
         }
     }
 };
