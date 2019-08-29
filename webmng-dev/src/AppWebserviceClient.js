@@ -110,6 +110,28 @@ module.exports.AppWebserviceClient = function () {
         AppMain.view.loadingIndicator();
     };
 
+    const processFailResponse = function (_this, response) {
+        if (defined(_this.statusCodes[response.status])) {
+            AppMain.dialog(response.status + " " + _this.statusCodes[response.status], "error");
+        } else {
+            AppMain.dialog("UNDEFINED_ERROR", "error");
+        }
+    };
+
+    const processFailResponseMessage = function (resp) {
+        if (defined(resp.Envelope)) {
+            const messageId = resp.Envelope.Body.Fault.Reason.Text.toString();
+            let message = AppMain.getAppMessage(messageId);
+            if (message) {
+                // Translate application message
+                message = AppMain.t(message, undefined);
+                AppMain.dialog(message, "warning");
+                return false;
+            }
+        }
+        return true;
+    };
+
     /**
      * Main method to execute request to the webservice.
      */
@@ -134,24 +156,11 @@ module.exports.AppWebserviceClient = function () {
 
             const resp = Json2Xml.xml2json(response.responseXML);
 
-            // Handle SOAP message response: errors, warnings, etc ...
-            if (defined(resp.Envelope)) {
-                const messageId = resp.Envelope.Body.Fault.Reason.Text.toString();
-                let message = AppMain.getAppMessage(messageId);
-                if (message) {
-                    // Translate application message
-                    message = AppMain.t(message, undefined);
-                    return AppMain.dialog(message, "warning");
-                }
+            if (processFailResponseMessage(resp)) {
                 if (response.status !== 400 && response.status !== 500) {
                     lastResponse = response.responseXML;
                 }
-            }
-
-            if (defined(_this.statusCodes[response.status])) {
-                AppMain.dialog(response.status + " " + _this.statusCodes[response.status], "error");
-            } else {
-                AppMain.dialog("UNDEFINED_ERROR", "error");
+                processFailResponse(_this, response);
             }
         });
         // Set last response
@@ -299,6 +308,17 @@ module.exports.AppWebserviceClient = function () {
             : this.exec(methodName, params).getResponse(false);
     };
 
+    const processResponseElement = function (responseElement) {
+        if (Object.prototype.toString.call(responseElement) === "[object Array]") {
+            return responseElement;
+        }
+        if (Object.prototype.toString.call(responseElement) === "[object Object]") {
+            return {"0": responseElement};
+        }
+
+        return [];
+    };
+
     /**
      * This method always returns response element as array.
      * It also fixes "__prefix"" problem with SOAP message elements.
@@ -323,14 +343,7 @@ module.exports.AppWebserviceClient = function () {
             return [responseElement];
         }
 
-        if (Object.prototype.toString.call(responseElement) === "[object Array]") {
-            return responseElement;
-        }
-        if (Object.prototype.toString.call(responseElement) === "[object Object]") {
-            return {"0": responseElement};
-        }
-
-        return [];
+        return processResponseElement(responseElement);
     };
 
     this.xmlSetElement = function (elementName) {

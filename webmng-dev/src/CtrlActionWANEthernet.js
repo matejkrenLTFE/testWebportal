@@ -275,6 +275,27 @@ CtrlActionWANEthernet.setParamsRest = function (data) {
     }
 };
 
+const checkSetParamsIfRegsIPv4 = function (re, obj) {
+    "use strict";
+    return (obj.ipStr.match(re) && obj.maskStr.match(re) && obj.dns1Str.match(re) && obj.dns2Str.match(re));
+};
+
+const checkSetParamsIfRegsIPv6 = function (reIpV6, obj) {
+    "use strict";
+    return (obj.ipV6.match(reIpV6) || obj.ipV6 === "---" || obj.ipV6 === "");
+};
+
+const checkSetParamsIfRegs = function (re, reIpV6, obj) {
+    "use strict";
+    return (checkSetParamsIfRegsIPv4(re, obj) && checkSetParamsIfRegsIPv6(reIpV6, obj));
+};
+
+const checkSetParamsIf = function (dhcpEnabled, re, reIpV6, obj) {
+    "use strict";
+
+    return (dhcpEnabled || checkSetParamsIfRegs(re, reIpV6, obj));
+};
+
 CtrlActionWANEthernet.setParams = function () {
     "use strict";
 
@@ -290,8 +311,13 @@ CtrlActionWANEthernet.setParams = function () {
             "{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}" +
             "%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|" +
             "([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))";
-    if (dhcpEnabled || (ipStr.match(re) && maskStr.match(re) && dns1Str.match(re) && dns2Str.match(re) && (ipV6.match(reIpV6)
-            || ipV6 === "---" || ipV6 === ""))) {
+    if (checkSetParamsIf(dhcpEnabled, re, reIpV6, {
+        ipStr: ipStr,
+        maskStr: maskStr,
+        dns1Str: dns1Str,
+        dns2Str: dns2Str,
+        ipV6: ipV6
+    })) {
 
         const form = $("#" + CtrlActionWANEthernet.formId);
         let data = form.serialize();
