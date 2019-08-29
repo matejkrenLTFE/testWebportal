@@ -11,6 +11,56 @@ const moment = require("moment");
 const modulecontrolleraction = require("./IControllerAction");
 let CtrlActionDefault = Object.create(new modulecontrolleraction.IControllerAction());
 
+CtrlActionDefault.updateUptime = function (generalInfo) {
+    "use strict";
+
+    if (defined(generalInfo.system.Uptime)) {
+        generalInfo.system.Uptime = generalInfo.system.Uptime.split(",");
+        generalInfo.system.Uptime = defined(generalInfo.system.Uptime[0])
+            ? generalInfo.system.Uptime[0]
+            : "";
+    }
+    return generalInfo;
+};
+/*eslint-disable camelcase*/
+CtrlActionDefault.prepareBatteryChargeLevelStr = function (generalInfo) {
+    "use strict";
+    // Battery level param translation
+    if (defined(generalInfo.system.Battery_level)) {
+        generalInfo.system.Battery_level = CtrlActionDefault.batteryChargeLevelStr(generalInfo.system.Battery_level);
+    }
+    return generalInfo;
+};
+
+CtrlActionDefault.prepareFwLibraryVersion = function (generalInfo) {
+    "use strict";
+    if (defined(generalInfo.system.FW_library_version)) {
+        generalInfo.system.FW_library_version = generalInfo.system.FW_library_version.split(" ")[0];
+    }
+    return generalInfo;
+};
+/*eslint-enable camelcase*/
+
+CtrlActionDefault.prepareCounters = function () {
+    "use strict";
+
+    const cnt = AppMain.ws().exec("GetCounters", undefined).getResponse(false);
+    let counters = {};
+    if (defined(cnt.GetCountersResponse.counter)) {
+        $.each(cnt.GetCountersResponse.counter["cnt-sys"], function (index, cntValue) {
+            if (index === "cpu-core-temperature" || index === "cpu-board-temperature") {
+                const cntValuePom = (cntValue / 1000);
+                cntValue = cntValuePom.toString().substring(0, 4);
+            }
+            if (index === "uptime") {
+                cntValue = uptimeFormat(cntValue);
+            }
+            counters[`${index}`] = cntValue;
+        });
+    }
+    return counters;
+};
+
 CtrlActionDefault.exec = function () {
     "use strict";
 
@@ -23,43 +73,13 @@ CtrlActionDefault.exec = function () {
 
     // Get infos
     const info = AppMain.ws().exec("GetInfos", undefined).getResponse(false);
-
     generalInfo = this.prepareGeneralInfoParams(generalInfo, info);
-    if (defined(generalInfo.system.Uptime)) {
-        generalInfo.system.Uptime = generalInfo.system.Uptime.split(",");
-        generalInfo.system.Uptime = defined(generalInfo.system.Uptime[0])
-            ? generalInfo.system.Uptime[0]
-            : "";
-    }
+    generalInfo = this.updateUptime(generalInfo);
+    generalInfo = this.prepareBatteryChargeLevelStr(generalInfo);
+    generalInfo = this.prepareFwLibraryVersion(generalInfo);
 
-    // Battery level param translation
-    /*eslint-disable camelcase*/
-    if (defined(generalInfo.system.Battery_level)) {
-        generalInfo.system.Battery_level = CtrlActionDefault.batteryChargeLevelStr(generalInfo.system.Battery_level);
-    }
-
-    if (defined(generalInfo.system.FW_library_version)) {
-        generalInfo.system.FW_library_version = generalInfo.system.FW_library_version.split(" ")[0];
-    }
-    /*eslint-enable camelcase*/
-
-    // Prepate counters
-    const cnt = AppMain.ws().exec("GetCounters", undefined).getResponse(false);
-    let counters = {};
-    if (defined(cnt.GetCountersResponse.counter)) {
-        $.each(cnt.GetCountersResponse.counter["cnt-sys"], function (index, cntValue) {
-            if (index === "cpu-core-temperature" || index === "cpu-board-temperature") {
-                const cntValuePom = (cntValue / 1000);
-                cntValue = cntValuePom.toString().substring(0, 4);
-            }
-            if (index === "uptime") {
-                //var uptimeTimestamp = (Date.now()/1000) - cntValue;
-                //cntValue = moment.unix( uptimeTimestamp ).format( "HH:mm:ss.SSS" );
-                cntValue = uptimeFormat(cntValue);
-            }
-            counters[`${index}`] = cntValue;
-        });
-    }
+    // Prepare counters
+    let counters = this.prepareCounters();
 
     this.view.render("Default#ViewDashboard", {
         generalTitle: AppMain.t("GENERAL", "DASHBOARD"),
