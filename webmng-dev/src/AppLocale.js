@@ -57,25 +57,42 @@ module.exports.AppLocale = function (loc) {
      * @return void
      */
     this.loadTranslations = function () {
-        languages.forEach(function (language) {  // protect dynamic require
-            translationStrings[`${language}`] = require("./locale/" + language); // eslint-disable-line security/detect-non-literal-require
-        });
+        if (Object.keys(translationStrings).length === 0 && translationStrings.constructor === Object) {
+            languages.forEach(function (language) {  // protect dynamic require
+                translationStrings[`${language}`] = require("./locale/" + language); // eslint-disable-line security/detect-non-literal-require
+            });
+        }
     };
 
     this.getLanguageStrings = function (selectLocale) {
         const _locale = selectLocale || locale;
         // Reload translation strings
-        if (Object.keys(translationStrings).length === 0 && translationStrings.constructor === Object) {
-            this.loadTranslations();
-        }
-        const defaultLang = {
-            name: "en_US"
-        };
+        this.loadTranslations();
+
         return defined(translationStrings[`${_locale}`])
             ? translationStrings[`${_locale}`]
-            : defaultLang;
+            : {};
     };
 
+    const getLangStr = function (string, langStrings) {
+        return defined(langStrings[`${string}`])
+            ? langStrings[`${string}`]
+            : string;
+    };
+
+    const getGlobalStrTranslate = function (string, langStrings, context) {
+        if (defined(langStrings[`${context}`]) && defined(langStrings[`${context}`][`${string}`])) {
+            string = langStrings[`${context}`][`${string}`];
+        } else {
+            string = getLangStr(string, langStrings);
+        }
+        return string;
+    };
+    const getContextStrTranslate = function (string, langStrings, context) {
+        return (defined(langStrings[`${context}`]) && defined(langStrings[`${context}`][`${string}`]))
+            ? langStrings[`${context}`][`${string}`]
+            : string;
+    };
     /**
      * Translate source string into selected internal locale.
      * @param {String}  string Source.
@@ -86,17 +103,9 @@ module.exports.AppLocale = function (loc) {
         let context = contextPom || "global";
         const langStrings = this.getLanguageStrings();
         if (context === "global") {
-            if (defined(langStrings[`${context}`]) && defined(langStrings[`${context}`][`${string}`])) {
-                string = langStrings[`${context}`][`${string}`];
-            } else {
-                string = defined(langStrings[`${string}`])
-                    ? langStrings[`${string}`]
-                    : string;
-            }
+            string = getGlobalStrTranslate(string, langStrings, context);
         } else {
-            string = (defined(langStrings[`${context}`]) && defined(langStrings[`${context}`][`${string}`]))
-                ? langStrings[`${context}`][`${string}`]
-                : string;
+            string = getContextStrTranslate(string, langStrings, context);
         }
 
         return this.stringTranslateProcessVars(string, vars);

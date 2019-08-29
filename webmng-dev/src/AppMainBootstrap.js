@@ -34,6 +34,17 @@ module.exports.AppMainBootstrap = function () {
      */
     let _checkAlarmsIntervalRunning = false;
 
+    const getFontStyle = function (centerConfig) {
+        return centerConfig.fontStyle || "Arial";
+    };
+
+    const getTextColor = function (centerConfig) {
+        return centerConfig.color || "#000";
+    };
+    const getSidePadding = function (centerConfig) {
+        return centerConfig.sidePadding || 20;
+    };
+
     this.init = function () {
         const _this = this;
         this.view = AppMain.getAppComponent("view");
@@ -66,16 +77,12 @@ module.exports.AppMainBootstrap = function () {
                 if (chart.config.options.elements.center) {
                     //Get ctx from string
                     const ctx = chart.chart.ctx;
-
-                    //Get options from the center object in options
                     const centerConfig = chart.config.options.elements.center;
-                    const fontStyle = centerConfig.fontStyle || "Arial";
+                    const fontStyle = getFontStyle(centerConfig);
                     const txt = centerConfig.text;
-                    //const txt_under = centerConfig.text_under;
-                    const color = centerConfig.color || "#000";
-                    const sidePadding = centerConfig.sidePadding || 20;
+                    const color = getTextColor(centerConfig);
+                    const sidePadding = getSidePadding(centerConfig);
                     const sidePaddingCalculated = (sidePadding / 100) * (chart.innerRadius * 2);
-                    //Start with a base font of 30px
                     ctx.font = "30px " + fontStyle;
 
                     //Get the width of the string and also the width of the element minus 10 to give it 5px side padding
@@ -95,15 +102,10 @@ module.exports.AppMainBootstrap = function () {
                     ctx.textBaseline = "middle";
                     const centerX = ((chart.chartArea.left + chart.chartArea.right) / 2);
                     const centerY = ((chart.chartArea.top + chart.chartArea.bottom) / 2);
-                    // const centerY_up = ((chart.chartArea.top + chart.chartArea.bottom)* (51/100.0));
-                    // const centerY_down = ((chart.chartArea.top + chart.chartArea.bottom)* (49/100.0));
 
                     ctx.font = fontSizeToUse + "px " + fontStyle;
                     ctx.fillStyle = color;
-
-                    //Draw text in center
                     ctx.fillText(txt, centerX, centerY);
-                    // ctx.fillText(txt_under, centerX, centerY_up);
                 }
             }
         });
