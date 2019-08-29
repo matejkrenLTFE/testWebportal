@@ -110,9 +110,8 @@ module.exports.AppHTML = function () {
     const defineMdlSelect = function (options, additionalClass, widthHtml) {
         if (defined(options.label) && options.label !== "") {
             return "<div class=\"mdl-select mdl-js-select mdl-select--floating-label mdl-textfield-less-padding " + additionalClass + "\" " + widthHtml + ">";
-        } else {
-            return "<div class=\"mdl-select mdl-js-select mdl-textfield-no-padding " + additionalClass + "\"" + widthHtml + ">";
         }
+        return "<div class=\"mdl-select mdl-js-select mdl-textfield-no-padding " + additionalClass + "\"" + widthHtml + ">";
     };
 
     /**

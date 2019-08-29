@@ -521,22 +521,8 @@ CtrlActionMonitoringManager.getParams = function () {
     return [];
 };
 
-CtrlActionMonitoringManager.updateProfileTypeSecond = function (cat) {
+CtrlActionMonitoringManager.updateProfileTypeFirst = function (cat) {
     "use strict";
-    if (cat === "CNT-WAN_LOCAL") {
-        $("#profileTypeHtml").html(this.profileTypeWANLocal);
-    }
-    if (cat === "CNT-WAN_MODEM") {
-        $("#profileTypeHtml").html(this.profileTypeWANModem);
-    }
-    if (cat === "CNT-APP") {
-        $("#profileTypeHtml").html(this.profileTypeApp);
-    }
-};
-CtrlActionMonitoringManager.updateProfileType = function () {
-    "use strict";
-
-    const cat = $("#profile-category").val();
     if (cat === "CNT-SYS") {
         $("#profileTypeHtml").html(this.profileTypeSys);
     }
@@ -546,10 +532,34 @@ CtrlActionMonitoringManager.updateProfileType = function () {
     if (cat === "CNT-RS485") {
         $("#profileTypeHtml").html(this.profileTypeRS485);
     }
+};
+CtrlActionMonitoringManager.updateProfileTypeSecond = function (cat) {
+    "use strict";
     if (cat === "CNT-WAN") {
         $("#profileTypeHtml").html(this.profileTypeWAN);
     }
+    if (cat === "CNT-WAN_LOCAL") {
+        $("#profileTypeHtml").html(this.profileTypeWANLocal);
+    }
+};
+
+CtrlActionMonitoringManager.updateProfileTypeThird = function (cat) {
+    "use strict";
+    if (cat === "CNT-WAN_MODEM") {
+        $("#profileTypeHtml").html(this.profileTypeWANModem);
+    }
+    if (cat === "CNT-APP") {
+        $("#profileTypeHtml").html(this.profileTypeApp);
+    }
+};
+
+CtrlActionMonitoringManager.updateProfileType = function () {
+    "use strict";
+
+    const cat = $("#profile-category").val();
+    this.updateProfileTypeFirst(cat);
     this.updateProfileTypeSecond(cat);
+    this.updateProfileTypeThird(cat);
 
     AppMain.html.updateElements([".mdl-js-textfield", ".mdl-js-select"]);
     this.adjustSelect();
@@ -582,13 +592,19 @@ CtrlActionMonitoringManager.export = function () {
             "_" + profileType.toUpperCase() + "_" + moment().format("YYYY-MM-DD-HH-mm-ss") + ".csv", "text/csv");
 };
 
-CtrlActionMonitoringManager.changeView = function (view) {
+const updateViewVariable = function (view) {
     "use strict";
-
     if (view !== undefined && view.target !== undefined) {
         view.target.MaterialRadio.check();
         view = $("input[name=\"display-type\"]:checked").val();
     }
+    return view;
+};
+
+CtrlActionMonitoringManager.changeView = function (view) {
+    "use strict";
+
+    view = updateViewVariable(view);
     if (view === "optionTable") {
         $("#cpu_usage_graph").hide();
         $("#cpu_usage_table").show();

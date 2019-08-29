@@ -187,8 +187,15 @@ module.exports.AppView = function () {
         return viewContent;
     };
 
+    const isActionNameOk = function (_this, actionName) {
+        return (actionName && actionName.indexOf(".") > 0 && _this.controller.ctrlActionComp !== null);
+    };
+    const isMethodNameOk = function (methodName) {
+        return (methodName && methodName.indexOf(".") > 0);
+    };
+
     const processExecMethod = function (_this, actionName, element) {
-        if (actionName && actionName.indexOf(".") > 0 && _this.controller.ctrlActionComp !== null) {
+        if (isActionNameOk(_this, actionName)) {
             const comp = actionName.split(".");
             if (comp[1] === "exec") {
                 $(element).on(element.getAttribute("data-bind-event"), function (e) {
@@ -200,11 +207,15 @@ module.exports.AppView = function () {
         }
     };
 
+    const checkControllerActionComp = function (_this) {
+        return (defined(_this.controller.ctrlActionComp) && defined(_this.controller.ctrlActionComp[comp2[1]]));
+    };
+
     const processMethodToCtrlActionComponent = function (_this, methodName, element) {
-        if (methodName && methodName.indexOf(".") > 0) {
+        if (isMethodNameOk(methodName)) {
             const comp2 = methodName.split(".");
 
-            if (defined(_this.controller.ctrlActionComp) && defined(_this.controller.ctrlActionComp[comp2[1]])) {
+            if (checkControllerActionComp(_this)) {
                 $(element).on(element.getAttribute("data-bind-event"), function (e) {
                     e.preventDefault();
                     e.stopImmediatePropagation();
@@ -376,20 +387,6 @@ module.exports.AppView = function () {
     this.renderSectionStatic = function (viewName, sectionName, placeholderData, includeHTML) {
         if (!this.cached(viewName, undefined)) {
             this.renderSection(viewName, sectionName, placeholderData, includeHTML);
-        }
-    };
-
-    /**
-     * Render processed template from cache.
-     * @param {String} viewName
-     * @return {String}
-     */
-    this.renderFromCache = function (viewName) {
-        const viewContent = this.cached(viewName, undefined)
-            ? this.cachePom[`${viewName}`]
-            : null;
-        if (viewContent) {
-            this.appendToCanvas(viewContent);
         }
     };
 
