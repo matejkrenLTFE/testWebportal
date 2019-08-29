@@ -1,4 +1,5 @@
 const List = require("list.js");
+const moment = require("moment");
 /* global AppMain */
 /* jshint maxstatements: false */
 /* jslint browser:true, node:true*/
@@ -84,7 +85,7 @@ module.exports.IControllerAction = function () {
         $("table#" + tableID).stupidtable();
         // When sorting close all opened event details
         $("th[data-sort]").on("click", function () {
-            $("tr[data-opened]").each(function (i, elm) {
+            $("tr[data-opened]").each(function (ignore, elm) {
                 const $element = $(elm);
                 $element.removeAttr("data-opened");
                 $element.next().remove();
@@ -192,5 +193,42 @@ module.exports.IControllerAction = function () {
                 selectNode.prop("checked", false);
             }
         });
+    };
+
+    this.prepareGeneralInfoParams = function (generalInfo, info) {
+        // Prepare params
+        $.each(info.GetInfosResponse.info, function (ignore, obj) {
+            if (generalInfo[obj.category] !== undefined) {
+                generalInfo[obj.category][obj.name] = (!obj.value)
+                    ? "---"
+                    : obj.value;
+            }
+        });
+        generalInfo.system.DateTime = moment(generalInfo.system.DateTime).format(AppMain.localization("DATETIME_FORMAT"));
+        return generalInfo;
+    };
+
+    this.processDisabledInterface = function () {
+        $("tr#FormActions > td").hide();
+        $("input[type='text'], input[type='password']").attr("disabled", "disabled");
+        $("input[type='checkbox']").each(function (ignore, elm) {
+            if (elm.id !== "enable") {
+                $(elm).attr("disabled", "disabled");
+            }
+        });
+        $("label.mdl-switch").addClass("is-disabled");
+    };
+
+    this.justNumberInputCheck = function () {
+        setTimeout(function () {
+            $(".just-number").on("input", function () {
+                const nonNumReg = /[^0-9]/g;
+                $(this).val($(this).val().replace(nonNumReg, ""));
+                const v = parseInt($(this).val(), 10);
+                if (v > 128) {
+                    $(this).val("128");
+                }
+            });
+        }, 100);
     };
 };

@@ -221,10 +221,10 @@ CtrlActionNetwork.buildNodeListHTML = function (nodes) {
 
 CtrlActionNetwork.buildNodesAndLinks = function (routing) {
     "use strict";
-    if (!routing || Object.prototype.toString.call(routing) !== "[object Object]") {
+    if (!routing || Object.prototype.toString.call(routing) !== "[object Array]") {
         return;
     }
-    $.each(routing, function (index, route) {
+    routing.forEach(function (route) {
         let destAdd = parseInt(route["destination-address"], 10).toString(16).toUpperCase();
         if (destAdd.length % 2 !== 0) {
             destAdd = "0" + destAdd;
