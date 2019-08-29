@@ -103,6 +103,17 @@ CtrlActionSystemCertManager.closeForm = function () {
     $(".tr-form").addClass("hidden");
 };
 
+CtrlActionSystemCertManager.getValidity = function () {
+    "use strict";
+
+    let validity = $("input[name='cert-validity']").val();
+    validity = parseInt(validity, 10);
+    if (Number.isNaN(validity)) {
+        validity = 0;
+    }
+    return validity;
+};
+
 CtrlActionSystemCertManager.generateCert = function () {
     "use strict";
 
@@ -110,17 +121,7 @@ CtrlActionSystemCertManager.generateCert = function () {
     let parameters = $("input[name='cert-generate-parameters']").val();
     let subject = $("input[name='cert-subject']").val();
     let email = $("input[name='cert-email']").val();
-    let validity = $("input[name='cert-validity']").val();
-    try {
-        validity = parseInt(validity, 10);
-    } catch (event) {
-        dmp(event.toString());
-        validity = 0;
-    } finally {
-        if (Number.isNaN(validity)) {
-            validity = 0;
-        }
-    }
+    let validity = this.getValidity();
 
     let result = AppMain.ws().exec("CreateSelfSignCertificate", {
         "key-type": keyType,
@@ -229,7 +230,7 @@ CtrlActionSystemCertManager.remove = function (e) {
 
     const certId = $(e.target).data("cert-id");
     if (certId) {
-        const resp = AppMain.ws().exec("DeleteCertificate", {"cert-nick": certId}).getResponse();
+        const resp = AppMain.ws().exec("DeleteCertificate", {"cert-nick": certId}).getResponse(false);
         dmp(resp);
         AppMain.dialog("CERT_SUCC_REMOVED", "success", [certId]);
     }
