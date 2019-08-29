@@ -486,7 +486,7 @@ CtrlActionNetwork.highlightedNodePom = function (node) {
             source = target;
         });
     }
-}
+};
 
 CtrlActionNetwork.highlightNode = function (node) {
     "use strict";
@@ -633,15 +633,19 @@ CtrlActionNetwork.checkForExistingPathDiscover = function (shortAddObj, node) {
     }
 };
 
+CtrlActionNetwork.setupNodeTitleFromNodesData = function (node) {
+    "use strict";
+    return (CtrlActionNetwork.nodesData[node["mac-address"]] && CtrlActionNetwork.nodesData[node["mac-address"]]["meter-id"])
+        ? CtrlActionNetwork.nodesData[node["mac-address"]]["meter-id"].toString()
+        : "";
+}
+
 CtrlActionNetwork.checkForExistingData = function (nodes) {
     "use strict";
     $.each(nodes, function (ignore, node) {
         if (node["ip-address"]) {
             const shortAddObj = this.calculateNodeShortAddress(node);
-            let nodeTitle = "";
-            if (CtrlActionNetwork.nodesData[node["mac-address"]] && CtrlActionNetwork.nodesData[node["mac-address"]]["meter-id"]) {
-                nodeTitle = CtrlActionNetwork.nodesData[node["mac-address"]]["meter-id"].toString();
-            }
+            let nodeTitle = CtrlActionNetwork.setupNodeTitleFromNodesData(node);
             CtrlActionNetwork.nodesInfo[`${shortAddObj.shortAddress}`] = {
                 ipAddress: node["ip-address"],
                 macAddress: node["mac-address"],

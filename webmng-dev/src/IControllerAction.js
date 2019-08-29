@@ -258,7 +258,7 @@ module.exports.IControllerAction = function () {
 
     const isNodesResponseListOk = function (nodes) {
         return (nodes && nodes.GetNodeListResponse && Object.prototype.toString.call(nodes.GetNodeListResponse.node) === "[object Array]");
-    }
+    };
     this.getNodesObject = function (nodesCosemStat) {
         let nodes = AppMain.ws().exec("GetNodeList", {"with-data": true}).getResponse(false);
 
@@ -274,8 +274,7 @@ module.exports.IControllerAction = function () {
     const isNodesCosemStatDefined = function (nodesCosemStat) {
         return nodesCosemStat && nodesCosemStat.GetCosemDeviceStatisticResponse && nodesCosemStat.GetCosemDeviceStatisticResponse["cosem-device-statistics"];
     };
-
-    this.getNodeCosemStatistics = function () {
+    this.getNodesCosemStatByRest = function () {
         let nodesCosemStat = AppMain.wsMes().exec("CosemDeviceStatisticRequest", undefined).getResponse(false);
         if (isNodesCosemStatDefined(nodesCosemStat)) {
             nodesCosemStat = nodesCosemStat.GetCosemDeviceStatisticResponse["cosem-device-statistics"];
@@ -285,6 +284,11 @@ module.exports.IControllerAction = function () {
         } else {
             nodesCosemStat = [];
         }
+        return nodesCosemStat;
+    };
+
+    this.getNodeCosemStatistics = function () {
+        let nodesCosemStat = this.getNodesCosemStatByRest();
         let nodesObj = {};
         $.each(nodesCosemStat, function (ignore, nodeStat) {
             nodesObj[nodeStat["mac-address"].toString()] = nodeStat;

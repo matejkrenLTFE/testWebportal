@@ -12,32 +12,22 @@ let moment = require("moment");
 const build = require("../build.info");
 const download = require("./vendor/download.js");
 
-CtrlActionGroupTable.exec = function () {
+CtrlActionGroupTable.getCntr = function () {
     "use strict";
-    this.view.setTitle("GROUP_TABLE");
-
-    this.view.renderEmpty("GroupTable#ViewGroups", {
-        labels: {
-            title: AppMain.t("TITLE", "GROUP_TABLE")
-        },
-        htmlGroups: "---"
-    }, true);
-    this.devicesForDetails = [];
-
-    this.groups = this.getGroups();
-
-    const nodesCosemStat = AppMain.wsMes().exec("CosemDeviceStatisticRequest", "").getResponse(false);
-    if (nodesCosemStat && nodesCosemStat.GetCosemDeviceStatisticResponse &&
-            nodesCosemStat.GetCosemDeviceStatisticResponse["cosem-device-statistics"]) {
-        this.arrangeNodeCosemStat(nodesCosemStat.GetCosemDeviceStatisticResponse["cosem-device-statistics"]);
-    }
-
     const cntrR = AppMain.ws().exec("GetParameters", {"cntr": {}}).getResponse(false);
     let cntr = "";
     if (cntrR.GetParametersResponse && cntrR.GetParametersResponse.cntr && cntrR.GetParametersResponse.cntr["dc-push-destination-url"]) {
         cntr = cntrR.GetParametersResponse.cntr;
     }
-
+    return cntr;
+};
+CtrlActionGroupTable.exec = function () {
+    "use strict";
+    this.view.setTitle("GROUP_TABLE");
+    this.devicesForDetails = [];
+    this.groups = this.getGroups();
+    this.arrangeNodeCosemStat();
+    let cntr = this.getCntr();
     let list = this.buildGroupsListHTML(this.groups);
 
     this.view.render("GroupTable#ViewGroups", {
@@ -65,8 +55,6 @@ CtrlActionGroupTable.exec = function () {
     };
     this.initTable("groupsList", "groupsList", tableOptions);
     this.initSelectAllForGroup("selectAll");
-
-
     //Fix attached devices table width
     $(".main-canvas").addClass("main-canvas-attached-devices");
     AppMain.html.updateAllElements();
@@ -82,7 +70,7 @@ CtrlActionGroupTable.buildGroupsListHTML = function (groups) {
 
     let i = 1;
     CtrlActionGroupTable.htmlTooltips = "";
-    $.each(groups, function (index, group) {
+    $.each(groups, function (ignore, group) {
         list.htmlGroups += "<tr>";
         list.htmlGroups += "<td class='checkbox-col' style='text-align: left!important;'><input type='checkbox' name='selectGroup' " +
                 "class='selectGroup' data-group-id='" + group.id + "'> </td>";
@@ -122,7 +110,7 @@ CtrlActionGroupTable.deleteGroup = function (e) {
     const $this = $(e.target);
     let group = $this.attr("data-group-id");
 
-    $.each(this.groups, function (index, node) {
+    $.each(this.groups, function (ignore, node) {
         if (node.id === group) {
             $.confirm({
                 title: AppMain.t("DELETE_GROUP", "GROUP_TABLE"),
@@ -149,6 +137,19 @@ CtrlActionGroupTable.deleteGroup = function (e) {
     });
 };
 
+const isGroupRestResponseOk = function (response) {
+    "use strict";
+    return (response.ResponseMessage.Reply && response.ResponseMessage.Reply.Result && response.ResponseMessage.Reply.Result.toString() === "OK");
+};
+const getGroupsFromRestResponse = function (response) {
+    "use strict";
+    let groups = response.ResponseMessage.Payload.DeviceGroup.DeviceGroup;
+    if (groups.length === undefined) {
+        groups = [groups];
+    }
+    return groups;
+};
+
 CtrlActionGroupTable.deleteGroupRest = function (group) {
     "use strict";
 
@@ -169,8 +170,7 @@ CtrlActionGroupTable.deleteGroupRest = function (group) {
         }
     }).getResponse(false);
 
-    if (response && response.ResponseMessage && response.ResponseMessage.Reply && response.ResponseMessage.Reply.Result
-            && response.ResponseMessage.Reply.Result.toString() === "OK") {
+    if (response && response.ResponseMessage && isGroupRestResponseOk(response)) {
         setTimeout(function () {
             CtrlActionGroupTable.exec();
         }, 200);
@@ -193,14 +193,10 @@ CtrlActionGroupTable.getGroups = function () {
         }
     }).getResponse(false);
 
-    if (response && response.ResponseMessage && response.ResponseMessage.Reply && response.ResponseMessage.Reply.Result
-            && response.ResponseMessage.Reply.Result.toString() === "OK") {
-        let groups = response.ResponseMessage.Payload.DeviceGroup.DeviceGroup;
+    if (response && response.ResponseMessage && isGroupRestResponseOk(response)) {
+        let groups = getGroupsFromRestResponse(response);
         let rez = [];
-        if (groups.length === undefined) {
-            groups = [groups];
-        }
-        $.each(groups, function (index, group) {
+        $.each(groups, function (ignore, group) {
             rez.push({
                 id: group._GroupID
             });
@@ -208,6 +204,61 @@ CtrlActionGroupTable.getGroups = function () {
         return rez;
     }
     return [];
+};
+
+const getPrefixFromResponse = function (response) {
+    "use strict";
+    let prefix;
+    if (response.ResponseMessage.Payload.DeviceGroup.DeviceGroup._Prefix) {
+        prefix = response.ResponseMessage.Payload.DeviceGroup.DeviceGroup._Prefix;
+    } else {
+        prefix = "---";
+    }
+    return prefix;
+};
+
+const getIsMoreRowsHtml = function (isMore, devicesHtml) {
+    "use strict";
+    if (isMore) {
+        return "<td data-bind-method='CtrlActionGroupTable.showNodes' data-bind-event='click' class='cursor-pointer' " +
+                "style='text-align: left'>" + devicesHtml + "</td>";
+    }
+    return "<td style='text-align: left'>" + devicesHtml + "</td>";
+};
+const checkGroupsLength = function (groups) {
+    "use strict";
+    if (groups.length === undefined) {
+        groups = [groups];
+    }
+    return groups;
+};
+const setDevicesHtml = function (groups) {
+    let devicesHtml = "";
+    if (groups.length > 0) {
+        devicesHtml += groups[0]._DeviceID;
+    }
+    return devicesHtml;
+};
+
+CtrlActionGroupTable.displayGroupHtml = function (groups, $thisParent, prefix) {
+    "use strict";
+    if (groups) {
+        groups = checkGroupsLength(groups);
+        let isMore = false;
+        let devicesHtml = setDevicesHtml(groups);
+        if (groups.length > 1) {
+            isMore = true;
+            devicesHtml += " <i class=\"material-icons more-icon\">photo_size_select_small</i>";
+        }
+        CtrlActionGroupTable.devicesForDetails = groups;
+        let html = "<tr class='row-details'><td></td><td style='text-align: left'>" + AppMain.t("DEVICES", "GROUP_TABLE") + "</td>";
+        html += getIsMoreRowsHtml(isMore, devicesHtml);
+        html += "<td>" + AppMain.t("GROUP_PREFIX", "GROUP_TABLE") + "</td>";
+        html += "<td>" + prefix + "</td>";
+        html += "</tr>";
+        $thisParent.after(html);
+        $thisParent.attr("data-opened", 1);
+    }
 };
 
 CtrlActionGroupTable.getGroupDevices = function (e) {
@@ -243,44 +294,10 @@ CtrlActionGroupTable.getGroupDevices = function (e) {
             }
         }
     }).getResponse(false);
-
-    if (response && response.ResponseMessage && response.ResponseMessage.Reply && response.ResponseMessage.Reply.Result
-            && response.ResponseMessage.Reply.Result.toString() === "OK") {
+    if (response && response.ResponseMessage && isGroupRestResponseOk(response)) {
         let groups = response.ResponseMessage.Payload.DeviceGroup.DeviceGroup.DeviceReference;
-        let prefix;
-        if (response.ResponseMessage.Payload.DeviceGroup.DeviceGroup._Prefix) {
-            prefix = response.ResponseMessage.Payload.DeviceGroup.DeviceGroup._Prefix;
-        } else {
-            prefix = "---";
-        }
-        if (groups) {
-            if (groups.length === undefined) {
-                groups = [groups];
-            }
-
-            let isMore = false;
-            let devicesHtml = "";
-            if (groups.length > 0) {
-                devicesHtml += groups[0]._DeviceID;
-            }
-            if (groups.length > 1) {
-                isMore = true;
-                devicesHtml += " <i class=\"material-icons more-icon\">photo_size_select_small</i>";
-            }
-            CtrlActionGroupTable.devicesForDetails = groups;
-            let html = "<tr class='row-details'><td></td><td style='text-align: left'>" + AppMain.t("DEVICES", "GROUP_TABLE") + "</td>";
-            if (isMore) {
-                html += "<td data-bind-method='CtrlActionGroupTable.showNodes' data-bind-event='click' class='cursor-pointer' " +
-                        "style='text-align: left'>" + devicesHtml + "</td>";
-            } else {
-                html += "<td style='text-align: left'>" + devicesHtml + "</td>";
-            }
-            html += "<td>" + AppMain.t("GROUP_PREFIX", "GROUP_TABLE") + "</td>";
-            html += "<td>" + prefix + "</td>";
-            html += "</tr>";
-            $thisParent.after(html);
-            $thisParent.attr("data-opened", 1);
-        }
+        let prefix = getPrefixFromResponse(response);
+        CtrlActionGroupTable.displayGroupHtml(groups, $thisParent, prefix);
     }
     CtrlActionGroupTable.view.rebindElementEvents();
     return true;
@@ -325,6 +342,20 @@ CtrlActionGroupTable.showNodes = function () {
     });
 };
 
+const getSelectedGroupPrefix = function (response) {
+    "use strict";
+    if (response.ResponseMessage.Payload.DeviceGroup.DeviceGroup._Prefix) {
+        return response.ResponseMessage.Payload.DeviceGroup.DeviceGroup._Prefix;
+    }
+    return "";
+};
+const getDevicesArr = function (devices) {
+    "use strict";
+    if (devices && devices.length === undefined) {
+        return [devices];
+    }
+    return devices;
+};
 
 CtrlActionGroupTable.editGroup = function (e) {
     "use strict";
@@ -349,25 +380,80 @@ CtrlActionGroupTable.editGroup = function (e) {
         }
     }).getResponse(false);
 
-    if (response && response.ResponseMessage && response.ResponseMessage.Reply && response.ResponseMessage.Reply.Result
-            && response.ResponseMessage.Reply.Result.toString() === "OK") {
+    if (response && response.ResponseMessage && isGroupRestResponseOk(response)) {
         let devices = response.ResponseMessage.Payload.DeviceGroup.DeviceGroup.DeviceReference;
-        let selectedGroupPrefix;
-        if (response.ResponseMessage.Payload.DeviceGroup.DeviceGroup._Prefix) {
-            selectedGroupPrefix = response.ResponseMessage.Payload.DeviceGroup.DeviceGroup._Prefix;
-        } else {
-            selectedGroupPrefix = "";
-        }
-        let devArr = [];
-        if (devices && devices.length === undefined) {
-            devices = [devices];
-        }
-        $.each(devices, function (index, device) {
+        let selectedGroupPrefix = getSelectedGroupPrefix(response);
+        let devArr = getDevicesArr(devices);
+        $.each(devices, function (ignore, device) {
             devArr.push(device._DeviceID);
         });
         CtrlActionGroupTable.addGroup(selectedGroup, selectedGroupPrefix, devArr);
     }
 };
+
+const defineBasicGroupObject = function (group) {
+    let groupObj = {};
+    if (group) {
+        groupObj.isEdit = true;
+    }
+    return groupObj;
+};
+
+CtrlActionGroupTable.getAddGroupObj = function (group) {
+    "use strict";
+    let groupObj = defineBasicGroupObject(group);
+    groupObj.groupID = $("input[name='group-id']").val();
+    groupObj.prefix = $("input[name='group-prefix']").val();
+    if (!groupObj.groupID) {
+        CtrlActionGroupTable.importAlert(AppMain.t("ADD_GROUP_ERROR", "GROUP_TABLE"),
+                AppMain.t("GROUP_ID_ERROR", "GROUP_TABLE"));
+        return false;
+    }
+    groupObj.devices = [];
+    if (groupObj.prefix === "") {
+        let inputC = $("input[name='selectNode']:checked");
+        inputC.each(function (ignore, elm) {
+            const element = $(elm);
+            groupObj.devices.push(element.attr("data-node-title"));
+        });
+    }
+    if (groupObj.devices.length === 0 && groupObj.prefix === "") {
+        CtrlActionGroupTable.importAlert(AppMain.t("ADD_GROUP_ERROR", "GROUP_TABLE"),
+                AppMain.t("DEVICES_SELECT_ERROR", "GROUP_TABLE"));
+        return false;
+    }
+    return groupObj;
+};
+
+CtrlActionGroupTable.addGroupExistingGroupDevicesHtml = function (devices) {
+    "use strict";
+    let allHtml = "";
+    if (this.nodesTitle && this.nodesTitle.length > 0) {
+        $.each(this.nodesTitle, function (ignore, title) {
+            if (title.toString() !== "[object Object]") {
+                allHtml += "<tr>";
+                if (devices && devices.indexOf(title.toString()) !== -1) {
+                    const ind = devices.indexOf(title.toString());
+                    devices.splice(ind, 1);
+                    allHtml += "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + title + "' checked/></td>";
+                } else {
+                    allHtml += "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + title + "'/></td>";
+                }
+                allHtml += "<td>" + title + "</td>" + "</tr>";
+            }
+
+        });
+    }
+    if (devices && devices.length > 0) {
+        $.each(devices, function (ignore, title) {
+            allHtml += "<tr>";
+            allHtml += "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + title + "' checked/></td>";
+            allHtml += "<td>" + title + "</td>" + "</tr>";
+        });
+    }
+    return allHtml;
+};
+
 CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
     "use strict";
 
@@ -419,29 +505,7 @@ CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
             "</tr>" +
             "</thead><tbody>";
 
-    if (this.nodesTitle && this.nodesTitle.length > 0) {
-        $.each(this.nodesTitle, function (index, title) {
-            if (title.toString() !== "[object Object]") {
-                allHtml += "<tr>";
-                if (devices && devices.indexOf(title.toString()) !== -1) {
-                    const ind = devices.indexOf(title.toString());
-                    devices.splice(ind, 1);
-                    allHtml += "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + title + "' checked/></td>";
-                } else {
-                    allHtml += "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + title + "'/></td>";
-                }
-                allHtml += "<td>" + title + "</td>" + "</tr>";
-            }
-
-        });
-    }
-    if (devices && devices.length > 0) {
-        $.each(devices, function (index, title) {
-            allHtml += "<tr>";
-            allHtml += "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + title + "' checked/></td>";
-            allHtml += "<td>" + title + "</td>" + "</tr>";
-        });
-    }
+    allHtml += CtrlActionGroupTable.addGroupExistingGroupDevicesHtml(devices);
     allHtml += "</tbody></table>";
 
     $.confirm({
@@ -458,57 +522,20 @@ CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
                     ? AppMain.t("OK", "global")
                     : AppMain.t("CREATE", "global"),
                 action: function () {
-                    let groupObj = {};
-                    if (group) {
-                        groupObj.isEdit = true;
-                    }
-                    groupObj.groupID = $("input[name='group-id']").val();
-                    groupObj.prefix = $("input[name='group-prefix']").val();
-                    if (!groupObj.groupID) {
-                        CtrlActionGroupTable.importAlert(AppMain.t("ADD_GROUP_ERROR", "GROUP_TABLE"),
-                                AppMain.t("GROUP_ID_ERROR", "GROUP_TABLE"));
-                        return false;
-                    }
-                    groupObj.devices = [];
-                    let inputC = $("input[name='selectNode']:checked");
-                    inputC.each(function (i, elm) {
-                        const element = $(elm);
-                        groupObj.devices.push(element.attr("data-node-title"));
-                    });
-                    if (groupObj.devices.length === 0 && groupObj.prefix === "") {
-                        CtrlActionGroupTable.importAlert(AppMain.t("ADD_GROUP_ERROR", "GROUP_TABLE"),
-                                AppMain.t("DEVICES_SELECT_ERROR", "GROUP_TABLE"));
+                    let groupObj = CtrlActionGroupTable.getAddGroupObj(group);
+                    if (!groupObj) {
                         return false;
                     }
                     CtrlActionGroupTable.addGroupRest(groupObj);
+                    return true;
                 }
             },
             createXML: {
                 text: AppMain.t("CREATE_TO_FILE", "global"),
                 isHidden: group,
                 action: function () {
-                    let groupObj = {};
-                    if (group) {
-                        groupObj.isEdit = true;
-                    }
-                    groupObj.groupID = $("input[name='group-id']").val();
-                    groupObj.prefix = $("input[name='group-prefix']").val();
-                    if (!groupObj.groupID) {
-                        CtrlActionGroupTable.importAlert(AppMain.t("ADD_GROUP_ERROR", "GROUP_TABLE"),
-                                AppMain.t("GROUP_ID_ERROR", "GROUP_TABLE"));
-                        return false;
-                    }
-                    groupObj.devices = [];
-                    if (groupObj.prefix === "") {
-                        let inputC = $("input[name='selectNode']:checked");
-                        inputC.each(function (i, elm) {
-                            const element = $(elm);
-                            groupObj.devices.push(element.attr("data-node-title"));
-                        });
-                    }
-                    if (groupObj.devices.length === 0 && groupObj.prefix === "") {
-                        CtrlActionGroupTable.importAlert(AppMain.t("ADD_GROUP_ERROR", "GROUP_TABLE"),
-                                AppMain.t("DEVICES_SELECT_ERROR", "GROUP_TABLE"));
+                    let groupObj = CtrlActionGroupTable.getAddGroupObj(group);
+                    if (!groupObj) {
                         return false;
                     }
                     CtrlActionGroupTable.addGroupXML(groupObj);
@@ -558,6 +585,21 @@ CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
             return false;
         });
 
+        const setHeader = function (allTextLines) {
+            let header = allTextLines[0];
+            if (allTextLines[0] === "SEP=,") { //second line is header line
+                header = allTextLines[1];
+            }
+            return header;
+        };
+        const setStartIndex = function (allTextLines) {
+            let startInd = 1;
+            if (allTextLines[0] === "SEP=,") { //second line is header line
+                startInd = 2;
+            }
+            return startInd;
+        };
+
         const inputElement = document.getElementById("file");
         inputElement.addEventListener("change", function () {
             const uploadElement = this;
@@ -565,7 +607,6 @@ CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
             const reader = new FileReader();
 
             reader.onload = function (e) {
-
                 const csv = e.target.result;
                 if (!csv.includes("\r\n") && !csv.includes("\n")) {
                     CtrlActionGroupTable.importAlert(AppMain.t("IMPORT_ERR_TITLE_TXT", "GROUP_TABLE"),
@@ -574,12 +615,8 @@ CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
                 }
                 const allTextLines = csv.split(/\r\n|\n/);
 
-                let header = allTextLines[0];
-                let startInd = 1;
-                if (allTextLines[0] === "SEP=,") { //second line is header line
-                    header = allTextLines[1];
-                    startInd = 2;
-                }
+                let header = setHeader(allTextLines);
+                let startInd = setStartIndex(allTextLines);
                 if (!header.includes(",")) {
                     CtrlActionGroupTable.importAlert(AppMain.t("IMPORT_ERR_TITLE_TXT", "GROUP_TABLE"),
                             AppMain.t("IMPORT_CSV_ERROR", "GROUP_TABLE"));
@@ -592,7 +629,7 @@ CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
                     CtrlActionGroupTable.importAlert(AppMain.t("IMPORT_ERR_TITLE_TXT", "GROUP_TABLE"),
                             AppMain.t("IMPORT_ERROR", "GROUP_TABLE"));
                 }
-                allTextLines.forEach(function (value, index) {
+                allTextLines.forEach(function (ignore, index) {
                     if (index >= startInd) {
                         const line = allTextLines[`${index}`];
                         if (line !== "") {
@@ -616,7 +653,7 @@ CtrlActionGroupTable.getRestJson = function (groupObj) {
     "use strict";
 
     let devicesArr = [];
-    $.each(groupObj.devices, function (i, elm) {
+    $.each(groupObj.devices, function (ignore, elm) {
         devicesArr.push({
             "_DeviceID": elm
         });
@@ -661,8 +698,7 @@ CtrlActionGroupTable.addGroupRest = function (groupObj) {
 
     let response = AppMain.wsMes().exec("RequestMessage", obj).getResponse(false);
 
-    if (response && response.ResponseMessage && response.ResponseMessage.Reply && response.ResponseMessage.Reply.Result
-            && response.ResponseMessage.Reply.Result.toString() === "OK") {
+    if (response && response.ResponseMessage && isGroupRestResponseOk(response)) {
         if (groupObj.isEdit) {
             AppMain.dialog("GROUP_UPDATED", "success");
         } else {
@@ -697,7 +733,7 @@ CtrlActionGroupTable.export = function () {
         csv += "\"" + AppMain.t("GROUP_ID", "GROUP_TABLE") + "\",";
         csv += "\r\n";
 
-        inputC.each(function (i, elm) {
+        inputC.each(function (ignore, elm) {
             const element = $(elm);
             if (element.hasClass("selectGroup")) {
                 isNotSelected = false;
@@ -717,19 +753,17 @@ CtrlActionGroupTable.export = function () {
     download("data:text/csv;charset=utf-8;base64," + btoa(csv), build.device + "_GroupsTable_" + moment().format("YYYY-MM-DD-HH-mm-ss") + ".csv", "text/csv");
 };
 
-CtrlActionGroupTable.arrangeNodeCosemStat = function (nodesCosemStat) {
+CtrlActionGroupTable.arrangeNodeCosemStat = function () {
     "use strict";
+    const nodesCosemStat = this.getNodesCosemStatByRest();
 
     this.nodesTitleObj = {};
     let nodesTitle = [];
-    if (nodesCosemStat.length === undefined) {
-        nodesCosemStat = [nodesCosemStat];
-    }
-    $.each(nodesCosemStat, function (index, nodeStat) {
+    $.each(nodesCosemStat, function (ignore, nodeStat) {
         nodesTitle.push(nodeStat["meter-id"]);
     });
     if (nodesTitle.length > 0) {
-        $.each(nodesTitle, function (index, title) {
+        $.each(nodesTitle, function (ignore, title) {
             CtrlActionGroupTable.nodesTitleObj[`${title}`] = title;
         });
     }
@@ -854,8 +888,7 @@ CtrlActionGroupTable.addResourceXMLRest = function (resourceTXT) {
 
     let response = AppMain.wsMes().exec("RequestMessage", resourceTXT).getResponse(false);
 
-    if (response && response.ResponseMessage && response.ResponseMessage.Reply && response.ResponseMessage.Reply.Result
-            && response.ResponseMessage.Reply.Result.toString() === "OK") {
+    if (response && response.ResponseMessage && isGroupRestResponseOk(response)) {
         CtrlActionGroupTable.exec();
         AppMain.dialog("GROUP_CREATED", "success", [response.ResponseMessage.Reply.ID.toString()]);
     }
