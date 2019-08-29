@@ -12,7 +12,6 @@ let CtrlActionLogin = Object.create(new modulecontrolleraction.IControllerAction
 CtrlActionLogin.exec = function () {
     "use strict";
     this.view.setTitle("Login");
-    //this.view.renderSectionStatic("Default#LoginForm", "#SectionLoginForm");
     dmp("Called: CtrlActionLogin.exec");
 
     this.view.render(this.controller.action, {
@@ -28,31 +27,36 @@ CtrlActionLogin.exec = function () {
     $("#LoginForm").prop("action", AppMain.getUrl("app") + "/index.html");
 };
 
+CtrlActionLogin.loginCertificate = function () {
+    "use strict";
+
+    AppMain.dialog("CHECKING_CERTIFICATE", undefined);
+    // Fetch user data from certificate
+    let userData = AppMain.ws().exec("GetUserData", {
+        "operation": "CERTIFICATE"
+    }).getResponse(false);
+
+    if (defined(userData.GetUserDataResponse) && defined(userData.GetUserDataResponse.user) && defined(userData.GetUserDataResponse.role)) {
+        let user = userData.GetUserDataResponse.user;
+        user.role = "";
+        user["access-level"] = userData.GetUserDataResponse.role["access-level"];
+        dmp("USER_DATA");
+        dmp(userData);
+        CtrlActionLogin.controller.userLogin(user);
+    } else {
+        AppMain.dialog("CERT_AUTH_FAILED", "error");
+    }
+};
+
 CtrlActionLogin.onBeforeExecute = function () {
     "use strict";
     // Redirect logged-in user back to Dashboard
     if (AppMain.user.loggedIn()) {
         AppMain.user.logout();
-        // setTimeout(function() { AppMain.redirect("#Default"); }, 2000);
     }
 
     if (AppMain.getConfigParams("authType") === AppMain.AUTH_TYPE_CERT) {
-        AppMain.dialog("CHECKING_CERTIFICATE");
-        // Fetch user data from certificate
-        let userData = AppMain.ws().exec("GetUserData", {
-            "operation": "CERTIFICATE"
-        }).getResponse(false);
-
-        if (defined(userData.GetUserDataResponse) && defined(userData.GetUserDataResponse.user) && defined(userData.GetUserDataResponse.role)) {
-            let user = userData.GetUserDataResponse.user;
-            user.role = "";
-            user["access-level"] = userData.GetUserDataResponse.role["access-level"];
-            dmp("USER_DATA");
-            dmp(userData);
-            CtrlActionLogin.controller.userLogin(user);
-        } else {
-            AppMain.dialog("CERT_AUTH_FAILED", "error");
-        }
+        CtrlActionLogin.loginCertificate();
     } else {
         $("#LoginFormFields").show();
     }
