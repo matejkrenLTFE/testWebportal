@@ -872,26 +872,6 @@ CtrlActionGroupTable.addResourceXMLRest = function (resourceTXT) {
     return true;
 };
 
-CtrlActionGroupTable.importAlert = function (title, content) {
-    "use strict";
-
-    $.alert({
-        useBootstrap: false,
-        theme: "material",
-        title: title,
-        content: content,
-        buttons: {
-            confirm: {
-                text: AppMain.t("OK", "global")
-            }
-        }
-    });
-    $("#file").val("");
-    $(".select-file").show();
-    $("#file-name").html("");
-    $(".file-selected").hide();
-};
-
 CtrlActionGroupTable.setParams = function () {
     "use strict";
 

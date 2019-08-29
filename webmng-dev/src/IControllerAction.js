@@ -231,4 +231,28 @@ module.exports.IControllerAction = function () {
             });
         }, 100);
     };
+
+
+    /**
+     * helper for alert pop-up
+     * @param title
+     * @param content
+     */
+    this.importAlert = function (title, content) {
+        $.alert({
+            useBootstrap: false,
+            theme: "material",
+            title: title,
+            content: content,
+            buttons: {
+                confirm: {
+                    text: AppMain.t("OK", "global")
+                }
+            }
+        });
+        $("#file").val("");
+        $(".select-file").show();
+        $("#file-name").html("");
+        $(".file-selected").hide();
+    };
 };

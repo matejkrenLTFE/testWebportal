@@ -37,6 +37,11 @@ CtrlActionSystemUsers.exec = function () {
     AppMain.html.updateElements([".mdl-tooltip"]);
 };
 
+const isImportantUser = function (user) {
+    "use strict";
+    return (user.username !== "admin" && user.username !== "user" && user.username !== "main");
+};
+
 /**
  * helper for create table html
  * @param users
@@ -57,10 +62,9 @@ CtrlActionSystemUsers.htmlUserList = function (users) {
         all.html += "<tr>";
         all.html += "<td  style=\"text-align:left\">" + user.username + "</td>";
         all.html += "<td  style=\"text-align:left\">" + user["user-role-name"] + "</td>";
-
         all.html += "<td><span data-rbac=\"users.actions\">";
 
-        if (user.username !== "admin" && user.username !== "user" && user.username !== "main") {
+        if (isImportantUser(user)) {
             all.html += "<i class=\"material-icons cursor-pointer\" id=\"delete_" + i + "\" data-rbac=\"users.button-remove-user\" data-username='" + user.username + "' " +
                     "data-bind-method=\"CtrlActionSystemUsers.removeUser\" data-bind-event=\"click\">clear</i>";
         }
@@ -68,16 +72,66 @@ CtrlActionSystemUsers.htmlUserList = function (users) {
         all.html += "<i class=\"material-icons cursor-pointer\" id=\"change_" + i + "\" data-rbac=\"users.button-change-password\" " +
                 "data-username=\"" + user.username + "\" " + " data-user-role=\"" + user["user-role-name"] + "\" " +
                 "data-bind-method=\"CtrlActionSystemUsers.editUser\" data-bind-event=\"click\">lock" + "</i>";
-
         all.html += "</span></td>";
-
         all.tooltips += "<div class=\"mdl-tooltip\" data-mdl-for=\"change_" + i + "\">" + AppMain.t("CHANGE_PASS", "SYS_USER_MNG") + "</div>";
-        if (user.username !== "admin" && user.username !== "user" && user.username !== "main") {
+        if (isImportantUser(user)) {
             all.tooltips += "<div class=\"mdl-tooltip\" data-mdl-for=\"delete_" + i + "\">" + AppMain.t("REMOVE", "global") + "</div>";
         }
         all.html += "</tr>";
     });
     return all;
+};
+
+const getHtmlForPassParams = function (allHtml, pass1Html, pass2Html, passOldHtml, username) {
+    "use strict";
+    allHtml += AppMain.t("INSERT_PASS_PARAMS", "SYS_USER_MNG", [username]) + "</br>" +
+            "<table class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">";
+    if (this.loggedUser["user-role-name"] === "admin") {
+        allHtml += pass1Html + pass2Html;
+    } else {
+        allHtml += passOldHtml + pass1Html + pass2Html;
+    }
+    return allHtml;
+};
+
+
+CtrlActionSystemUsers.checkImputedUser = function (user) {
+    "use strict";
+    if (user.username === "") {
+        CtrlActionSystemUsers.importAlert(AppMain.t("ADD_NEW_USER_ERROR", "SYS_USER_MNG"),
+                AppMain.t("USERNAME_ERROR", "SYS_USER_MNG"));
+        return false;
+    }
+    if (user.password === "") {
+        CtrlActionSystemUsers.importAlert(AppMain.t("ADD_NEW_USER_ERROR", "SYS_USER_MNG"),
+                AppMain.t("USER_NO_PASSWORD", "global"));
+        return false;
+    }
+    if (user.password !== user.passwordRepeat) {
+        CtrlActionSystemUsers.importAlert(AppMain.t("ADD_NEW_USER_ERROR", "SYS_USER_MNG"),
+                AppMain.t("PASSWORD_ERROR", "SYS_USER_MNG"));
+        return false;
+    }
+    return true;
+};
+
+CtrlActionSystemUsers.checkImputedUserNotEvent = function (user, username) {
+    "use strict";
+    user.username = username;
+    user.oldPassword = $("input[name='password-old']").val();
+    user.password = $("input[name='password']").val();
+    if (user.password === "") {
+        CtrlActionSystemUsers.importAlert(AppMain.t("PASSWORD_TITLE_ERROR", "SYS_USER_MNG"),
+                AppMain.t("USER_NO_PASSWORD", "global"));
+        return false;
+    }
+    user.passwordRepeat = $("input[name='password-repeat']").val();
+    if (user.password !== user.passwordRepeat) {
+        CtrlActionSystemUsers.importAlert(AppMain.t("PASSWORD_TITLE_ERROR", "SYS_USER_MNG"),
+                AppMain.t("PASSWORD_ERROR", "SYS_USER_MNG"));
+        return false;
+    }
+    return CtrlActionSystemUsers.saveUser("change", user);
 };
 
 /**
@@ -121,13 +175,7 @@ CtrlActionSystemUsers.addNewUser = function (username) {
                 "<table class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">";
         allHtml += usernameHtml + pass1Html + pass2Html + roleHtml;
     } else {
-        allHtml += AppMain.t("INSERT_PASS_PARAMS", "SYS_USER_MNG", [username]) + "</br>" +
-                "<table class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">";
-        if (this.loggedUser["user-role-name"] === "admin") {
-            allHtml += pass1Html + pass2Html;
-        } else {
-            allHtml += passOldHtml + pass1Html + pass2Html;
-        }
+        getHtmlForPassParams(allHtml, pass1Html, pass2Html, passOldHtml, username);
     }
 
     allHtml += "</table><br/><br/>";
@@ -148,41 +196,15 @@ CtrlActionSystemUsers.addNewUser = function (username) {
                     let user = {};
                     if (username.event) {
                         user.username = $("input[name='username']").val();
-                        if (user.username === "") {
-                            CtrlActionSystemUsers.importAlert(AppMain.t("ADD_NEW_USER_ERROR", "SYS_USER_MNG"),
-                                    AppMain.t("USERNAME_ERROR", "SYS_USER_MNG"));
-                            return false;
-                        }
                         user.password = $("input[name='password']").val();
-                        if (user.password === "") {
-                            CtrlActionSystemUsers.importAlert(AppMain.t("ADD_NEW_USER_ERROR", "SYS_USER_MNG"),
-                                    AppMain.t("USER_NO_PASSWORD", "global"));
-                            return false;
-                        }
                         user.passwordRepeat = $("input[name='password-repeat']").val();
-                        if (user.password !== user.passwordRepeat) {
-                            CtrlActionSystemUsers.importAlert(AppMain.t("ADD_NEW_USER_ERROR", "SYS_USER_MNG"),
-                                    AppMain.t("PASSWORD_ERROR", "SYS_USER_MNG"));
+                        user.role = $("#role-select").val();
+                        if (!CtrlActionSystemUsers.checkImputedUser(user)) {
                             return false;
                         }
-                        user.role = $("#role-select").val();
                         return CtrlActionSystemUsers.saveUser("add", user);
                     }
-                    user.username = username;
-                    user.oldPassword = $("input[name='password-old']").val();
-                    user.password = $("input[name='password']").val();
-                    if (user.password === "") {
-                        CtrlActionSystemUsers.importAlert(AppMain.t("PASSWORD_TITLE_ERROR", "SYS_USER_MNG"),
-                                AppMain.t("USER_NO_PASSWORD", "global"));
-                        return false;
-                    }
-                    user.passwordRepeat = $("input[name='password-repeat']").val();
-                    if (user.password !== user.passwordRepeat) {
-                        CtrlActionSystemUsers.importAlert(AppMain.t("PASSWORD_TITLE_ERROR", "SYS_USER_MNG"),
-                                AppMain.t("PASSWORD_ERROR", "SYS_USER_MNG"));
-                        return false;
-                    }
-                    return CtrlActionSystemUsers.saveUser("change", user);
+                    CtrlActionSystemUsers.checkImputedUserNotEvent(user, username);
                 }
             },
             cancel: {
@@ -228,31 +250,6 @@ CtrlActionSystemUsers.editUser = function (e) {
     } else {
         this.addNewUser(username);
     }
-};
-
-/**
- * helper for alert pop-up
- * @param title
- * @param content
- */
-CtrlActionSystemUsers.importAlert = function (title, content) {
-    "use strict";
-
-    $.alert({
-        useBootstrap: false,
-        theme: "material",
-        title: title,
-        content: content,
-        buttons: {
-            confirm: {
-                text: AppMain.t("OK", "global")
-            }
-        }
-    });
-    $("#file").val("");
-    $(".select-file").show();
-    $("#file-name").html("");
-    $(".file-selected").hide();
 };
 
 /**
@@ -322,6 +319,45 @@ CtrlActionSystemUsers.remove = function (username) {
     this.exec();
 };
 
+CtrlActionSystemUsers.saveAddUser = function (user) {
+    "use strict";
+    let response = AppMain.ws().exec("SetUserData", {
+        operation: CtrlActionSystemUsers.operations.addUser,
+        username: user.username,
+        password: user.password,
+        "user-role-name": user.role
+    }).getResponse(false);
+
+    if (defined(response.SetUserDataResponse) && response.SetUserDataResponse.toString() === "OK") {
+        AppMain.dialog("SUCC_USER_CREATED", "success");
+    } else {
+        AppMain.dialog("ERR_USER_CREATED", "error");
+    }
+    this.exec();
+};
+CtrlActionSystemUsers.saveChangeUser = function (user) {
+    "use strict";
+    let response = AppMain.ws().exec("SetUserData", {
+        operation: CtrlActionSystemUsers.operations.changePassword,
+        "old-password": user.oldPassword,
+        username: user.username,
+        password: user.password
+    }).getResponse(false);
+
+    if (defined(response.SetUserDataResponse) && response.SetUserDataResponse.toString() === "OK") {
+        AppMain.dialog("SUCC_USER_PASSWORD", "success");
+        if (AppMain.user.getUserData("username") === user.username) {
+            AppMain.dialog("USER_REAUTH", "warning");
+            window.setTimeout(function () {
+                AppMain.user.logout();
+            }, 2000);
+        }
+    } else {
+        AppMain.dialog("ERR_USER_PASSWORD", "error");
+    }
+    this.exec();
+};
+
 /**
  * save user rest
  * @param type
@@ -331,43 +367,11 @@ CtrlActionSystemUsers.remove = function (username) {
 CtrlActionSystemUsers.saveUser = function (type, user) {
     "use strict";
 
-    let response;
-    switch (type) {
-    case "add":
-        response = AppMain.ws().exec("SetUserData", {
-            operation: CtrlActionSystemUsers.operations.addUser,
-            username: user.username,
-            password: user.password,
-            "user-role-name": user.role
-        }).getResponse(false);
-
-        if (defined(response.SetUserDataResponse) && response.SetUserDataResponse.toString() === "OK") {
-            AppMain.dialog("SUCC_USER_CREATED", "success");
-        } else {
-            AppMain.dialog("ERR_USER_CREATED", "error");
-        }
-        this.exec();
-        break;
-    case "change":
-        response = AppMain.ws().exec("SetUserData", {
-            operation: CtrlActionSystemUsers.operations.changePassword,
-            "old-password": user.oldPassword,
-            username: user.username,
-            password: user.password
-        }).getResponse(false);
-
-        if (defined(response.SetUserDataResponse) && response.SetUserDataResponse.toString() === "OK") {
-            AppMain.dialog("SUCC_USER_PASSWORD", "success");
-            if (AppMain.user.getUserData("username") === user.username) {
-                AppMain.dialog("USER_REAUTH", "warning");
-                window.setTimeout(function () {
-                    AppMain.user.logout();
-                }, 2000);
-            }
-        } else {
-            AppMain.dialog("ERR_USER_PASSWORD", "error");
-        }
-        break;
+    if (type === "add") {
+        CtrlActionSystemUsers.saveAddUser(user);
+    }
+    if (type === "change") {
+        CtrlActionSystemUsers.saveChangeUser(user);
     }
 };
 
