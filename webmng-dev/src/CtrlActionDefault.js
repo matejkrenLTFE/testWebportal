@@ -24,16 +24,7 @@ CtrlActionDefault.exec = function () {
     // Get infos
     const info = AppMain.ws().exec("GetInfos", undefined).getResponse(false);
 
-    // Prepare params
-    $.each(info.GetInfosResponse.info, function (i, obj) {
-        if (generalInfo[obj.category] !== undefined) {
-            generalInfo[obj.category][obj.name] = (!obj.value)
-                ? "---"
-                : obj.value;
-        }
-    });
-
-    generalInfo.system.DateTime = moment(generalInfo.system.DateTime).format(AppMain.localization("DATETIME_FORMAT"));
+    generalInfo = this.prepareGeneralInfoParams(generalInfo, info);
     if (defined(generalInfo.system.Uptime)) {
         generalInfo.system.Uptime = generalInfo.system.Uptime.split(",");
         generalInfo.system.Uptime = defined(generalInfo.system.Uptime[0])

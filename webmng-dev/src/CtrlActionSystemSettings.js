@@ -9,7 +9,38 @@
 
 const modulecontrolleraction = require("./IControllerAction");
 const CtrlActionSystemSettings = Object.create(new modulecontrolleraction.IControllerAction());
-const moment = require("moment");
+
+CtrlActionSystemSettings.getTimezoneObj = function () {
+    "use strict";
+
+    let timezones = AppMain.ws().exec("TimeZoneListGet", undefined).getResponse(false);
+    if (timezones && timezones.TimeZoneListResponse) {
+        timezones = timezones.TimeZoneListResponse.value;
+    } else {
+        timezones = {};
+    }
+    let timezoneObj = {};
+    $.each(timezones, function (ignore, timezone) {
+        timezoneObj[`${timezone}`] = timezone;
+    });
+    return timezoneObj;
+};
+
+CtrlActionSystemSettings.getParams = function () {
+    "use strict";
+
+    let params = AppMain.ws().exec("GetParameters", {"dcmng": "", "iloc": "", "cntr": ""}).getResponse(false);
+    return defined(params.GetParametersResponse)
+        ? params.GetParametersResponse
+        : { //default values
+            dcmng: {
+                "sys-time-zone": "",
+                "ntp-sync-interval": ""
+            },
+            iloc: {},
+            cntr: {}
+        };
+};
 
 CtrlActionSystemSettings.exec = function () {
     "use strict";
@@ -20,31 +51,10 @@ CtrlActionSystemSettings.exec = function () {
     let generalInfo = {
         system: {}
     };
+    generalInfo = this.prepareGeneralInfoParams(generalInfo, info);
 
-    $.each(info.GetInfosResponse.info, function (i, obj) {
-        if (generalInfo[obj.category] !== undefined) {
-            generalInfo[obj.category][obj.name] = (!obj.value)
-                ? "---"
-                : obj.value;
-        }
-    });
-    generalInfo.system.DateTime = moment(generalInfo.system.DateTime).format(AppMain.localization("DATETIME_FORMAT"));
-
-    let params = AppMain.ws().exec("GetParameters", {"dcmng": "", "iloc": "", "cntr": ""}).getResponse(false);
-    params = defined(params.GetParametersResponse)
-        ? params.GetParametersResponse
-        : {};
-
-    let timezones = AppMain.ws().exec("TimeZoneListGet", undefined).getResponse(false);
-    if (timezones && timezones.TimeZoneListResponse) {
-        timezones = timezones.TimeZoneListResponse.value;
-    } else {
-        timezones = {};
-    }
-    let timezoneObj = {};
-    $.each(timezones, function (index, timezone) {
-        timezoneObj[`${timezone}`] = timezone;
-    });
+    let params = this.getParams();
+    let timezoneObj = this.getTimezoneObj();
 
     let intervalOpt = {
         "60": AppMain.t("HOUR1", "SYS_SETTINGS"),
@@ -54,11 +64,11 @@ CtrlActionSystemSettings.exec = function () {
         "1440": AppMain.t("HOUR24", "SYS_SETTINGS"),
         "8640": AppMain.t("HOUR144", "SYS_SETTINGS")
     };
-    if (defined(params.dcmng)) {
-        if (!defined(intervalOpt[params.dcmng["ntp-sync-interval"]])) {
-            intervalOpt[params.dcmng["ntp-sync-interval"]] = params.dcmng["ntp-sync-interval"] + " " + AppMain.t("MINUTES", "global");
-        }
+    if (!defined(intervalOpt[params.dcmng["ntp-sync-interval"]])) {
+        intervalOpt[params.dcmng["ntp-sync-interval"]] = params.dcmng["ntp-sync-interval"] + " " + AppMain.t("MINUTES", "global");
     }
+
+    let syncIntervalEnabled = defined(params.dcmng) && params.dcmng["ntp-sync-interval"] === "0";
 
     this.view.render(this.controller.action, {
         title: AppMain.t("SETTINGS", "SYS_SETTINGS"),
@@ -67,19 +77,15 @@ CtrlActionSystemSettings.exec = function () {
         elements: {
             selectTimezone: AppMain.html.formElementSelect("dcmng_sys-time-zone", timezoneObj, {
                 label: "",
-                elementSelected: defined(params.dcmng)
-                    ? params.dcmng["sys-time-zone"]
-                    : ""
+                elementSelected: params.dcmng["sys-time-zone"]
             }, undefined, "textfield-short-145 text-align-right"),
             syncInterval: AppMain.html.formElementSelect("dcmng_ntp-sync-interval", intervalOpt, {
                 label: AppMain.t("SELECT_INTERVAL", "SYS_SETTINGS"),
-                elementSelected: defined(params.dcmng)
-                    ? params.dcmng["ntp-sync-interval"]
-                    : "",
+                elementSelected: params.dcmng["ntp-sync-interval"],
                 elementAttr: "data-rbac-element=\"settings.ntp-sync-interval\""
             }, undefined, "textfield-short-145 text-align-right"),
             enableSyncInterval: AppMain.html.formElementSwitch("enable", "true", {
-                checked: !(defined(params.dcmng) && params.dcmng["ntp-sync-interval"] === "0"),
+                checked: !syncIntervalEnabled,
                 labelClass: "switchEnable",
                 inputAttr: {
                     "data-bind-event": "click",
@@ -88,15 +94,9 @@ CtrlActionSystemSettings.exec = function () {
                 }
             }, undefined, "textfield-short-145 text-align-right")
         },
-        paramsDcmng: defined(params.dcmng)
-            ? params.dcmng
-            : {},
-        paramsIloc: defined(params.iloc)
-            ? params.iloc
-            : {},
-        cntr: defined(params.cntr)
-            ? params.cntr
-            : {},
+        paramsDcmng: params.dcmng,
+        paramsIloc: params.iloc,
+        cntr: params.cntr,
         params: {
             dateTime: generalInfo.system.DateTime
         },
@@ -119,7 +119,7 @@ CtrlActionSystemSettings.exec = function () {
             pushTimeout: AppMain.t("PUSH_TIMEOUT", "SYS_SETTINGS")
         }
     });
-    this.enableSyncInterval(defined(params.dcmng) && params.dcmng["ntp-sync-interval"] === "0");
+    this.enableSyncInterval(syncIntervalEnabled);
     AppMain.html.updateElements([".mdl-button", ".mdl-select"]);
 };
 

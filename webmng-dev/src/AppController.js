@@ -12,6 +12,7 @@
 const modulewebservice = require("./AppWebserviceClient");
 const X2JS = require("xml-json-parser");
 const Json2Xml = new X2JS();
+const moment = require("moment");
 
 /**
  * Application controller component.
@@ -300,5 +301,18 @@ module.exports.AppController = function () {
 
     this.getRequestParam = function (name) {
         return localStorage.getItem(name);
+    };
+
+    this.prepareGeneralInfoParams = function (generalInfo, info) {
+        // Prepare params
+        $.each(info.GetInfosResponse.info, function (ignore, obj) {
+            if (generalInfo[obj.category] !== undefined) {
+                generalInfo[obj.category][obj.name] = (!obj.value)
+                    ? "---"
+                    : obj.value;
+            }
+        });
+        generalInfo.system.DateTime = moment(generalInfo.system.DateTime).format(AppMain.localization("DATETIME_FORMAT"));
+        return generalInfo;
     };
 };
