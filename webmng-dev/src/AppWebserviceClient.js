@@ -268,6 +268,23 @@ module.exports.AppWebserviceClient = function () {
         return vkbeautify.xml(Json2Xml.json2xml_str(params), 2);
     };
 
+    const updateCacheLastMethod = function () {
+        if (!defined(_cache[`${_lastMethodExec}`])) {
+            _cache[`${_lastMethodExec}`] = null;
+        }
+    };
+
+    this.processResponse = function () {
+        const jsonResponse = Xml2Json.xml2json(this.lastResponsePom);
+        if (jsonResponse.Envelope.Body === undefined) {
+            throw "SOAP response error or SOAP envelope has no body.";
+        }
+
+        AppMain.log(jsonResponse.Envelope.Body);
+        _cache[`${_lastMethodExec}`] = jsonResponse.Envelope.Body;
+        return jsonResponse.Envelope.Body;
+    };
+
     /**
      * Get WS last response. Call this after AppWS.exec() was executed.
      * @param {Boolean} rawResp If true raw XML is returned instead of JSON object.
@@ -275,9 +292,7 @@ module.exports.AppWebserviceClient = function () {
      */
     this.getResponse = function (rawResp) {
         // Create method response cache
-        if (!defined(_cache[`${_lastMethodExec}`])) {
-            _cache[`${_lastMethodExec}`] = null;
-        }
+        updateCacheLastMethod();
         dmp("Executed method: " + _lastMethodExec);
 
         const rawResponse = (rawResp !== undefined && rawResp === true);
@@ -286,14 +301,7 @@ module.exports.AppWebserviceClient = function () {
             return this.lastResponsePom;
         }
         if (this.lastResponsePom !== null) {
-            const jsonResponse = Xml2Json.xml2json(this.lastResponsePom);
-            if (jsonResponse.Envelope.Body === undefined) {
-                throw "SOAP response error or SOAP envelope has no body.";
-            }
-
-            AppMain.log(jsonResponse.Envelope.Body);
-            _cache[`${_lastMethodExec}`] = jsonResponse.Envelope.Body;
-            return jsonResponse.Envelope.Body;
+            return this.processResponse();
         }
     };
 

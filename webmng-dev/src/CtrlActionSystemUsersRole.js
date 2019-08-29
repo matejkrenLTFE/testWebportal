@@ -76,23 +76,38 @@ CtrlActionSystemUsersRole.exec = function () {
     AppMain.html.updateElements([".mdl-js-select", ".mdl-textfield__input", ".mdl-radio"]);
 };
 
-CtrlActionSystemUsersRole.changeMode = function (mode) {
+const updateMode = function (mode) {
     "use strict";
-
     if (mode === undefined || mode.target !== undefined) {
         mode.target.MaterialRadio.check();
         mode = $("#SystemUsersRoleForm input[name=\"mode\"]:checked").val();
     }
+    return mode;
+};
+
+const processModeUpdate = function () {
+    "use strict";
+    if (AppMain.user.getRBACpermissionElement("users_roles", "actions")) {
+        $(".update-option").show();
+    }
+    $(".add-option").hide();
+};
+
+const processModeNotUpdate = function () {
+    "use strict";
+    $(".update-option").hide();
+    if (AppMain.user.getRBACpermissionElement("users_roles", "actions")) {
+        $(".add-option").show();
+    }
+};
+
+CtrlActionSystemUsersRole.changeMode = function (mode) {
+    "use strict";
+    mode = updateMode(mode);
     if (mode === "update") {
-        if (AppMain.user.getRBACpermissionElement("users_roles", "actions")) {
-            $(".update-option").show();
-        }
-        $(".add-option").hide();
+        processModeUpdate();
     } else {
-        $(".update-option").hide();
-        if (AppMain.user.getRBACpermissionElement("users_roles", "actions")) {
-            $(".add-option").show();
-        }
+        processModeNotUpdate();
     }
     return true;
 };
@@ -126,6 +141,21 @@ CtrlActionSystemUsersRole.selectRBACColumn = function (e) {
     }
 };
 
+const getPermisions = function (rbacPermissions, category, valueRbac) {
+    "use strict";
+    return {
+        fullControl: (!defined(rbacPermissions[`${category}`][`${valueRbac}`]) || rbacPermissions[`${category}`][`${valueRbac}`] === "*")
+            ? "checked"
+            : "",
+        read: (defined(rbacPermissions[`${category}`][`${valueRbac}`]) && rbacPermissions[`${category}`][`${valueRbac}`] === "r")
+            ? "checked"
+            : "",
+        disabled: (defined(rbacPermissions[`${category}`][`${valueRbac}`]) && rbacPermissions[`${category}`][`${valueRbac}`] === "h")
+            ? "checked"
+            : ""
+    };
+};
+
 CtrlActionSystemUsersRole.htmlRoleTable = function (rolePermissions) {
     "use strict";
 
@@ -152,17 +182,7 @@ CtrlActionSystemUsersRole.htmlRoleTable = function (rolePermissions) {
         value.forEach(function (valueRbac) {
             let permission = {};
             if (defined(rbacPermissions[`${category}`])) {
-                permission = {
-                    fullControl: (!defined(rbacPermissions[`${category}`][`${valueRbac}`]) || rbacPermissions[`${category}`][`${valueRbac}`] === "*")
-                        ? "checked"
-                        : "",
-                    read: (defined(rbacPermissions[`${category}`][`${valueRbac}`]) && rbacPermissions[`${category}`][`${valueRbac}`] === "r")
-                        ? "checked"
-                        : "",
-                    disabled: (defined(rbacPermissions[`${category}`][`${valueRbac}`]) && rbacPermissions[`${category}`][`${valueRbac}`] === "h")
-                        ? "checked"
-                        : ""
-                };
+                permission = getPermisions(rbacPermissions, category, valueRbac);
             } else {
                 permission = {fullControl: "checked", read: "", disabled: ""};
             }
