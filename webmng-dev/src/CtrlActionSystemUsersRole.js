@@ -151,11 +151,12 @@ const getPermissionPom = function (rbacPermissions, category, valueRbac) {
     const disabledStr = (rbacPermissions[`${category}`][`${valueRbac}`] === "h")
         ? "checked"
         : "";
-    return {
+    const obj = {
         fullControl: fullControl,
         read: read,
         disabled: disabledStr
     };
+    return obj;
 };
 
 const getPermissions = function (rbacPermissions, category, valueRbac) {

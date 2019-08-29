@@ -10,6 +10,26 @@
 module.exports.AppHTML = function () {
     "use strict";
 
+    const getOptionChecked = function (options) {
+        return (defined(options.checked) && options.checked === true)
+            ? "checked"
+            : "";
+    };
+    const getLabelClass = function (options) {
+        return (defined(options.labelClass) && options.labelClass) || "";
+    };
+    const getLabelId = function (options) {
+        return (defined(options.labelId) && options.labelId) || "";
+    };
+    const getInputClass = function (options) {
+        return (defined(options.inputClass) && options.inputClass) || "";
+    };
+    const getInputId = function (options, name) {
+        return (defined(options.inputId) && options.inputId) || name;
+    };
+    const getInputAttr = function (options) {
+        return (defined(options.inputAttr) && options.inputAttr) || {};
+    };
     /**
      * Render switch button
      *
@@ -25,22 +45,17 @@ module.exports.AppHTML = function () {
         const inputHiddenVal = defined(opt.checked) && opt.checked === true;
 
         let options = opt || {};
-        options.checked = (defined(options.checked) && options.checked === true)
-            ? "checked"
-            : "";
-        options.labelClass = (defined(options.labelClass) && options.labelClass) || "";
-        options.labelId = (defined(options.labelId) && options.labelId) || "";
-        options.inputClass = (defined(options.inputClass) && options.inputClass) || "";
-        options.inputId = (defined(options.inputId) && options.inputId) || null;
-        options.inputAttr = (defined(options.inputAttr) && options.inputAttr) || {};
+        options.checked = getOptionChecked(options);
+        options.labelClass = getLabelClass(options);
+        options.labelId = getLabelId(options, name);
+        options.inputClass = getInputClass(options);
+        options.inputId = getInputId(options);
+        options.inputAttr = getInputAttr(options);
 
         let html = "";
         html += "<label style=\"width:0;\" class=\"mdl-switch mdl-js-switch mdl-js-ripple-effect " + options.labelClass + " \" for=\"" + name + "\">";
         html += "<input type=\"hidden\" name=\"" + name + "\" value=\"" + inputHiddenVal + "\"  />";
-        // html += '<input type="hidden" name="' + name + '" value="false"  />';
-        let input = "<input type=\"checkbox\" id=\"" + (defined(options.inputId)
-            ? options.inputId
-            : name)
+        let input = "<input type=\"checkbox\" id=\"" + options.inputId
                 + "\" class=\"mdl-switch__input " + options.inputClass
                 + " \" name=\"" + name + "\" value=\"" + value + "\" " + options.checked + " ";
         $.each(options.inputAttr, function (index, value) {
@@ -52,6 +67,54 @@ module.exports.AppHTML = function () {
         return html + "</label>";
     };
 
+    const defineWidth = function (width) {
+        return (defined(width))
+            ? " style='width:" + width + "'"
+            : "";
+    };
+    const defineAdditionalClass = function (additionalClass) {
+        return defined(additionalClass)
+            ? additionalClass
+            : "";
+    };
+    const defineElementAttr = function (options) {
+        return defined(options.elementAttr)
+            ? options.elementAttr
+            : "";
+    };
+    const defineWrapperAttr = function (options) {
+        return defined(options.wrapperAttr)
+            ? options.wrapperAttr
+            : "";
+    };
+    const defineWrapperClass = function (options) {
+        return defined(options.wrapperClass)
+            ? options.wrapperClass
+            : "";
+    };
+    const defineInputType = function (options) {
+        return defined(options.inputType)
+            ? options.inputType
+            : "text";
+    };
+    const isElementSelectedCheck = function (options, index) {
+        return (defined(options.elementSelected) && options.elementSelected === index)
+            ? "selected"
+            : "";
+    };
+    const getLabelTxtForSelect = function (options) {
+        return (defined(options.label)
+            ? options.label
+            : name);
+    };
+    const defineMdlSelect = function (options, additionalClass, widthHtml) {
+        if (defined(options.label) && options.label !== "") {
+            return "<div class=\"mdl-select mdl-js-select mdl-select--floating-label mdl-textfield-less-padding " + additionalClass + "\" " + widthHtml + ">";
+        } else {
+            return "<div class=\"mdl-select mdl-js-select mdl-textfield-no-padding " + additionalClass + "\"" + widthHtml + ">";
+        }
+    };
+
     /**
      * HTML select menu.
      *
@@ -60,37 +123,19 @@ module.exports.AppHTML = function () {
      */
     this.formElementSelect = function (name, values, options, width, additionalClass) {
         options = options || {};
-        let widthHtml = "";
-        if (defined(width)) {
-            widthHtml = " style='width:" + width + "'";
-        }
-        if (!defined(additionalClass)) {
-            additionalClass = "";
-        }
-        let html = "";
-        if (defined(options.label) && options.label !== "") {
-            html = "<div class=\"mdl-select mdl-js-select mdl-select--floating-label mdl-textfield-less-padding " + additionalClass + "\" " + widthHtml + ">";
-        } else {
-            html = "<div class=\"mdl-select mdl-js-select mdl-textfield-no-padding " + additionalClass + "\"" + widthHtml + ">";
-        }
+        let widthHtml = defineWidth(width);
+        additionalClass = defineAdditionalClass(additionalClass);
+        options.elementAttr = defineElementAttr(options);
 
-        options.elementAttr = defined(options.elementAttr)
-            ? options.elementAttr
-            : "";
-
+        let html = defineMdlSelect(options, additionalClass, widthHtml);
         html += "<select " + options.elementAttr + " class=\"mdl-select__input\" id=\"" + name + "\" name=\"" + name + "\">";
-
         $.each(values, function (index, value) {
-            const selected = (defined(options.elementSelected) && options.elementSelected === index)
-                ? "selected"
-                : "";
+            const selected = isElementSelectedCheck(options, index);
             html += "<option " + selected + " value=\"" + index + "\">" + value + "</option>";
         });
 
         html += "</select>";
-        html += "<label class=\"mdl-select__label\" for=\"" + name + "\">" + (defined(options.label)
-            ? options.label
-            : name) + "</label>";
+        html += "<label class=\"mdl-select__label\" for=\"" + name + "\">" + getLabelTxtForSelect(options) + "</label>";
         html += "</div>";
 
         return html;
@@ -144,18 +189,10 @@ module.exports.AppHTML = function () {
      */
     this.formTextInput = function (name, label, options) {
         options = options || {};
-        options.elementAttr = defined(options.elementAttr)
-            ? options.elementAttr
-            : "";
-        options.wrapperAttr = defined(options.wrapperAttr)
-            ? options.wrapperAttr
-            : "";
-        options.wrapperClass = defined(options.wrapperClass)
-            ? options.wrapperClass
-            : "";
-        const type = defined(options.inputType)
-            ? options.inputType
-            : "text";
+        options.elementAttr = defineElementAttr(options);
+        options.wrapperAttr = defineWrapperAttr(options);
+        options.wrapperClass = defineWrapperClass(options);
+        const type = defineInputType(options);
 
         let html = "<div class=\"mdl-textfield mdl-js-textfield mdl-textfield--floating-label " + options.wrapperClass + "\" " + options.wrapperAttr + " >";
         html += "<input class=\"mdl-textfield__input\" type=\"" + type + "\" id=\"" + name + "\" name=\"" + name + "\" " + options.elementAttr + " >";

@@ -43,6 +43,13 @@ CtrlActionEvents.getTo = function () {
     }
     return to;
 };
+CtrlActionEvents.processEventsResponse = function (response) {
+    "use strict";
+    if (defined(response) && defined(response.event) && defined(response.event.id)) {
+        return [response.event];
+    }
+    return [];
+};
 
 CtrlActionEvents.getEventsData = function () {
     "use strict";
@@ -61,11 +68,7 @@ CtrlActionEvents.getEventsData = function () {
     if (defined(response) && defined(response.event) && Object.prototype.toString.call(response.event) === "[object Array]") {
         data = response.event;
     } else {
-        if (defined(response) && defined(response.event) && defined(response.event.id)) {
-            data = [response.event];
-        } else {
-            data = [];
-        }
+        data = this.processEventsResponse(response);
     }
     return data;
 };

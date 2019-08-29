@@ -483,7 +483,7 @@ CtrlActionWhiteList.addWhiteList = function () {
                 const csv = e.target.result;
                 if (!csv.includes("\r\n") && !csv.includes("\n")) {
                     CtrlActionWhiteList.importAlert(AppMain.t("IMPORT_WHITE_LIST_CSV_ERROR", "WHITE_LIST"));
-                    return;
+                    return false;
                 }
                 const allTextLines = csv.split(/\r\n|\n/);
                 let header = allTextLines[0];

@@ -379,21 +379,43 @@ CtrlActionMonitoringManager.drawGraph = function () {
 
 };
 
+CtrlActionMonitoringManager.getCategoryColor = function (profileCategory) {
+    "use strict";
+    return defined(this.categoryToColor[`${profileCategory}`])
+        ? this.categoryToColor[`${profileCategory}`]
+        : "rgb(255, 172, 171)";
+};
+
+CtrlActionMonitoringManager.updateProfileCategory = function (profileCategory) {
+    "use strict";
+    profileCategory.toLowerCase();
+    const cntWan = "CNT-WAN";
+    if (profileCategory.indexOf(cntWan.toLowerCase()) !== -1) {
+        profileCategory = cntWan.toLowerCase();
+    }
+    return profileCategory;
+};
+CtrlActionMonitoringManager.getChartType = function (profileType) {
+    "use strict";
+    return this.typeObj[`${profileType}`] === "COUNTER"
+        ? "line"
+        : "bar";
+};
+CtrlActionMonitoringManager.getUnits = function (profileType) {
+    "use strict";
+    return defined(this.unitsObj[`${profileType}`])
+        ? " (" + this.unitsObj[`${profileType}`] + ")"
+        : "";
+};
+
 CtrlActionMonitoringManager.drawGraphSetUp = function () {
     "use strict";
 
     $("#view-option").show();
 
     let profileCategory = $("#profile-category").val();
-    const color = defined(this.categoryToColor[`${profileCategory}`])
-        ? this.categoryToColor[`${profileCategory}`]
-        : "rgb(255, 172, 171)";
-
-    profileCategory = profileCategory.toLowerCase();
-    const cntWan = "CNT-WAN";
-    if (profileCategory.indexOf(cntWan.toLowerCase()) !== -1) {
-        profileCategory = cntWan.toLowerCase();
-    }
+    const color = this.getCategoryColor(profileCategory);
+    profileCategory = this.updateProfileCategory(profileCategory);
     const profileType = $("#profile-type").val();
     const profileTypeTranslate = this.translateObj[`${profileType}`];
 
@@ -401,18 +423,12 @@ CtrlActionMonitoringManager.drawGraphSetUp = function () {
     this.contersForExport = counters;
     this.setCounters(counters, profileCategory, profileType);
 
-    let chartType = this.typeObj[`${profileType}`] === "COUNTER"
-        ? "line"
-        : "bar";
+    let chartType = this.getChartType(profileType);
     if (!this.firstTime) {
         this.chart.destroy();
     }
     this.firstTime = false;
-
-    const units = defined(this.unitsObj[`${profileType}`])
-        ? " (" + this.unitsObj[`${profileType}`] + ")"
-        : "";
-
+    const units = this.getUnits();
     let chartData = {
         labels: this.chartLabels,
         datasets: [{
@@ -423,7 +439,6 @@ CtrlActionMonitoringManager.drawGraphSetUp = function () {
             data: this.chartDatasets[0].data
         }]
     };
-
     const ctx = document.getElementById("canvas_graph").getContext("2d");
 
     this.chart = new Chart(ctx, {
@@ -506,6 +521,18 @@ CtrlActionMonitoringManager.getParams = function () {
     return [];
 };
 
+CtrlActionMonitoringManager.updateProfileTypeSecond = function (cat) {
+    "use strict";
+    if (cat === "CNT-WAN_LOCAL") {
+        $("#profileTypeHtml").html(this.profileTypeWANLocal);
+    }
+    if (cat === "CNT-WAN_MODEM") {
+        $("#profileTypeHtml").html(this.profileTypeWANModem);
+    }
+    if (cat === "CNT-APP") {
+        $("#profileTypeHtml").html(this.profileTypeApp);
+    }
+};
 CtrlActionMonitoringManager.updateProfileType = function () {
     "use strict";
 
@@ -522,15 +549,7 @@ CtrlActionMonitoringManager.updateProfileType = function () {
     if (cat === "CNT-WAN") {
         $("#profileTypeHtml").html(this.profileTypeWAN);
     }
-    if (cat === "CNT-WAN_LOCAL") {
-        $("#profileTypeHtml").html(this.profileTypeWANLocal);
-    }
-    if (cat === "CNT-WAN_MODEM") {
-        $("#profileTypeHtml").html(this.profileTypeWANModem);
-    }
-    if (cat === "CNT-APP") {
-        $("#profileTypeHtml").html(this.profileTypeApp);
-    }
+    this.updateProfileTypeSecond(cat);
 
     AppMain.html.updateElements([".mdl-js-textfield", ".mdl-js-select"]);
     this.adjustSelect();

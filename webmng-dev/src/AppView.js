@@ -187,7 +187,53 @@ module.exports.AppView = function () {
         return viewContent;
     };
 
+    const processExecMethod = function (_this, actionName, element) {
+        if (actionName && actionName.indexOf(".") > 0 && _this.controller.ctrlActionComp !== null) {
+            const comp = actionName.split(".");
+            if (comp[1] === "exec") {
+                $(element).on(element.getAttribute("data-bind-event"), function (e) {
+                    e.stopImmediatePropagation();
+                    _this.controller.ctrlActionComp.exec(actionName, {event: e, target: element});
+                    return false;
+                });
+            }
+        }
+    };
 
+    const processMethodToCtrlActionComponent = function (_this, methodName, element) {
+        if (methodName && methodName.indexOf(".") > 0) {
+            const comp2 = methodName.split(".");
+
+            if (defined(_this.controller.ctrlActionComp) && defined(_this.controller.ctrlActionComp[comp2[1]])) {
+                $(element).on(element.getAttribute("data-bind-event"), function (e) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    _this.controller.ctrlActionComp[comp2[1]]({event: e, target: element});
+                    return false;
+                });
+            }
+        }
+    };
+
+    const processBindDefaultCtrlAction = function (_this, actionName, element) {
+        if (_this.controller["exec" + actionName] !== undefined) {
+            $(element).on(element.getAttribute("data-bind-event"), function (e) {
+                e.stopImmediatePropagation();
+                _this.controller.exec(actionName, {event: e, target: element});
+                return false;
+            });
+        }
+    };
+    const processBindDefaultCtrlMethod = function (_this, methodName, element) {
+        if (_this.controller[`${methodName}`] !== undefined) {
+            $(element).on(element.getAttribute("data-bind-event"), function (e) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                _this.controller[`${methodName}`]({event: e, target: element});
+                return false;
+            });
+        }
+    };
     /**
      * Bind controller actions and methods defined by view template elements elements.<br>
      *
@@ -200,53 +246,20 @@ module.exports.AppView = function () {
         AppMain.log("AppView._bindElementControllerEvents");
 
         // Bind controller "action" & "method" from elements
-        $("[data-bind-action],[data-bind-method]").each(function (i, element) {
+        $("[data-bind-action],[data-bind-method]").each(function (ignore, element) {
             const actionName = element.getAttribute("data-bind-action");
             const methodName = element.getAttribute("data-bind-method");
 
             // Action callback to component controller
-            if (actionName && actionName.indexOf(".") > 0 && _this.controller.ctrlActionComp !== null) {
-                const comp = actionName.split(".");
-                if (comp[1] === "exec") {
-                    $(element).on(element.getAttribute("data-bind-event"), function (e) {
-                        e.stopImmediatePropagation();
-                        _this.controller.ctrlActionComp.exec(actionName, {event: e, target: element});
-                        return false;
-                    });
-                }
-            }
+            processExecMethod(_this, actionName, element);
 
             // Method callback to controller action component
-            if (methodName && methodName.indexOf(".") > 0) {
-                const comp2 = methodName.split(".");
-
-                if (defined(_this.controller.ctrlActionComp) && defined(_this.controller.ctrlActionComp[comp2[1]])) {
-                    $(element).on(element.getAttribute("data-bind-event"), function (e) {
-                        e.preventDefault();
-                        e.stopImmediatePropagation();
-                        _this.controller.ctrlActionComp[comp2[1]]({event: e, target: element});
-                        return false;
-                    });
-                }
-            }
+            processMethodToCtrlActionComponent(_this, methodName, element);
 
             // Bind default controller action
-            if (_this.controller["exec" + actionName] !== undefined) {
-                $(element).on(element.getAttribute("data-bind-event"), function (e) {
-                    e.stopImmediatePropagation();
-                    _this.controller.exec(actionName, {event: e, target: element});
-                    return false;
-                });
-            }
+            processBindDefaultCtrlAction(_this, actionName, element);
             // Bind default controller method
-            if (_this.controller[`${methodName}`] !== undefined) {
-                $(element).on(element.getAttribute("data-bind-event"), function (e) {
-                    e.stopImmediatePropagation();
-                    e.preventDefault();
-                    _this.controller[`${methodName}`]({event: e, target: element});
-                    return false;
-                });
-            }
+            processBindDefaultCtrlMethod(_this, methodName, element);
         });
     };
 
@@ -257,6 +270,21 @@ module.exports.AppView = function () {
         _bindElementControllerEvents(_this);
     };
 
+    this.defineIncludeForRender = function (includeHTML) {
+        return defined(includeHTML)
+            ? includeHTML
+            : this.include;
+    };
+    const defineAppendToCanvas = function (appendToCanvas) {
+        return defined(appendToCanvas)
+            ? appendToCanvas
+            : true;
+    };
+    const defineViewContent = function (viewSectionSelector, viewContent) {
+        return (viewSectionSelector)
+            ? $(viewContent).filter("#" + viewSectionSelector).prop("innerHTML")
+            : viewContent;
+    };
     /**
      * Render view template:
      * view templates are placed inside <script type="text/template" id="viewName">
@@ -267,14 +295,10 @@ module.exports.AppView = function () {
      * @param {Boolean} appendToCanvas Append view template to canvas or return it as a string. Default: true.
      */
     this.render = function (viewName, placeholderData, includeHTML, appendToCanvas) {
-        this.include = defined(includeHTML)
-            ? includeHTML
-            : this.include;
+        this.include = this.defineIncludeForRender(includeHTML);
         const viewTemplateName = _resolveViewName(viewName); // viewName without section selectors
         const viewSectionSelector = _resolveViewNameSectionSelector(viewName);
-        appendToCanvas = defined(appendToCanvas)
-            ? appendToCanvas
-            : true;
+        appendToCanvas = defineAppendToCanvas(appendToCanvas);
 
         // View render logging
         if (AppMain.environment === AppMain.ENVIRONMENT_DEV) {
@@ -294,9 +318,7 @@ module.exports.AppView = function () {
         let viewContent = _loadViewTemplate(this, viewName);
 
         // Load template section if requested (viewName # part)
-        viewContent = (viewSectionSelector)
-            ? $(viewContent).filter("#" + viewSectionSelector).prop("innerHTML")
-            : viewContent;
+        viewContent = defineViewContent(viewSectionSelector, viewContent);
 
         // Append view content to template
         if (viewContent !== undefined) {
@@ -449,6 +471,28 @@ module.exports.AppView = function () {
         }
     };
 
+    const setTimeoutForClosingDialog = function (type, messageId) {
+        if (type === "default" || type === "success" || type === "error-discovery") {
+            setTimeout(function () {
+                $("." + messageId).hide("slow", function () {
+                    this.remove();
+                });
+            }, 5000);
+        }
+        // Close dialog event
+        $("." + messageId + " .close").on("click", function () {
+            $("." + messageId).remove();
+        });
+    };
+    const checkForOpenErrors = function () {
+        let errDisc = $(".error-discovery");
+        if (errDisc.length) {
+            errDisc.hide(0, function () {
+                this.remove();
+            });
+        }
+    };
+
     /**
      * Diplay dialog message inside template dialog message section.
      * @param {String} message Message string.
@@ -461,27 +505,10 @@ module.exports.AppView = function () {
             $(this.canvasDialog).append("<div class='dialog-message " + type + " " + messageId + "'><a class='close'>&Cross;</a>"
                     + "<p>" + message + "</p>" + "<div style='clear:both'></div> </div>");
         } else {
-            let errDisc = $(".error-discovery");
-            if (errDisc.length) {
-                errDisc.hide(0, function () {
-                    this.remove();
-                });
-            }
+            checkForOpenErrors();
             $(this.canvasDialog).append("<div class='dialog-message error error-discovery" + " " + messageId + "'><a class='close'>&Cross;</a>"
                     + "<p>" + message + "</p>" + "<div style='clear:both'></div> </div>");
         }
-
-
-        if (type === "default" || type === "success" || type === "error-discovery") {
-            setTimeout(function () {
-                $("." + messageId).hide("slow", function () {
-                    this.remove();
-                });
-            }, 5000);
-        }
-        // Close dialog event
-        $("." + messageId + " .close").on("click", function () {
-            $("." + messageId).remove();
-        });
+        setTimeoutForClosingDialog(type, messageId);
     };
 };
