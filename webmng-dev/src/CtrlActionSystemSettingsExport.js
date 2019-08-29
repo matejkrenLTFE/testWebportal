@@ -76,6 +76,20 @@ CtrlActionSystemSettingsExport.exec = function () {
     AppMain.html.formCheckboxSelectAll("SystemSettingsExport", "selectAllCheckbox");
 };
 
+CtrlActionSystemSettingsExport.updateParamsPom = function (paramPom) {
+    "use strict";
+
+    let parser = new DOMParser();
+    let xmlDoc = parser.parseFromString(this.params, "text/xml");
+    let childNodes = xmlDoc.childNodes;
+    if (childNodes.length === 1 && childNodes[0].nodeName === "parameters") {
+        paramPom += childNodes[0].innerHTML;
+    } else {
+        paramPom += this.params;
+    }
+    return paramPom;
+};
+
 CtrlActionSystemSettingsExport.importFile = function () {
     "use strict";
 
@@ -88,14 +102,7 @@ CtrlActionSystemSettingsExport.importFile = function () {
         paramPom += "<create-factory-file>true</create-factory-file>";
     }
 
-    let parser = new DOMParser();
-    let xmlDoc = parser.parseFromString(this.params, "text/xml");
-    let childNodes = xmlDoc.childNodes;
-    if (childNodes.length === 1 && childNodes[0].nodeName === "parameters") {
-        paramPom += childNodes[0].innerHTML;
-    } else {
-        paramPom += this.params;
-    }
+    paramPom = this.updateParamsPom(paramPom);
     CtrlActionSystemSettingsExport.setParams(paramPom);
 };
 
@@ -120,6 +127,49 @@ CtrlActionSystemSettingsExport.setParams = function (params) {
     }
     document.getElementById("SystemSettingsExport").reset();
     AppMain.html.updateAllElements();
+};
+
+const downloadXMLtoFile = function (xml, exportCategories) {
+    "use strict";
+
+    if (xml) {
+        xml = "<parameters>\n" + xml + "</parameters>";
+        const userRoleName = AppMain.user.getUserData("user-role-name");
+        if (userRoleName !== "Factory") {
+            //comment some lines
+            //factory-number
+            xml = xml.replace("<factory-number>", "<!--factory-number>");
+            xml = xml.replace("</factory-number>", "<factory-number-->");
+            //device-type
+            xml = xml.replace("<device-type>", "<!--device-type>");
+            xml = xml.replace("</device-type>", "<device-type-->");
+            //device-type
+            xml = xml.replace("<production-date>", "<!--production-date>");
+            xml = xml.replace("</production-date>", "<production-date-->");
+            //mac-address
+            xml = xml.replace("<mac-address>", "<!--mac-address>");
+            xml = xml.replace("</mac-address>", "<mac-address-->");
+        }
+        xml = vkbeautify.xml(xml, 2);
+
+        const dateStr = moment(new Date()).format(AppMain.localization("EXPORT_DATETIME_FORMAT"));
+        const filename = build.device + "_Parameters_" + exportCategories.join("_").replace("_cntr", "") + "_" + dateStr + ".xml";
+        download("data:application/xml;charset=utf-8;base64," + btoa(xml), filename, "application/xml");
+    }
+};
+
+const checkDCMGandCTRDM = function (formData) {
+    "use strict";
+
+    // DCMNG & CTRDM are considered the same parameters group
+    // if ether is selected enable both.
+    /*eslint-disable camelcase*/
+    if (defined(formData.export_dcmng) || defined(formData.export_cntr)) {
+        formData.export_dcmng = "on";
+        formData.export_cntr = "on";
+    }
+    /*eslint-enable camelcase*/
+    return formData;
 };
 
 CtrlActionSystemSettingsExport.exportParams = function () {
@@ -147,15 +197,7 @@ CtrlActionSystemSettingsExport.exportParams = function () {
     if (defined(params.GetParametersResponse) && Object.keys(formData).length > 0) {
         let xml = "";
         let exportCategories = [];
-
-        // DCMNG & CTRDM are considered the same parameters group
-        // if ether is selected enable both.
-        /*eslint-disable camelcase*/
-        if (defined(formData.export_dcmng) || defined(formData.export_cntr)) {
-            formData.export_dcmng = "on";
-            formData.export_cntr = "on";
-        }
-        /*eslint-enable camelcase*/
+        formData = checkDCMGandCTRDM(formData);
         $.each(params.GetParametersResponse, function (cat, value) {
             if (defined(formData["export_" + cat])) {
                 exportCategories[exportCategories.length] = defined(expNameMap[`${cat}`])
@@ -167,37 +209,11 @@ CtrlActionSystemSettingsExport.exportParams = function () {
             }
         });
 
-        if (xml) {
-            xml = "<parameters>\n" + xml + "</parameters>";
-            const userRoleName = AppMain.user.getUserData("user-role-name");
-            if (userRoleName !== "Factory") {
-                //comment some lines
-                //factory-number
-                xml = xml.replace("<factory-number>", "<!--factory-number>");
-                xml = xml.replace("</factory-number>", "<factory-number-->");
-                //device-type
-                xml = xml.replace("<device-type>", "<!--device-type>");
-                xml = xml.replace("</device-type>", "<device-type-->");
-                //device-type
-                xml = xml.replace("<production-date>", "<!--production-date>");
-                xml = xml.replace("</production-date>", "<production-date-->");
-                //mac-address
-                xml = xml.replace("<mac-address>", "<!--mac-address>");
-                xml = xml.replace("</mac-address>", "<mac-address-->");
-            }
-            xml = vkbeautify.xml(xml, 2);
-            //AC750_Parameters_iloc_YYYY-MM-DD-HH-MM-SS
-            const dateStr = moment(new Date()).format(AppMain.localization("EXPORT_DATETIME_FORMAT"));
-            const filename = build.device + "_Parameters_" + exportCategories.join("_").replace("_cntr", "") + "_" + dateStr + ".xml";
-            download("data:application/xml;charset=utf-8;base64," + btoa(xml), filename, "application/xml");
-        }
+        downloadXMLtoFile(xml, exportCategories);
     } else {
         AppMain.dialog("SELECT_PARAMETERS_TO_EXPORT", "warning");
     }
-
-
     AppMain.html.updateElements([".mdl-button"]);
-
 };
 
 module.exports.CtrlActionSystemSettingsExport = CtrlActionSystemSettingsExport;
