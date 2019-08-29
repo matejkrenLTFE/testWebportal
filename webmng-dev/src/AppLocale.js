@@ -71,7 +71,7 @@ module.exports.AppLocale = function (loc) {
 
         return defined(translationStrings[`${_locale}`])
             ? translationStrings[`${_locale}`]
-            : {};
+            : {nameLang: "en_US"};
     };
 
     const getLangStr = function (string, langStrings) {

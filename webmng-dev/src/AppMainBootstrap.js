@@ -217,6 +217,18 @@ module.exports.AppMainBootstrap = function () {
         $("#SectionBuildV").html("Dev-Build / " + build.version);
     };
 
+    const updateActiveMenu = function (submenu, hasParrent) {
+        if (defined(submenu) && submenu.nodeName === "UL") {
+            $(submenu).addClass("mdl-navigation__submenu-active");
+            if (hasParrent) {
+                const parentLink = $(submenu).prev().get(0);
+                $(parentLink).addClass("active");
+            }
+            return true;
+        }
+        return false;
+    };
+
     this.controllerOnAfterExecute = function () {
         // Init alarm events checking component
         // Only do alarm events checking when logged-in and alarm interval is not yet running
@@ -231,18 +243,9 @@ module.exports.AppMainBootstrap = function () {
             $("ul.mdl-navigation__submenu-active").removeClass("mdl-navigation__submenu-active");
             // Submenu - next item
             let submenu = $(this).next().get(0);
-            if (defined(submenu) && submenu.nodeName === "UL") {
-                $(submenu).addClass("mdl-navigation__submenu-active");
-                return;
-            }
-            // Submenu - parent
-            submenu = $(this).parent().parent().get(0);
-            if (defined(submenu) && submenu.nodeName === "UL") {
-                $(submenu).addClass("mdl-navigation__submenu-active");
-                const parentLink = $(submenu).prev().get(0);
-                //dmp( $(submenu).prev().get(0) );
-                //$($(submenu).prev().get(0)).addClass("active");
-                $(parentLink).addClass("active");
+            if (!updateActiveMenu(submenu, false)) {
+                submenu = $(this).parent().parent().get(0);
+                updateActiveMenu(submenu, true);
             }
         });
 
