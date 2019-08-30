@@ -89,12 +89,271 @@ CtrlActionTaskManager.hasNotificationJob = function () {
     "use strict";
 
     let hasNotify = false;
-    $.each(this.resourceList, function (index, node) {
+    $.each(this.resourceList, function (ignore, node) {
         if (defined(node.ResourceType) && node.ResourceType.toString() === "DATA-NOTIFICATION") {
             hasNotify = true;
         }
     });
     return hasNotify;
+};
+
+CtrlActionTaskManager.updateResourceList = function (resourceList) {
+    "use strict";
+    if (defined(resourceList.ResponseMessage.Payload.ResourceDirectory)) {
+        this.resourceList = resourceList.ResponseMessage.Payload.ResourceDirectory.Resource;
+        if (this.resourceList.length === undefined) {
+            this.resourceList = [this.resourceList];
+        }
+    } else {
+        this.resourceList = [];
+    }
+};
+
+const isResourceUpgrade = function (node) {
+    "use strict";
+    return defined(node.ResourceType) && node.ResourceType.toString() === "UPGRADE";
+};
+const isResourceNotification = function (node) {
+    "use strict";
+    return (defined(node.ResourceType) && node.ResourceType.toString() === "DATA-NOTIFICATION");
+};
+const isResourceScheduledNodePom2 = function (node) {
+    "use strict";
+    return (defined(node.Duration) && node.Duration !== "");
+};
+const isResourceScheduledNodePom1 = function (node) {
+    "use strict";
+    return (defined(node.RepeatingInterval) && node.RepeatingInterval !== "") || isResourceScheduledNodePom2(node);
+};
+const isResourceScheduledNode = function (node) {
+    "use strict";
+    return ((defined(node.Activates) && node.Activates !== "") || isResourceScheduledNodePom1(node));
+};
+const isResourceScheduled = function (node, isUpgrade, isNotification) {
+    "use strict";
+    return !isUpgrade && !isNotification && isResourceScheduledNode(node);
+};
+const isResourceOnDemand = function (isScheduled, isUpgrade, isNotification) {
+    "use strict";
+    return !isScheduled && !isNotification && !isUpgrade;
+};
+const getResourceTypeTxtNotScheduled = function (isOndemand, isNotification, isUpgrade) {
+    "use strict";
+    let typeTxt = "";
+    if (isOndemand) {
+        typeTxt = AppMain.t("ON_DEMAND", "TASK_MANAGER");
+    } else {
+        if (isNotification) {
+            typeTxt = AppMain.t("NOTIFICATION", "TASK_MANAGER");
+        }
+        if (isUpgrade) {
+            typeTxt = AppMain.t("UPGRADE_TXT", "TASK_MANAGER");
+        }
+    }
+    return typeTxt;
+};
+const getResourceTypeTxt = function (isScheduled, isOndemand, isNotification, isUpgrade) {
+    "use strict";
+    let typeTxt = "";
+    if (isScheduled) {
+        typeTxt = AppMain.t("SCHEDULED", "TASK_MANAGER");
+    } else {
+        typeTxt = getResourceTypeTxtNotScheduled(isOndemand, isNotification, isUpgrade);
+    }
+    return typeTxt;
+};
+const getDeviceRefDeviceId = function (node) {
+    "use strict";
+    return defined(node.DeviceReference._DeviceID)
+        ? node.DeviceReference._DeviceID
+        : "---";
+};
+const getDeviceRefGroupId = function (node) {
+    "use strict";
+    return defined(node.GroupReference._GroupID)
+        ? node.GroupReference._GroupID
+        : "---";
+};
+const getResourceDeviceReferenceTxt = function (node) {
+    "use strict";
+    let txtObj = {
+        deviceTXT: "",
+        deviceTXTshort: ""
+    };
+    if (node.DeviceReference.length > 0) {
+        if (node.DeviceReference.length === 1) {
+            txtObj.deviceTXT = node.DeviceReference[0]._DeviceID;
+            txtObj.deviceTXTshort = txtObj.deviceTXT;
+        } else {
+            txtObj.deviceTXT = "";
+            $.each(node.DeviceReference, function (index, node) {
+                if (index !== 0) {
+                    txtObj.deviceTXT += "; ";
+                }
+                txtObj.deviceTXT += node._DeviceID;
+            });
+            txtObj.deviceTXTshort = node.DeviceReference[0]._DeviceID + " ...";
+        }
+    } else {
+        txtObj.deviceTXT = getDeviceRefDeviceId(node);
+        txtObj.deviceTXTshort = txtObj.deviceTXT;
+    }
+    return txtObj;
+};
+
+const getResourceRefGroupTxt = function (node) {
+    "use strict";
+    let txtObj = {
+        deviceTXT: "",
+        deviceTXTshort: ""
+    };
+    if (node.GroupReference.length > 0) {
+        if (node.GroupReference.length === 1) {
+            txtObj.deviceTXT = node.GroupReference[0]._GroupID;
+            txtObj.deviceTXTshort = txtObj.deviceTXT;
+        } else {
+            txtObj.deviceTXT = "";
+            $.each(node.GroupReference, function (index, node) {
+                if (index !== 0) {
+                    txtObj.deviceTXT += "; ";
+                }
+                txtObj.deviceTXT += node._GroupID;
+            });
+            txtObj.deviceTXTshort = node.GroupReference[0]._GroupID + " ...";
+        }
+    } else {
+        txtObj.deviceTXT = getDeviceRefGroupId(node);
+        txtObj.deviceTXTshort = txtObj.deviceTXT;
+    }
+    return txtObj;
+};
+
+const getResourceDeviceTxt = function (node, isNotification) {
+    "use strict";
+    let obj = {
+        deviceTXT: "",
+        deviceTXTshort: ""
+    };
+    if (defined(node.DeviceReference)) {
+        return getResourceDeviceReferenceTxt(node);
+    }
+    if (defined(node.GroupReference)) {
+        return getResourceRefGroupTxt(node);
+    }
+    if (isNotification) {
+        obj.deviceTXT = "DG_ALL_METERS";
+        obj.deviceTXTshort = obj.deviceTXT;
+    }
+    return obj;
+};
+
+const getResourceCosemAttrDescriptorObj = function (node) {
+    "use strict";
+    let obj = {
+        cosemTXT: "",
+        cosemTXTshort: ""
+    };
+    if (node.CosemAttributeDescriptor.length === undefined) {
+        node.CosemAttributeDescriptor = [node.CosemAttributeDescriptor];
+    }
+    obj.cosemTXTshort = CtrlActionTaskManager.transformObject(node.CosemAttributeDescriptor[0]["class-id"],
+            node.CosemAttributeDescriptor[0]["instance-id"], node.CosemAttributeDescriptor[0]["attribute-id"]);
+    if (node.CosemAttributeDescriptor.length > 1) {
+        obj.cosemTXTshort += " ..."; // change
+    }
+    $.each(node.CosemAttributeDescriptor, function (index, cosem) {
+        if (index !== 0) {
+            obj.cosemTXT += "; ";
+        }
+        obj.cosemTXT += CtrlActionTaskManager.transformObject(cosem["class-id"], cosem["instance-id"], cosem["attribute-id"]);
+    });
+    return obj;
+};
+const getResourceCosemObj = function (node) {
+    "use strict";
+    let obj = {
+        cosemTXT: "",
+        cosemTXTshort: ""
+    };
+    if (defined(node.CosemAttributeDescriptor)) {
+        return getResourceCosemAttrDescriptorObj(node);
+    }
+    obj.cosemTXT = "---";
+    obj.cosemTXTshort = "---";
+    return obj;
+};
+
+const getResourceServiceTXT = function (node) {
+    "use strict";
+    return defined(node.ResourceType)
+        ? AppMain.t(node.ResourceType, "TASK_MANAGER")
+        : "";
+};
+const getResourceActivatesTXT = function (node) {
+    "use strict";
+    return defined(node.Activates)
+        ? moment(node.Activates.toString()).format(AppMain.localization("DATETIME_FORMAT"))
+        : "---";
+};
+const getResourceExpiresTXT = function (node) {
+    "use strict";
+    return defined(node.Expires)
+        ? moment(node.Expires.toString()).format(AppMain.localization("DATETIME_FORMAT"))
+        : "---";
+};
+const getResourceOlderTXT = function (node) {
+    "use strict";
+    return defined(node.NotOlderThan)
+        ? moment(node.NotOlderThan.toString()).format(AppMain.localization("DATETIME_FORMAT"))
+        : "---";
+};
+const getResourcePriorityTXT = function (node) {
+    "use strict";
+    return defined(node.Priority)
+        ? node.Priority.toString()
+        : "---";
+};
+const getResourceStatusTXT = function (node) {
+    "use strict";
+    return defined(node.ResourceStatus)
+        ? AppMain.t(node.ResourceStatus.toString().replace(/-/g, "_"), "TASK_MANAGER")
+        : "---";
+};
+const getResourceActivationTXT = function (node) {
+    "use strict";
+    return defined(node.LastActivation)
+        ? moment(node.LastActivation.toString()).format(AppMain.localization("DATETIME_FORMAT"))
+        : "---";
+};
+const getResourceReplyTXT = function (node) {
+    "use strict";
+    return defined(node.ReplyAddress)
+        ? node.ReplyAddress.toString()
+        : "---";
+};
+const getResourceDurationTXT = function (node) {
+    "use strict";
+    return (defined(node.Duration))
+        ? moment.duration(node.Duration).asMinutes() + " " + AppMain.t("MINUTES", "global")
+        : "---";
+};
+
+const repeatingMap = {
+    "P1D": AppMain.t("DAILY", "TASK_MANAGER"),
+    "P7D": AppMain.t("WEEKLY", "TASK_MANAGER"),
+    "P1M": AppMain.t("MONTHLY", "TASK_MANAGER"),
+    "P1Y": AppMain.t("YEARLY", "TASK_MANAGER"),
+    "PT1M": AppMain.t("PT1M", "TASK_MANAGER")
+};
+const getResourceRepeatingTXT = function (node) {
+    "use strict";
+    if (defined(node.RepeatingInterval)) {
+        if (defined(repeatingMap[node.RepeatingInterval.toString()])) {
+            return repeatingMap[node.RepeatingInterval.toString()];
+        }
+        return moment.duration(node.RepeatingInterval).asMinutes() + " " + AppMain.t("MINUTES", "global");
+    }
+    return "---";
 };
 
 /**
@@ -107,176 +366,33 @@ CtrlActionTaskManager.buildNodeListHTML = function (resourceList) {
     this.htmlTooltips = "";
     if (resourceList && resourceList.ResponseMessage && resourceList.ResponseMessage.Reply && resourceList.ResponseMessage.Reply.Result
             && resourceList.ResponseMessage.Reply.Result.toString() === "OK") {
-        if (defined(resourceList.ResponseMessage.Payload.ResourceDirectory)) {
-            this.resourceList = resourceList.ResponseMessage.Payload.ResourceDirectory.Resource;
-            if (this.resourceList.length === undefined) {
-                this.resourceList = [this.resourceList];
-            }
-        } else {
-            this.resourceList = [];
-        }
+        CtrlActionTaskManager.updateResourceList(resourceList);
     }
 
-    $.each(this.resourceList, function (index, node) {
-        const isUpgrade = defined(node.ResourceType) && node.ResourceType.toString() === "UPGRADE";
-        const isNotification = defined(node.ResourceType) && node.ResourceType.toString() === "DATA-NOTIFICATION";
-        const isScheduled = !isUpgrade && !isNotification && ((defined(node.Activates) && node.Activates !== "") ||
-                (defined(node.RepeatingInterval) && node.RepeatingInterval !== "") || (defined(node.Duration) && node.Duration !== ""));
-
-        const isOndemand = !isScheduled && !isNotification && !isUpgrade;
-
-        listHtml += "<tr>";
-        let typeTxt = "";
-        if (isScheduled) {
-            typeTxt = AppMain.t("SCHEDULED", "TASK_MANAGER");
-        } else {
-            if (isOndemand) {
-                typeTxt = AppMain.t("ON_DEMAND", "TASK_MANAGER");
-            } else {
-                if (isNotification) {
-                    typeTxt = AppMain.t("NOTIFICATION", "TASK_MANAGER");
-                }
-                if (isUpgrade) {
-                    typeTxt = AppMain.t("UPGRADE_TXT", "TASK_MANAGER");
-                }
-            }
-        }
-
-        let deviceTXT = "";
-        let deviceTXTshort = "";
-        if (defined(node.DeviceReference)) {
-            if (node.DeviceReference.length > 0) {
-                if (node.DeviceReference.length === 1) {
-                    deviceTXT = node.DeviceReference[0]._DeviceID;
-                    deviceTXTshort = deviceTXT;
-                } else {
-                    deviceTXT = "";
-                    $.each(node.DeviceReference, function (index, node) {
-                        if (index !== 0) {
-                            deviceTXT += "; ";
-                        }
-                        deviceTXT += node._DeviceID;
-                    });
-                    deviceTXTshort = node.DeviceReference[0]._DeviceID + " ...";
-                }
-            } else {
-                deviceTXT = defined(node.DeviceReference._DeviceID)
-                    ? node.DeviceReference._DeviceID
-                    : "---";
-                deviceTXTshort = deviceTXT;
-            }
-        } else {
-            if (defined(node.GroupReference)) {
-                if (node.GroupReference.length > 0) {
-                    if (node.GroupReference.length === 1) {
-                        deviceTXT = node.GroupReference[0]._GroupID;
-                        deviceTXTshort = deviceTXT;
-                    } else {
-                        deviceTXT = "";
-                        $.each(node.GroupReference, function (index, node) {
-                            if (index !== 0) {
-                                deviceTXT += "; ";
-                            }
-                            deviceTXT += node._GroupID;
-                        });
-                        deviceTXTshort = node.GroupReference[0]._GroupID + " ...";
-                    }
-                } else {
-                    deviceTXT = defined(node.GroupReference._GroupID)
-                        ? node.GroupReference._GroupID
-                        : "---";
-                    deviceTXTshort = deviceTXT;
-                }
-            } else {
-                if (isNotification) {
-                    deviceTXT = "DG_ALL_METERS";
-                    deviceTXTshort = deviceTXT;
-                }
-            }
-        }
-
-        let cosemTXT = "";
-        let cosemTXTshort = "";
-        if (defined(node.CosemAttributeDescriptor)) {
-            if (node.CosemAttributeDescriptor.length === undefined) {
-                node.CosemAttributeDescriptor = [node.CosemAttributeDescriptor];
-            }
-            cosemTXTshort = CtrlActionTaskManager.transformObject(node.CosemAttributeDescriptor[0]["class-id"],
-                    node.CosemAttributeDescriptor[0]["instance-id"], node.CosemAttributeDescriptor[0]["attribute-id"]);
-            if (node.CosemAttributeDescriptor.length > 1) {
-                cosemTXTshort += " ..."; // change
-            }
-            $.each(node.CosemAttributeDescriptor, function (index, cosem) {
-                if (index !== 0) {
-                    cosemTXT += "; ";
-                }
-                cosemTXT += CtrlActionTaskManager.transformObject(cosem["class-id"], cosem["instance-id"], cosem["attribute-id"]);
-            });
-        } else {
-            cosemTXT = "---";
-            cosemTXTshort = "---";
-        }
-        const serviceTXT = defined(node.ResourceType)
-            ? AppMain.t(node.ResourceType, "TASK_MANAGER")
-            : "";
-        const activatesTXT = defined(node.Activates)
-            ? moment(node.Activates.toString()).format(AppMain.localization("DATETIME_FORMAT"))
-            : "---";
-        const expiresTXT = defined(node.Expires)
-            ? moment(node.Expires.toString()).format(AppMain.localization("DATETIME_FORMAT"))
-            : "---";
-        let repeatTxt = "";
-        if (defined(node.RepeatingInterval)) {
-            switch (node.RepeatingInterval.toString()) {
-            case "P1D":
-                repeatTxt = AppMain.t("DAILY", "TASK_MANAGER");
-                break;
-            case "P7D":
-                repeatTxt = AppMain.t("WEEKLY", "TASK_MANAGER");
-                break;
-            case "P1M":
-                repeatTxt = AppMain.t("MONTHLY", "TASK_MANAGER");
-                break;
-            case "P1Y":
-                repeatTxt = AppMain.t("YEARLY", "TASK_MANAGER");
-                break;
-            case "PT1M":
-                repeatTxt = AppMain.t("PT1M", "TASK_MANAGER");
-                break;
-            }
-            if (repeatTxt === "") {
-                const repeat = moment.duration(node.RepeatingInterval);
-                repeatTxt = repeat.asMinutes() + " " + AppMain.t("MINUTES", "global");
-            }
-        } else {
-            repeatTxt = "---";
-        }
-        const olderTXT = defined(node.NotOlderThan)
-            ? moment(node.NotOlderThan.toString()).format(AppMain.localization("DATETIME_FORMAT"))
-            : "---";
-        const priorityTXT = defined(node.Priority)
-            ? node.Priority.toString()
-            : "---";
-        const statusTXT = defined(node.ResourceStatus)
-            ? AppMain.t(node.ResourceStatus.toString().replace(/-/g, "_"), "TASK_MANAGER")
-            : "---";
-        const activationTXT = defined(node.LastActivation)
-            ? moment(node.LastActivation.toString()).format(AppMain.localization("DATETIME_FORMAT"))
-            : "---";
-        const replyTXT = defined(node.ReplyAddress)
-            ? node.ReplyAddress.toString()
-            : "---";
-        let durTXT = "---";
-        if (defined(node.Duration)) {
-            durTXT = moment.duration(node.Duration).asMinutes() + " " + AppMain.t("MINUTES", "global");
-        }
+    $.each(this.resourceList, function (ignore, node) {
+        const isUpgrade = isResourceUpgrade(node);
+        const isNotification = isResourceNotification(node);
+        const isScheduled = isResourceScheduled(node, isUpgrade, isNotification);
+        const isOndemand = isResourceOnDemand(isScheduled, isUpgrade, isNotification);
+        let typeTxt = getResourceTypeTxt(isScheduled, isOndemand, isNotification, isUpgrade);
+        const deviceTXTObj = getResourceDeviceTxt(node, isNotification);
+        const cosemObj = getResourceCosemObj(node);
+        const serviceTXT = getResourceServiceTXT(node);
+        const activatesTXT = getResourceActivatesTXT(node);
+        const expiresTXT = getResourceExpiresTXT(node);
+        let repeatTxt = getResourceRepeatingTXT(node);
+        const olderTXT = getResourceOlderTXT(node);
+        const priorityTXT = getResourcePriorityTXT(node);
+        const statusTXT = getResourceStatusTXT(node);
+        const activationTXT = getResourceActivationTXT(node);
+        const replyTXT = getResourceReplyTXT(node);
+        let durTXT = getResourceDurationTXT(node);
         let notification = defined(node.AsyncReplyFlag);
-
         const clickHTML = " data-bind-event='click' data-node-id='" + node.ID.toString() + "' data-bind-method='CtrlActionTaskManager.getReferenceDevice' ";
-
+        listHtml += "<tr>";
         listHtml += "<td class='checkbox-col'><input type='checkbox' name='selectJob' class='selectJob' data-node-ID='" + node.ID.toString() + "' " +
                 "data-node-type='" + typeTxt + "' " +
-                "data-node-device='" + deviceTXT + "' " +
+                "data-node-device='" + deviceTXTObj.deviceTXT + "' " +
                 "data-node-service='" + serviceTXT + "' " +
                 "data-node-activates='" + activatesTXT + "' " +
                 "data-node-expires='" + expiresTXT + "' " +
@@ -287,14 +403,14 @@ CtrlActionTaskManager.buildNodeListHTML = function (resourceList) {
                 "data-node-activation='" + activationTXT + "' " +
                 "data-node-notification='" + (notification.toString()) + "' " +
                 "data-node-reply='" + replyTXT + "' " +
-                "data-node-cosem='" + cosemTXT + "' " +
+                "data-node-cosem='" + cosemObj.cosemTXT + "' " +
                 "data-node-duration='" + durTXT + "' " +
                 "></td>";
         listHtml += "<td class='ID'" + clickHTML + ">" + node.ID.toString() + "</td>";
         listHtml += "<td class='Type'" + clickHTML + ">" + typeTxt + "</td>";
-        listHtml += "<td class='DeviceReference'" + clickHTML + ">" + deviceTXTshort + "</td>";
+        listHtml += "<td class='DeviceReference'" + clickHTML + ">" + deviceTXTObj.deviceTXTshort + "</td>";
         listHtml += "<td class='Service'" + clickHTML + ">" + serviceTXT + "</td>";
-        listHtml += "<td class='Object'" + clickHTML + ">" + cosemTXTshort + "</td>";
+        listHtml += "<td class='Object'" + clickHTML + ">" + cosemObj.cosemTXTshort + "</td>";
         listHtml += "<td class='Activates'" + clickHTML + ">" + activatesTXT + "</td>";
         listHtml += "<td class='Expires'" + clickHTML + ">" + expiresTXT + "</td>";
         listHtml += "<td class='RepeatingInterval'" + clickHTML + ">" + repeatTxt + "</td>";
@@ -307,7 +423,6 @@ CtrlActionTaskManager.buildNodeListHTML = function (resourceList) {
         } else {
             listHtml += "<td" + clickHTML + "><input type='checkbox' disabled/></td>";
         }
-
         listHtml += "<td>";
         if (node.ResourceStatus.toString() !== "FINISHED" && !isUpgrade) {
             listHtml += "<i id='edit_" + node.ID.toString() + "' data-rbac='taskManager.edit' class=\"material-icons cursor-pointer\"" +
@@ -399,7 +514,7 @@ CtrlActionTaskManager.export = function () {
         csv += "\"" + AppMain.t("DURATION", "TASK_MANAGER") + "\"";
         csv += "\r\n";
 
-        inputC.each(function (i, elm) {
+        inputC.each(function (ignore, elm) {
             const element = $(elm);
             if (element.hasClass("selectJob")) {
                 isNotSelected = false;
@@ -451,7 +566,7 @@ CtrlActionTaskManager.getReferenceDevice = function (e) {
 
     let nodeID = $this.attr("data-node-id");
 
-    $.each(this.resourceList, function (index, node) {
+    $.each(this.resourceList, function (ignore, node) {
         if (node.ID.toString() === nodeID) {
             $thisParent.attr("data-opened", 1);
             let html = "<tr class='nodeListShowDetails'>";
@@ -556,7 +671,7 @@ CtrlActionTaskManager.cosemAttributeDescriptor = function (e) {
 
     let tableHTML = "";
     let title = "";
-    $.each(this.resourceList, function (index, node) {
+    $.each(this.resourceList, function (ignore, node) {
         if (node.ID.toString() === nodeID) {
             switch (type) {
             case "cosem":
@@ -653,7 +768,7 @@ CtrlActionTaskManager.deleteResource = function (e) {
     const $this = $(e.target);
     let nodeID = $this.attr("data-node-id");
 
-    $.each(this.resourceList, function (index, node) {
+    $.each(this.resourceList, function (ignore, node) {
         if (node.ID.toString() === nodeID) {
             $.confirm({
                 title: AppMain.t("DELETE_RESOURCE", "TASK_MANAGER"),
@@ -689,7 +804,7 @@ CtrlActionTaskManager.editResource = function (e) {
     const $this = $(e.target);
     let nodeID = $this.attr("data-node-id");
 
-    $.each(this.resourceList, function (index, node) {
+    $.each(this.resourceList, function (ignore, node) {
         if (node.ID.toString() === nodeID) {
             CtrlActionTaskManager.addJobSecond(undefined, node);
             return false;
@@ -1531,7 +1646,7 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
             "</thead><tbody>";
 
     if (this.nodesTitle && this.nodesTitle.length > 0) {
-        $.each(this.nodesTitle, function (index, title) {
+        $.each(this.nodesTitle, function (ignore, title) {
             if (title.toString() !== "[object Object]") {
                 allHtml += "<tr>" +
                         "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + title + "'/></td>" +
@@ -1564,7 +1679,7 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
                 action: function () {
                     jobObj.devices = [];
                     let inputC = $("input[name='selectNode']:checked");
-                    inputC.each(function (i, elm) {
+                    inputC.each(function (ignore, elm) {
                         const element = $(elm);
                         jobObj.devices.push(element.attr("data-node-title"));
                     });
@@ -1723,7 +1838,7 @@ CtrlActionTaskManager.addJobGroup = function (jobObj) {
             "</thead><tbody>";
 
     if (this.groups.length > 0) {
-        $.each(this.groups, function (index, group) {
+        $.each(this.groups, function (ignore, group) {
             allHtml += "<tr>" +
                     "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + group + "'/></td>" +
                     "<td>" + group + "</td>" +
@@ -1754,7 +1869,7 @@ CtrlActionTaskManager.addJobGroup = function (jobObj) {
                 action: function () {
                     jobObj.groups = [];
                     let inputC = $("input[name='selectNode']:checked");
-                    inputC.each(function (i, elm) {
+                    inputC.each(function (ignore, elm) {
                         const element = $(elm);
                         jobObj.groups.push(element.attr("data-node-title"));
                     });
@@ -2326,7 +2441,7 @@ CtrlActionTaskManager.updateAttrs = function (jobObj) {
 
     jobObj.attrs = [];
     let inputC = $("input[name='selectNode']:checked");
-    inputC.each(function (i, elm) {
+    inputC.each(function (ignore, elm) {
         const element = $(elm);
         jobObj.attrs.push({
             cClass: element.attr("data-node-class"),
@@ -2345,7 +2460,7 @@ CtrlActionTaskManager.updateAttrs = function (jobObj) {
     if (jobObj.attrs.length === 0) {
         if (CtrlActionTaskManager.addAttrPress()) {
             inputC = $("input[name='selectNode']:checked");
-            inputC.each(function (i, elm) {
+            inputC.each(function (ignore, elm) {
                 const element = $(elm);
                 jobObj.attrs.push({
                     cClass: element.attr("data-node-class"),
@@ -2846,7 +2961,7 @@ CtrlActionTaskManager.getResourceJson = function (resource, isEdit) {
         if (resource.devices && resource.devices.length > 0) {
             addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:DevicesReferenceList"] = {};
             addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:DeviceReference"] = [];
-            $.each(resource.devices, function (i, elm) {
+            $.each(resource.devices, function (ignore, elm) {
                 addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:DeviceReference"].push({
                     "_DeviceID": elm
                 });
@@ -2855,7 +2970,7 @@ CtrlActionTaskManager.getResourceJson = function (resource, isEdit) {
             if (resource.groups && resource.groups.length > 0) {
                 addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:DevicesReferenceList"] = {};
                 addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:GroupReference"] = [];
-                $.each(resource.groups, function (i, elm) {
+                $.each(resource.groups, function (ignore, elm) {
                     addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:GroupReference"].push({
                         "_GroupID": elm
                     });
@@ -2866,7 +2981,7 @@ CtrlActionTaskManager.getResourceJson = function (resource, isEdit) {
         if (resource.jobType !== "notification") {  //cosem access list
             addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:CosemAccessList"] = {};
             addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:CosemAccessList"]["dev:CosemAccess"] = [];
-            $.each(resource.attrs, function (i, elm) {
+            $.each(resource.attrs, function (ignore, elm) {
                 let obj;
                 if (resource.jobService === "time-sync") {
                     obj = {
@@ -3103,11 +3218,11 @@ CtrlActionTaskManager.arrangeNodeCosemStat = function (nodesCosemStat) {
     if (nodesCosemStat.length === undefined) {
         nodesCosemStat = [nodesCosemStat];
     }
-    $.each(nodesCosemStat, function (index, nodeStat) {
+    $.each(nodesCosemStat, function (ignore, nodeStat) {
         nodesTitle.push(nodeStat["meter-id"]);
     });
     if (nodesTitle.length > 0) {
-        $.each(nodesTitle, function (index, title) {
+        $.each(nodesTitle, function (ignore, title) {
             CtrlActionTaskManager.nodesTitleObj[`${title}`] = title;
         });
     }
@@ -3139,7 +3254,7 @@ CtrlActionTaskManager.getGroups = function () {
         if (groups.length === undefined) {
             groups = [groups];
         }
-        $.each(groups, function (index, group) {
+        $.each(groups, function (ignore, group) {
             rez.push(group._GroupID);
         });
         return rez;
@@ -3263,7 +3378,7 @@ CtrlActionTaskManager.getDataPopUp = function (e) {
     const $this = $(e.target);
     let nodeID = $this.attr("data-node-id");
 
-    $.each(this.resourceList, function (index, node) {
+    $.each(this.resourceList, function (ignore, node) {
         if (node.ID.toString() === nodeID) {
 
             const startHtml = "<tr><td>" + AppMain.t("START_TIME", "TASK_MANAGER") + "</td>" +
@@ -3300,7 +3415,7 @@ CtrlActionTaskManager.getDataPopUp = function (e) {
                     if (!node.DeviceReference.length) {
                         node.DeviceReference = [node.DeviceReference];
                     }
-                    $.each(node.DeviceReference, function (index, title) {
+                    $.each(node.DeviceReference, function (ignore, title) {
                         allHtml += "<tr>";
                         allHtml += "<td><input type='checkbox' name='selectTitle' class='selectTitle' data-node-title='" + title._DeviceID + "'/></td>";
                         allHtml += "<td class='deviceTitleTxT'>" + title._DeviceID + "</td>" + "</tr>";
@@ -3309,7 +3424,7 @@ CtrlActionTaskManager.getDataPopUp = function (e) {
                     if (!node.GroupReference.length) {
                         node.GroupReference = [node.GroupReference];
                     }
-                    $.each(node.GroupReference, function (index, title) {
+                    $.each(node.GroupReference, function (ignore, title) {
                         allHtml += "<tr>";
                         allHtml += "<td><input type='checkbox' name='selectTitle' class='selectTitle' data-node-title='" + title._GroupID + "'/></td>";
                         allHtml += "<td class='deviceTitleTxT'>" + title._GroupID + "</td>" + "</tr>";
@@ -3346,7 +3461,7 @@ CtrlActionTaskManager.getDataPopUp = function (e) {
                             getDataObj.deviceReference = [];
                             getDataObj.groupReference = [];
                             let inputC = $("input[name='selectTitle']:checked");
-                            inputC.each(function (i, elm) {
+                            inputC.each(function (ignore, elm) {
                                 const element = $(elm);
                                 if (node.DeviceReference) {
                                     getDataObj.deviceReference.push({

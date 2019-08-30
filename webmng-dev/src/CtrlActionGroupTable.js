@@ -399,6 +399,11 @@ const defineBasicGroupObject = function (group) {
     return groupObj;
 };
 
+const isGroupDevicesOk = function (groupObj) {
+    "use strict";
+    return groupObj.devices.length === 0 && groupObj.prefix === "";
+};
+
 CtrlActionGroupTable.getAddGroupObj = function (group) {
     "use strict";
     let groupObj = defineBasicGroupObject(group);
@@ -417,7 +422,7 @@ CtrlActionGroupTable.getAddGroupObj = function (group) {
             groupObj.devices.push(element.attr("data-node-title"));
         });
     }
-    if (groupObj.devices.length === 0 && groupObj.prefix === "") {
+    if (isGroupDevicesOk(groupObj)) {
         CtrlActionGroupTable.importAlert(AppMain.t("ADD_GROUP_ERROR", "GROUP_TABLE"),
                 AppMain.t("DEVICES_SELECT_ERROR", "GROUP_TABLE"));
         return false;
@@ -425,23 +430,29 @@ CtrlActionGroupTable.getAddGroupObj = function (group) {
     return groupObj;
 };
 
+const processSingleNode = function (devices, title) {
+    "use strict";
+    let allHtml = "";
+    if (title.toString() !== "[object Object]") {
+        allHtml += "<tr>";
+        if (devices && devices.indexOf(title.toString()) !== -1) {
+            const ind = devices.indexOf(title.toString());
+            devices.splice(ind, 1);
+            allHtml += "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + title + "' checked/></td>";
+        } else {
+            allHtml += "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + title + "'/></td>";
+        }
+        allHtml += "<td>" + title + "</td>" + "</tr>";
+    }
+    return allHtml;
+};
+
 CtrlActionGroupTable.addGroupExistingGroupDevicesHtml = function (devices) {
     "use strict";
     let allHtml = "";
     if (this.nodesTitle && this.nodesTitle.length > 0) {
         $.each(this.nodesTitle, function (ignore, title) {
-            if (title.toString() !== "[object Object]") {
-                allHtml += "<tr>";
-                if (devices && devices.indexOf(title.toString()) !== -1) {
-                    const ind = devices.indexOf(title.toString());
-                    devices.splice(ind, 1);
-                    allHtml += "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + title + "' checked/></td>";
-                } else {
-                    allHtml += "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + title + "'/></td>";
-                }
-                allHtml += "<td>" + title + "</td>" + "</tr>";
-            }
-
+            allHtml += processSingleNode(devices, title);
         });
     }
     if (devices && devices.length > 0) {
