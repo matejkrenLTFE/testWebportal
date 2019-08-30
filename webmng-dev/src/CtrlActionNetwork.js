@@ -638,7 +638,7 @@ CtrlActionNetwork.setupNodeTitleFromNodesData = function (node) {
     return (CtrlActionNetwork.nodesData[node["mac-address"]] && CtrlActionNetwork.nodesData[node["mac-address"]]["meter-id"])
         ? CtrlActionNetwork.nodesData[node["mac-address"]]["meter-id"].toString()
         : "";
-}
+};
 
 CtrlActionNetwork.checkForExistingData = function (nodes) {
     "use strict";
