@@ -812,6 +812,11 @@ CtrlActionTaskManager.editResource = function (e) {
     });
 };
 
+const isResourceRestResponseOk = function (response) {
+    "use strict";
+    return response.ResponseMessage.Reply && response.ResponseMessage.Reply.Result && response.ResponseMessage.Reply.Result.toString() === "OK";
+};
+
 /**
  * function for delete job request
  */
@@ -831,8 +836,7 @@ CtrlActionTaskManager.deleteResourceRest = function (resourceID) {
         }
     }).getResponse(false);
 
-    if (response && response.ResponseMessage && response.ResponseMessage.Reply && response.ResponseMessage.Reply.Result
-            && response.ResponseMessage.Reply.Result.toString() === "OK") {
+    if (response && response.ResponseMessage && isResourceRestResponseOk(response)) {
         setTimeout(function () {
             CtrlActionTaskManager.exec();
         }, 500);
@@ -841,6 +845,97 @@ CtrlActionTaskManager.deleteResourceRest = function (resourceID) {
     }
     AppMain.dialog("JOB_REMOVED_ERROR", "success");
     return false;
+};
+
+CtrlActionTaskManager.addJobNotificationsStepsHtml = function (html, position) {
+    "use strict";
+    if (position === 1) {
+        html += "<div class='mdl-card mdl-cell--5-col active'>";
+    } else {
+        html += "<div class='mdl-card mdl-cell--5-col'>";
+    }
+    html += "<span class=\"mdl-chip\">" +
+            "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_TYPE", "TASK_MANAGER") + "</span>" +
+            "</span></div>";
+    if (position === 2) {
+        html += "<div class='mdl-card mdl-cell--5-col active'>";
+    } else {
+        html += "<div class='mdl-card mdl-cell--5-col'>";
+    }
+    html += "<span class=\"mdl-chip\">" +
+            "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_PARAMETERS", "TASK_MANAGER") + "</span>" +
+            "</span></div>";
+    return html;
+};
+CtrlActionTaskManager.addJobStepsFirsStepHtml = function (position) {
+    "use strict";
+    let html = "";
+    if (position === 1) {
+        html += "<div class='mdl-card mdl-cell--2-col active'>";
+    } else {
+        html += "<div class='mdl-card mdl-cell--2-col'>";
+    }
+
+    html += "<span class=\"mdl-chip\">" +
+            "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_TYPE", "TASK_MANAGER") + "</span>" +
+            "</span></div>";
+    return html;
+};
+CtrlActionTaskManager.addJobStepsSecondStepHtml = function (position) {
+    "use strict";
+    let html = "";
+    if (position === 2) {
+        html += "<div class='mdl-card mdl-cell--3-col active'>";
+    } else {
+        html += "<div class='mdl-card mdl-cell--3-col'>";
+    }
+
+    html += "<span class=\"mdl-chip\">" +
+            "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_PARAMETERS", "TASK_MANAGER") + "</span>" +
+            "</span></div>";
+    return html;
+};
+CtrlActionTaskManager.addJobStepsThirdStepHtml = function (position) {
+    "use strict";
+    let html = "";
+    if (position === 3) {
+        html += "<div class='mdl-card mdl-cell--3-col active'>";
+    } else {
+        html += "<div class='mdl-card mdl-cell--3-col'>";
+    }
+
+    html += "<span class=\"mdl-chip\">" +
+            "<span class=\"mdl-chip__text\">" + AppMain.t("REFERENCE_TYPE", "TASK_MANAGER") + "</span>" +
+            "</span></div>";
+    return html;
+};
+CtrlActionTaskManager.addJobStepsFourthStepHtml = function (position) {
+    "use strict";
+    let html = "";
+    if (position === 4) {
+        html += "<div class='mdl-card mdl-cell--2-col active'>";
+    } else {
+        html += "<div class='mdl-card mdl-cell--2-col'>";
+    }
+
+    html += "<span class=\"mdl-chip\">" +
+            "<span class=\"mdl-chip__text\">" + AppMain.t("REFERENCE", "TASK_MANAGER") + "</span>" +
+            "</span></div>";
+    return html;
+};
+CtrlActionTaskManager.addJobStepsFifthStepHtml = function (position) {
+    "use strict";
+    let html = "";
+    if (position === 5) {
+        html += "<div class='mdl-card mdl-cell--2-col cosem active'>";
+    } else {
+        html += "<div class='mdl-card mdl-cell--2-col cosem'>";
+    }
+
+    html += "<span class=\"mdl-chip cosem-chip\">" +
+            "<span class=\"mdl-chip__text\">" + AppMain.t("COSEM", "TASK_MANAGER") + "</span>" +
+            "</span></div>";
+    return html;
 };
 
 /**
@@ -857,74 +952,14 @@ CtrlActionTaskManager.addJobStepsHtml = function (position, jobType) {
             "<div class='mdl-card mdl-cell--1-col'></div>";
 
     if (jobType === "notification") {
-        if (position === 1) {
-            html += "<div class='mdl-card mdl-cell--5-col active'>";
-        } else {
-            html += "<div class='mdl-card mdl-cell--5-col'>";
-        }
-        html += "<span class=\"mdl-chip\">" +
-                "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_TYPE", "TASK_MANAGER") + "</span>" +
-                "</span></div>";
-        if (position === 2) {
-            html += "<div class='mdl-card mdl-cell--5-col active'>";
-        } else {
-            html += "<div class='mdl-card mdl-cell--5-col'>";
-        }
-        html += "<span class=\"mdl-chip\">" +
-                "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_PARAMETERS", "TASK_MANAGER") + "</span>" +
-                "</span></div>";
-        return html;
+        CtrlActionTaskManager.addJobNotificationsStepsHtml(html, position);
     }
-    if (position === 1) {
-        html += "<div class='mdl-card mdl-cell--2-col active'>";
-    } else {
-        html += "<div class='mdl-card mdl-cell--2-col'>";
-    }
-
-    html += "<span class=\"mdl-chip\">" +
-            "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_TYPE", "TASK_MANAGER") + "</span>" +
-            "</span></div>";
-    if (position === 2) {
-        html += "<div class='mdl-card mdl-cell--3-col active'>";
-    } else {
-        html += "<div class='mdl-card mdl-cell--3-col'>";
-    }
-
-    html += "<span class=\"mdl-chip\">" +
-            "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_PARAMETERS", "TASK_MANAGER") + "</span>" +
-            "</span></div>";
-
-    if (position === 3) {
-        html += "<div class='mdl-card mdl-cell--3-col active'>";
-    } else {
-        html += "<div class='mdl-card mdl-cell--3-col'>";
-    }
-
-    html += "<span class=\"mdl-chip\">" +
-            "<span class=\"mdl-chip__text\">" + AppMain.t("REFERENCE_TYPE", "TASK_MANAGER") + "</span>" +
-            "</span></div>";
-    if (position === 4) {
-        html += "<div class='mdl-card mdl-cell--2-col active'>";
-    } else {
-        html += "<div class='mdl-card mdl-cell--2-col'>";
-    }
-
-    html += "<span class=\"mdl-chip\">" +
-            "<span class=\"mdl-chip__text\">" + AppMain.t("REFERENCE", "TASK_MANAGER") + "</span>" +
-            "</span></div>";
-
-    if (position === 5) {
-        html += "<div class='mdl-card mdl-cell--2-col cosem active'>";
-    } else {
-        html += "<div class='mdl-card mdl-cell--2-col cosem'>";
-    }
-
-    html += "<span class=\"mdl-chip cosem-chip\">" +
-            "<span class=\"mdl-chip__text\">" + AppMain.t("COSEM", "TASK_MANAGER") + "</span>" +
-            "</span></div>";
-
+    html += CtrlActionTaskManager.addJobStepsFirsStepHtml(position);
+    html += CtrlActionTaskManager.addJobStepsSecondStepHtml(position);
+    html += CtrlActionTaskManager.addJobStepsThirdStepHtml(position);
+    html += CtrlActionTaskManager.addJobStepsFourthStepHtml(position);
+    html += CtrlActionTaskManager.addJobStepsFifthStepHtml(position);
     html += "" + "</div>";
-
     return html;
 };
 
@@ -1741,6 +1776,21 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
             return false;
         });
 
+        const setHeader = function (allTextLines) {
+            let header = allTextLines[0];
+            if (allTextLines[0] === "SEP=,") { //second line is header line
+                header = allTextLines[1];
+            }
+            return header;
+        };
+        const setStartIndex = function (allTextLines) {
+            let startInd = 1;
+            if (allTextLines[0] === "SEP=,") { //second line is header line
+                startInd = 2;
+            }
+            return startInd;
+        };
+
         const inputElement = document.getElementById("file");
         inputElement.addEventListener("change", function () {
             const uploadElement = this;
@@ -1757,12 +1807,8 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
                 }
                 const allTextLines = csv.split(/\r\n|\n/);
 
-                let header = allTextLines[0];
-                let startInd = 1;
-                if (allTextLines[0] === "SEP=,") { //second line is header line
-                    header = allTextLines[1];
-                    startInd = 2;
-                }
+                let header = setHeader(allTextLines);
+                let startInd = setStartIndex(allTextLines);
                 if (!header.includes(",")) {
                     CtrlActionTaskManager.importAlert(AppMain.t("IMPORT_ERR_TITLE_TXT", "TASK_MANAGER"),
                             AppMain.t("IMPORT_CSV_ERROR", "TASK_MANAGER"));
@@ -2031,6 +2077,13 @@ CtrlActionTaskManager.getAddCosemHTML = function (jobType, jobService) {
     return "";
 };
 
+const getAddCosemTableHTMLMap = {
+    "get": AppMain.t("ACCESS_SELECTION", "TASK_MANAGER"),
+    "set": AppMain.t("VALUE", "TASK_MANAGER"),
+    "action": AppMain.t("VALUE", "TASK_MANAGER"),
+    "time-sync": AppMain.t("TIME_SYNC", "TASK_MANAGER")
+};
+
 /**
  * helper function service type
  * @param jobService
@@ -2038,17 +2091,28 @@ CtrlActionTaskManager.getAddCosemHTML = function (jobType, jobService) {
  */
 CtrlActionTaskManager.getAddCosemTableHTML = function (jobService) {
     "use strict";
-
-    switch (jobService) {
-    case "get":
-        return AppMain.t("ACCESS_SELECTION", "TASK_MANAGER");
-    case "set":
-    case "action":
-        return AppMain.t("VALUE", "TASK_MANAGER");
-    case "time-sync":
-        return AppMain.t("TIME_SYNC", "TASK_MANAGER");
+    if (defined(getAddCosemTableHTMLMap[`${jobService}`])) {
+        return getAddCosemTableHTMLMap[jobService];
     }
     return "";
+};
+
+const updateJobService = function (jobObj) {
+    "use strict";
+    if (jobObj.jobType !== "upgrade") {
+        jobObj.jobService = "get";
+    }
+};
+
+CtrlActionTaskManager.initAllhtml1 = function (jobObj, serviceSelector) {
+    "use strict";
+    if (jobObj.jobType === "upgrade") {
+        return this.addJobStepsHtml(5, jobObj.jobType) + AppMain.t("INSERT_COSEM_ATTRS_FOR_UP", "TASK_MANAGER") + "</br>" +
+                "<div style='width: 100%;padding: 0;' class='mdl-grid'>";
+    }
+    return this.addJobStepsHtml(5, jobObj.jobType) + AppMain.t("INSERT_COSEM_ATTRS", "TASK_MANAGER") + "</br>" +
+            "<div style='width: 100%;padding: 0;' class='mdl-grid'>" +
+            "<div class='mdl-cell' style='width: 100%;'>" + serviceSelector + "</div>";
 };
 
 /**
@@ -2059,9 +2123,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
     "use strict";
 
     CtrlActionTaskManager.hasCossemAttrs = false;
-    if (jobObj.jobType !== "upgrade") {
-        jobObj.jobService = "get";
-    }
+    updateJobService(jobObj);
     let objValues = {
         "0": "---"
     };
@@ -2124,15 +2186,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
     const addHtml = "<button id='add-icon' class='mdl-button mdl-js-button mdl-button--raised mdl-button-small ' style='margin-left: 5px;position: relative;top: 12px;'>" +
             AppMain.t("ADD", "global") + "</button>";
 
-    let allHtml1;
-    if (jobObj.jobType === "upgrade") {
-        allHtml1 = this.addJobStepsHtml(5, jobObj.jobType) + AppMain.t("INSERT_COSEM_ATTRS_FOR_UP", "TASK_MANAGER") + "</br>" +
-                "<div style='width: 100%;padding: 0;' class='mdl-grid'>";
-    } else {
-        allHtml1 = this.addJobStepsHtml(5, jobObj.jobType) + AppMain.t("INSERT_COSEM_ATTRS", "TASK_MANAGER") + "</br>" +
-                "<div style='width: 100%;padding: 0;' class='mdl-grid'>" +
-                "<div class='mdl-cell' style='width: 100%;'>" + serviceSelector + "</div>";
-    }
+    let allHtml1 = CtrlActionTaskManager.initAllhtml1(jobObj, serviceSelector);
 
     allHtml1 += "<div class='mdl-cell' id='obj_desc_cell' style='width: auto; margin-right: 15px;'>" + objectSelector + "</div>" +
             "<div class='mdl-cell' style='width:auto;margin-right:15px;'>" + classHtml + "</div>" +
@@ -2286,6 +2340,20 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
             }
         });
         const jS = $("#job-service");
+        const processDescCell = function (jobObj) {
+            const descCell = $("#obj_desc_cell");
+            if (jobObj.jobService !== "get" && jobObj.jobService !== "time-sync") {
+                descCell.hide();
+                descCell.html();
+            } else {
+                descCell.show();
+                if (jobObj.jobService === "time-sync") {
+                    descCell.html(objectTimeSelector);
+                } else {
+                    descCell.html(objectSelector);
+                }
+            }
+        };
         jS.on("change", function () {
             const jSerPom = jobObj.jobService;
             if (CtrlActionTaskManager.hasCossemAttrs && jobObj.jobService !== jS.val()) {
@@ -2319,18 +2387,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
                 });
             }
             jobObj.jobService = jS.val();
-            const descCell = $("#obj_desc_cell");
-            if (jobObj.jobService !== "get" && jobObj.jobService !== "time-sync") {
-                descCell.hide();
-                descCell.html();
-            } else {
-                descCell.show();
-                if (jobObj.jobService === "time-sync") {
-                    descCell.html(objectTimeSelector);
-                } else {
-                    descCell.html(objectSelector);
-                }
-            }
+            processDescCell(jobObj);
             $("#accessSelRow").html(CtrlActionTaskManager.getAddCosemHTML(jobObj.jobType, jobObj.jobService));
             $("#tableCosemTH").html(CtrlActionTaskManager.getAddCosemTableHTML(jobObj.jobService));
             let varType = $("#variable-type");
@@ -2882,8 +2939,7 @@ CtrlActionTaskManager.addResourceRest = function (resource, isEdit) {
 
     const addJson = CtrlActionTaskManager.getResourceJson(resource, isEdit);
     let response = AppMain.wsMes().exec("RequestMessage", addJson).getResponse(false);
-    if (response && response.ResponseMessage && response.ResponseMessage.Reply && response.ResponseMessage.Reply.Result
-            && response.ResponseMessage.Reply.Result.toString() === "OK") {
+    if (response && response.ResponseMessage && isResourceRestResponseOk(response)) {
         CtrlActionTaskManager.exec();
         if (!isEdit) {
             AppMain.dialog("JOB_CREATED", "success", [response.ResponseMessage.Reply.ID.toString()]);
@@ -2902,8 +2958,7 @@ CtrlActionTaskManager.addResourceXMLRest = function (resourceTXT) {
     "use strict";
 
     let response = AppMain.wsMes().exec("RequestMessage", resourceTXT).getResponse(false);
-    if (response && response.ResponseMessage && response.ResponseMessage.Reply && response.ResponseMessage.Reply.Result
-            && response.ResponseMessage.Reply.Result.toString() === "OK") {
+    if (response && response.ResponseMessage && isResourceRestResponseOk(response)) {
         CtrlActionTaskManager.exec();
         AppMain.dialog("JOB_CREATED", "success", [response.ResponseMessage.Reply.ID.toString()]);
     }
@@ -3247,8 +3302,7 @@ CtrlActionTaskManager.getGroups = function () {
         }
     }).getResponse(false);
 
-    if (response && response.ResponseMessage && response.ResponseMessage.Reply && response.ResponseMessage.Reply.Result
-            && response.ResponseMessage.Reply.Result.toString() === "OK") {
+    if (response && response.ResponseMessage && isResourceRestResponseOk(response)) {
         let groups = response.ResponseMessage.Payload.DeviceGroup.DeviceGroup;
         let rez = [];
         if (groups.length === undefined) {

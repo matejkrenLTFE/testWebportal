@@ -392,6 +392,7 @@ CtrlActionGroupTable.editGroup = function (e) {
 };
 
 const defineBasicGroupObject = function (group) {
+    "use strict";
     let groupObj = {};
     if (group) {
         groupObj.isEdit = true;
