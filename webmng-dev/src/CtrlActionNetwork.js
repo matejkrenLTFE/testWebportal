@@ -137,12 +137,12 @@ CtrlActionNetwork.exec = function () {
 
             trRows.bind("mouseenter", function (e) {
                 e.preventDefault();
-                const nodeInd = this.getNodeInfoNodeInd(e);
+                const nodeInd = CtrlActionNetwork.getNodeInfoNodeInd(e);
                 CtrlActionNetwork.showHoverTooltip(CtrlActionNetwork.cv.$("#" + nodeInd));
             });
             trRows.bind("mouseout", function (e) {
                 e.preventDefault();
-                const nodeInd = this.getNodeInfoNodeInd(e);
+                const nodeInd = CtrlActionNetwork.getNodeInfoNodeInd(e);
                 CtrlActionNetwork.hideHoverTooltip(CtrlActionNetwork.cv.$("#" + nodeInd));
             });
         }, 200);
@@ -165,7 +165,7 @@ CtrlActionNetwork.buildNodeListHTML = function (nodes) {
     let htmlNodes = "";
 
     $.each(nodes, function (ignore, node) {
-        const shortAddObj = this.calculateNodeShortAddress(node);
+        const shortAddObj = CtrlActionNetwork.calculateNodeShortAddress(node);
 
         htmlNodes += "<tr class='node-" + shortAddObj.shortAddress + "' data-bind-event='click' " +
                 "data-bind-method='CtrlActionNetwork.getNodeInfo' data-node='" + shortAddObj.shortAddress + "'>";
@@ -209,6 +209,7 @@ CtrlActionNetwork.processDestAddInd = function (destAddInd, destAdd, route) {
         CtrlActionNetwork.nodes[`${destAddInd}`].data.hopCount = route["hop-count"];
         CtrlActionNetwork.nodes[`${destAddInd}`].data.routeCost = route["route-cost"];
     }
+    return destAddInd;
 };
 CtrlActionNetwork.processNextHopAddInd = function (destAddInd, nextHopAddInd, route, nextHopAdd) {
     "use strict";
@@ -229,6 +230,7 @@ CtrlActionNetwork.processNextHopAddInd = function (destAddInd, nextHopAddInd, ro
             CtrlActionNetwork.nodes[`${nextHopAddInd}`].data.busyness += 1;
         }
     }
+    return nextHopAddInd;
 };
 CtrlActionNetwork.addPathRoute = function (destAddInd, nextHopAddInd, route) {
     "use strict";
@@ -271,9 +273,9 @@ CtrlActionNetwork.buildNodesAndLinks = function (routing) {
         let destAdd = getDestAddress(route, "destination-address");
         let nextHopAdd = getDestAddress(route, "next-hop-address");
         let destAddInd = CtrlActionNetwork.nodesTmp.indexOf(destAdd);
-        CtrlActionNetwork.processDestAddInd(destAddInd, destAdd, route);
+        destAddInd = CtrlActionNetwork.processDestAddInd(destAddInd, destAdd, route);
         let nextHopAddInd = CtrlActionNetwork.nodesTmp.indexOf(nextHopAdd);
-        CtrlActionNetwork.processNextHopAddInd(destAddInd, nextHopAddInd, route, nextHopAdd);
+        nextHopAddInd = CtrlActionNetwork.processNextHopAddInd(destAddInd, nextHopAddInd, route, nextHopAdd);
         // add pathRouting
         CtrlActionNetwork.addPathRoute(destAddInd, nextHopAddInd, route);
         CtrlActionNetwork.updatesEdgesData(destAddInd, nextHopAddInd, route);
@@ -644,7 +646,7 @@ CtrlActionNetwork.checkForExistingData = function (nodes) {
     "use strict";
     $.each(nodes, function (ignore, node) {
         if (node["ip-address"]) {
-            const shortAddObj = this.calculateNodeShortAddress(node);
+            const shortAddObj = CtrlActionNetwork.calculateNodeShortAddress(node);
             let nodeTitle = CtrlActionNetwork.setupNodeTitleFromNodesData(node);
             CtrlActionNetwork.nodesInfo[`${shortAddObj.shortAddress}`] = {
                 ipAddress: node["ip-address"],

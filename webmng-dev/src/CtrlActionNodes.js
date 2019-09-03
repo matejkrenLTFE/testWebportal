@@ -378,10 +378,10 @@ CtrlActionNodes.buildNodeListHTML = function (nodes) {
                 node["tx-ack-packets"] + "'" + " data-device-last-tx-ack-timestamp='" + deviceLastTxAckTimestamp +
                 "'" + " data-node-rx-link-quality='" + node["rx-link-quality"] + "'" + " data-node-short='" + shortAddObj.shortAddress +
                 "'" + " data-node-commissioned='" + defineDeviceCommissioningTimeExport(commissioningTime) + "'" + " data-node-succ-comm='" +
-                defineDeviceLastSuccTimeExport + "'" + " data-node-tx-ack-packets='" + node["tx-ack-packets"] + "'" + " data-node-tx-no-ack-packets='" +
+                defineDeviceLastSuccTimeExport(node) + "'" + " data-node-tx-ack-packets='" + node["tx-ack-packets"] + "'" + " data-node-tx-no-ack-packets='" +
                 node["tx-no-ack-packets"] + "'" + " data-device-last-rx-timestamp='" + deviceLastRxTimestamp + "'" + " data-node-title='" +
                 nodeTitle + "'" + " data-node-dc-state='" + defineDeviceDcStateTxt(node) + "'" + " data-node-state='" + CtrlActionNodes.getNodeStateString(node["node-state"]) +
-                "'" + " data-node-successful-communications='" + defineDeviceSuccCommTxt + "'" + " data-node-last-successful-communication='" + defineDeviceSuccCommTimeTxt(node) +
+                "'" + " data-node-successful-communications='" + defineDeviceSuccCommTxt(node) + "'" + " data-node-last-successful-communication='" + defineDeviceSuccCommTimeTxt(node) +
                 "'" + " data-node-unsuccessful-communications='" + defineDeviceUnSuccCommTxt(node) + "'" +
                 " data-node-last-unsuccessful-communication='" + defineDeviceUnSuccCommTimeTxt(node) + "'" + " data-node-security-counter='" +
                 defineDeviceSecurityCounterTxt(node) + "'" + " data-node-success-rate='" + defineDeviceSuccessRateTxt(node) +

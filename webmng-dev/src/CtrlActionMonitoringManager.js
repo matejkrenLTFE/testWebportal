@@ -388,12 +388,11 @@ CtrlActionMonitoringManager.getCategoryColor = function (profileCategory) {
 
 CtrlActionMonitoringManager.updateProfileCategory = function (profileCategory) {
     "use strict";
-    profileCategory.toLowerCase();
     const cntWan = "CNT-WAN";
-    if (profileCategory.indexOf(cntWan.toLowerCase()) !== -1) {
-        profileCategory = cntWan.toLowerCase();
+    if (profileCategory.indexOf(cntWan) !== -1) {
+        profileCategory = cntWan;
     }
-    return profileCategory;
+    return profileCategory.toLowerCase();
 };
 CtrlActionMonitoringManager.getChartType = function (profileType) {
     "use strict";
@@ -486,6 +485,7 @@ CtrlActionMonitoringManager.setCounters = function (counters, profileCategory, p
         }
         self.chartLabels.push(moment(val["time-stamp"]).format(AppMain.localization("DATETIME_FORMAT")));
         let value = 0;
+        profileCategory = profileCategory.toLowerCase();
         if (self.typeObj[`${profileType}`] === "COUNTER") {
             value = Math.max(parseInt(val[`${profileCategory}`][`${profileType}`], 10) - parseInt(counters[index - 1][`${profileCategory}`][`${profileType}`], 10), 0);
         } else {

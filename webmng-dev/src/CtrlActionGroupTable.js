@@ -233,6 +233,7 @@ const checkGroupsLength = function (groups) {
     return groups;
 };
 const setDevicesHtml = function (groups) {
+    "use strict";
     let devicesHtml = "";
     if (groups.length > 0) {
         devicesHtml += groups[0]._DeviceID;
