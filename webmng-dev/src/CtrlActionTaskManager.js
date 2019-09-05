@@ -720,6 +720,20 @@ CtrlActionTaskManager.addJobFileUpload = function (jobType, node) {
     }, 250);
 };
 
+CtrlActionTaskManager.addJobSecondProcessNext = function (node, jobObj, jobType) {
+    "use strict";
+    if (node && !node.back) {
+        jobObj.ID = node.ID;
+        CtrlActionTaskManager.addResourceRest(jobObj, true);
+    } else {
+        if (jobType === "notification") {
+            CtrlActionTaskManager.addResourceRest(jobObj);
+        } else {
+            CtrlActionTaskManager.addJobThirdStep(jobObj);
+        }
+    }
+};
+
 /**
  * function for pop up add job: second step
  * @param jobType
@@ -801,118 +815,14 @@ CtrlActionTaskManager.addJobSecond = function (jobType, node) {
             confirm: {
                 text: this.helper.getAddJobSecondConfirmText(node, jobType),
                 action: function () {
-                    let jobObj = {};
-                    jobObj.jobType = jobType;
-                    jobObj.ReplyAddress = $("input[name='reply-address']").val();
-                    if (jobType === "notification" || obj.isNodeNotification) {
-                        jobObj.AcceptDataNotification = true;
-                        jobObj.AsyncReplyFlag = $("input[name=\"async-data-push\"]:checked").length > 0;
-                    } else {
-                        const priority = $("input[name='priority']").val();
-                        jobObj.Priority = priority !== ""
-                            ? (Number.isNaN(parseInt(priority, 10))
-                                ? 255
-                                : parseInt(priority, 10))
-                            : 255;
-                        if (jobObj.Priority > 255 || jobObj.Priority < 0) {
-                            jobObj.Priority = 255;
-                            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                                    AppMain.t("PRIORITY_ERROR_TXT", "TASK_MANAGER"));
-                            return false;
-                        }
-                        const expires = $("#dateExpires").val();
-                        jobObj.Expires = (expires && expires !== "")
-                            ? moment(expires).toISOString()
-                            : "";
-
-                        const dateNotOlderThan = $("#dateNotOlderThan").val();
-                        jobObj.NotOlderThan = dateNotOlderThan !== ""
-                            ? moment(dateNotOlderThan).toISOString()
-                            : "";
-
-                        jobObj.AsyncReplyFlag = $("input[name=\"async-data-push\"]:checked").length > 0;
-
-                        if (jobType === "scheduled" || obj.isNodeScheduled) {
-                            const startTime = $("#dateStart").val();
-                            jobObj.Activates = startTime !== ""
-                                ? moment(startTime).toISOString()
-                                : "";
-
-                            jobObj.RepeatingInterval = $("#repeating").val();
-
-                            const dMinutes = parseInt($("#d-minutes").val(), 10);
-                            jobObj.Duration = moment.duration({
-                                seconds: 0,
-                                minutes: (Number.isNaN(dMinutes) || dMinutes < 0)
-                                    ? 0
-                                    : dMinutes,
-                                hours: 0,
-                                days: 0,
-                                months: 0,
-                                years: 0
-                            }).toISOString();
-                            if (moment.duration(jobObj.Duration).asSeconds() === 0) {
-                                jobObj.Duration = "";
-                            }
-                        }
-                    }
-
-                    // manage add rules
-                    if (jobObj.NotOlderThan && jobObj.NotOlderThan !== "" && moment(jobObj.NotOlderThan).diff(moment()) <= 0) {
-                        // Data Valid until  > current
-                        CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                                AppMain.t("DATA_VALID_ERROR_TXT", "TASK_MANAGER"));
+                    let jobObj = CtrlActionTaskManager.helper.getAddJobSecondResourceObject(jobType, obj, CtrlActionTaskManager);
+                    if (!jobObj) {
                         return false;
                     }
-                    if (jobObj.ReplyAddress) {
-                        let re = new RegExp("^[a-zA-Z\\d\\-:\/_.]+$");
-                        if (!re.test(jobObj.ReplyAddress)) {
-                            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                                    AppMain.t("PUSH_DEST_ERROR_TXT", "TASK_MANAGER"));
-                            return false;
-                        }
+                    if (!CtrlActionTaskManager.helper.checkAddJobSecondManageAddRules(jobObj, jobType, CtrlActionTaskManager)) {
+                        return false;
                     }
-                    if (jobType === "scheduled") {
-                        if (jobObj.Activates === "") {
-                            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                                    AppMain.t("START_TIME_ERROR_TXT", "TASK_MANAGER"));
-                            return false;
-                        }
-                        if (jobObj.Expires && jobObj.Expires !== "") {
-                            if (moment(jobObj.Expires).diff(moment(jobObj.Activates)) <= 0) { //expires > start_time
-                                CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                                        AppMain.t("EXPIRES_START_TIME_GREATER_ERROR_TXT", "TASK_MANAGER"));
-                                return false;
-                            }
-                            if (jobObj.NotOlderThan && jobObj.NotOlderThan !== "" && moment(jobObj.NotOlderThan)
-                                .diff(moment(jobObj.Expires)) <= 0) { //Data Valid until > expires
-                                CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                                        AppMain.t("EXPIRES_DATA_VALID_GREATER_ERROR_TXT", "TASK_MANAGER"));
-                                return false;
-                            }
-                        }
-                        if (jobObj.Duration && moment.duration(jobObj.Duration).asSeconds() < 60) {
-                            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                                    AppMain.t("DURATION_ERROR_TXT", "TASK_MANAGER"));
-                            return false;
-                        }
-                        if (jobObj.RepeatingInterval && moment.duration(jobObj.RepeatingInterval).asSeconds() < 60) {
-                            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                                    AppMain.t("REPEATING_ERROR_TXT", "TASK_MANAGER"));
-                            return false;
-                        }
-                    }
-
-                    if (node && !node.back) {
-                        jobObj.ID = node.ID;
-                        CtrlActionTaskManager.addResourceRest(jobObj, true);
-                    } else {
-                        if (jobType === "notification") {
-                            CtrlActionTaskManager.addResourceRest(jobObj);
-                        } else {
-                            CtrlActionTaskManager.addJobThirdStep(jobObj);
-                        }
-                    }
+                    CtrlActionTaskManager.addJobSecondProcessNext(node, jobObj, jobType);
                     return true;
                 }
             },
@@ -1352,37 +1262,6 @@ CtrlActionTaskManager.addJobGroup = function (jobObj) {
     }, 300);
 };
 
-
-/**
- * relative range selector
- * @type {{"0": string, FFFDFFFF5AFFFFFFFFFFFFFF: String, FFFDFFFF1EFFFFFFFFFFFFFF: String, FFFDFFFF01FFFFFFFFFFFFFF: String, FFFDFFFFFF01FFFFFFFFFFFF:
- * String, FFFDFFFF07FFFFFFFFFFFFFF: String, FFFDFFFFB4FFFFFFFFFFFFFF: String}}
- */
-CtrlActionTaskManager.relativeSelector = {
-    "0": "---",
-    "FFFDFFFFFF01FFFFFFFFFFFF": AppMain.t("1_HOUR", "TASK_MANAGER"),
-    "FFFDFFFF01FFFFFFFFFFFFFF": AppMain.t("1_DAY", "TASK_MANAGER"),
-    "FFFDFFFF07FFFFFFFFFFFFFF": AppMain.t("7_DAY", "TASK_MANAGER"),
-    "FFFDFFFF1EFFFFFFFFFFFFFF": AppMain.t("30_DAY", "TASK_MANAGER"),
-    "FFFDFFFF5AFFFFFFFFFFFFFF": AppMain.t("90_DAY", "TASK_MANAGER"),
-    "FFFDFFFFB4FFFFFFFFFFFFFF": AppMain.t("180_DAY", "TASK_MANAGER")
-};
-
-/**
- * type selector
- * @type {{"cos:long-unsigned": String, "cos:enum": String, "cos:octet-string": String, "cos:integer": String}}
- */
-CtrlActionTaskManager.typeSelector = {
-    "cos:enum": AppMain.t("ENUM", "TASK_MANAGER"),
-    "cos:long": AppMain.t("LONG", "TASK_MANAGER"),
-    "cos:integer": AppMain.t("INTEGER", "TASK_MANAGER"),
-    "cos:boolean": AppMain.t("BOOLEAN", "TASK_MANAGER"),
-    "cos:unsigned": AppMain.t("UNSIGNED", "TASK_MANAGER"),
-    "cos:long-unsigned": AppMain.t("LONG_UNSIGNED", "TASK_MANAGER"),
-    "cos:double-long-unsigned": AppMain.t("DOUBLE_LONG_UNSIGNED", "TASK_MANAGER"),
-    "cos:octet-string": AppMain.t("OCTET_STRING", "TASK_MANAGER")
-};
-
 /**
  * helper function for cosem html
  * @param jobType
@@ -1403,11 +1282,10 @@ CtrlActionTaskManager.getAddCosemHTML = function (jobType, jobService) {
             "</div>";
 
     const repeatingSelector = AppMain.html.formElementSelect("relative-selector",
-            CtrlActionTaskManager.relativeSelector, {
+            CtrlActionTaskManager.helper.relativeSelector, {
         label: AppMain.t("RELATIVE_ACCESS_SELECTION", "TASK_MANAGER"),
         elementSelected: "0"
     }, undefined, "textfield-short-175 is-dirty");
-
 
     const timeSelRowHtml = "<div class=\"mdl-textfield mdl-textfield-less-padding mdl-textfield--floating-label is-dirty\" style='margin-right: 20px;'>" +
             "<input class=\"mdl-textfield__input just-number\" type=\"text\" id='min-time-diff' name=\"min-time-diff\"/>" +
@@ -1419,7 +1297,7 @@ CtrlActionTaskManager.getAddCosemHTML = function (jobType, jobService) {
             "</div>";
 
     const typeSelector = AppMain.html.formElementSelect("variable-type",
-            CtrlActionTaskManager.typeSelector, {
+            CtrlActionTaskManager.helper.typeSelector, {
         label: AppMain.t("VALUE_TYPE", "TASK_MANAGER")
     }, undefined, "textfield-short-145 is-dirty");
 
@@ -1430,42 +1308,13 @@ CtrlActionTaskManager.getAddCosemHTML = function (jobType, jobService) {
     const attrLabel = $("#attr-label");
     attrLabel.html(AppMain.t("ATTRIBUTE_ID", "TASK_MANAGER") + " *");
 
-    switch (jobType) {
-    case "on-demand":
-        switch (jobService) {
-        case "get":
-            return accessSelRowHtml;
-        case "action":
-            attrLabel.html(AppMain.t("METHOD_ID", "TASK_MANAGER") + " *");
-            return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
-        case "set":
-            return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
-        case "time-sync":
-            return timeSelRowHtml;
-        }
-        break;
-    case "scheduled":
-        switch (jobService) {
-        case "get":
-            return repeatingSelector;
-        case "action":
-            attrLabel.html(AppMain.t("METHOD_ID", "TASK_MANAGER") + " *");
-            return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
-        case "set":
-            return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
-        case "time-sync":
-            return timeSelRowHtml;
-        }
-        break;
+    if (jobType === "on-demand") {
+        return this.helper.getAddCosemHTMLForOnDemand(jobService, accessSelRowHtml, attrLabel, typeSelector, valueInput, timeSelRowHtml);
+    }
+    if (jobType === "scheduled") {
+        return this.helper.getAddCosemHTMLForScheduled(jobService, repeatingSelector, attrLabel, typeSelector, valueInput, timeSelRowHtml);
     }
     return "";
-};
-
-const getAddCosemTableHTMLMap = {
-    "get": AppMain.t("ACCESS_SELECTION", "TASK_MANAGER"),
-    "set": AppMain.t("VALUE", "TASK_MANAGER"),
-    "action": AppMain.t("VALUE", "TASK_MANAGER"),
-    "time-sync": AppMain.t("TIME_SYNC", "TASK_MANAGER")
 };
 
 /**
@@ -1475,8 +1324,8 @@ const getAddCosemTableHTMLMap = {
  */
 CtrlActionTaskManager.getAddCosemTableHTML = function (jobService) {
     "use strict";
-    if (defined(getAddCosemTableHTMLMap[`${jobService}`])) {
-        return getAddCosemTableHTMLMap[jobService];
+    if (defined(this.helper.getAddCosemTableHTMLMap[`${jobService}`])) {
+        return this.helper.getAddCosemTableHTMLMap[jobService];
     }
     return "";
 };
@@ -1809,23 +1658,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
                 varVal = $("#variable-value");
                 varVal.addClass("just-number"); // also enum is integer
                 varType.on("change", function () {
-                    switch (varType.val()) {
-                    case "cos:enum":
-                    case "cos:integer":
-                    case "cos:long":
-                    case "cos:boolean":
-                    case "cos:long-unsigned":
-                    case "cos:unsigned":
-                    case "cos:double-long-unsigned":
-                        varVal.addClass("just-number");
-                        break;
-                    default:
-                        varVal.removeClass("just-number");
-                    }
-                    if (varVal.hasClass("just-number")) {
-                        const nonNumReg = /[^0-9]/g;
-                        varVal.val(varVal.val().replace(nonNumReg, ""));
-                    }
+                    CtrlActionTaskManager.helper.varTypeOnchangeForJustNumberCheck(varType, varVal);
                     return false;
                 });
 
@@ -2285,12 +2118,12 @@ CtrlActionTaskManager.addAttrHtml = function (attrObj) {
         devHtml += "<td colspan='2'>" + AppMain.t("ACCESS_SELECTION_FROM", "TASK_MANAGER") + ": " + attrObj.accessFromTXT + " <br/> "
                 + AppMain.t("ACCESS_SELECTION_TO", "TASK_MANAGER") + ": " + attrObj.accessToTXT + "</td>";
     } else if (attrObj.relAccessFrom && attrObj.relAccessFrom !== "") {
-        devHtml += "<td colspan='2'>" + CtrlActionTaskManager.relativeSelector[`${attrObj.relAccessFrom}`] + "</td>";
+        devHtml += "<td colspan='2'>" + CtrlActionTaskManager.helper.relativeSelector[`${attrObj.relAccessFrom}`] + "</td>";
     } else if ((attrObj.maxDiff !== "") || (attrObj.minDiff !== "")) {
         devHtml += "<td colspan='2'>" + AppMain.t("MAX_TIME_DIFF", "TASK_MANAGER") + ": " + attrObj.maxDiff + " <br/> "
                 + AppMain.t("MIN_TIME_DIFF", "TASK_MANAGER") + ": " + attrObj.minDiff + "</td>";
     } else if (attrObj.vType.length) {
-        devHtml += "<td colspan='2'>" + CtrlActionTaskManager.typeSelector[`${attrObj.varType}`] + "(" + attrObj.varValue + ")</td>";
+        devHtml += "<td colspan='2'>" + CtrlActionTaskManager.helper.typeSelector[`${attrObj.varType}`] + "(" + attrObj.varValue + ")</td>";
     } else {
         devHtml += "<td></td>";
     }

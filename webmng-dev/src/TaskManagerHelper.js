@@ -12,6 +12,73 @@ const moment = require("moment");
 module.exports.TaskManagerHelper = function () {
     "use strict";
 
+
+    const justNumberVarTypeValues = ["cos:enum", "cos:integer", "cos:long", "cos:boolean", "cos:long-unsigned", "cos:unsigned", "cos:double-long-unsigned"];
+
+    this.repeatingMap = {
+        "P1D": AppMain.t("DAILY", "TASK_MANAGER"),
+        "P7D": AppMain.t("WEEKLY", "TASK_MANAGER"),
+        "P1M": AppMain.t("MONTHLY", "TASK_MANAGER"),
+        "P1Y": AppMain.t("YEARLY", "TASK_MANAGER"),
+        "PT1M": AppMain.t("PT1M", "TASK_MANAGER")
+    };
+
+
+    this.repeatValues = {
+        "": AppMain.t("NONE", "TASK_MANAGER"),
+        "P1D": AppMain.t("DAILY", "TASK_MANAGER"),
+        "P7D": AppMain.t("WEEKLY", "TASK_MANAGER"),
+        "P1M": AppMain.t("MONTHLY", "TASK_MANAGER"),
+        "P1Y": AppMain.t("YEARLY", "TASK_MANAGER"),
+        "PT1M": AppMain.t("PT1M", "TASK_MANAGER"),
+        "PT5M": AppMain.t("PT5M", "TASK_MANAGER"),
+        "PT10M": AppMain.t("PT10M", "TASK_MANAGER"),
+        "PT15M": AppMain.t("PT15M", "TASK_MANAGER"),
+        "PT30M": AppMain.t("PT30M", "TASK_MANAGER"),
+        "PT1H": AppMain.t("PT1H", "TASK_MANAGER"),
+        "PT2H": AppMain.t("PT2H", "TASK_MANAGER"),
+        "PT3H": AppMain.t("PT3H", "TASK_MANAGER"),
+        "PT5H": AppMain.t("PT5H", "TASK_MANAGER"),
+        "PT6H": AppMain.t("PT6H", "TASK_MANAGER"),
+        "PT12H": AppMain.t("PT12H", "TASK_MANAGER")
+    };
+
+    /**
+     * relative range selector
+     * @type {{"0": string, FFFDFFFF5AFFFFFFFFFFFFFF: String, FFFDFFFF1EFFFFFFFFFFFFFF: String, FFFDFFFF01FFFFFFFFFFFFFF: String, FFFDFFFFFF01FFFFFFFFFFFF:
+     * String, FFFDFFFF07FFFFFFFFFFFFFF: String, FFFDFFFFB4FFFFFFFFFFFFFF: String}}
+     */
+    this.relativeSelector = {
+        "0": "---",
+        "FFFDFFFFFF01FFFFFFFFFFFF": AppMain.t("1_HOUR", "TASK_MANAGER"),
+        "FFFDFFFF01FFFFFFFFFFFFFF": AppMain.t("1_DAY", "TASK_MANAGER"),
+        "FFFDFFFF07FFFFFFFFFFFFFF": AppMain.t("7_DAY", "TASK_MANAGER"),
+        "FFFDFFFF1EFFFFFFFFFFFFFF": AppMain.t("30_DAY", "TASK_MANAGER"),
+        "FFFDFFFF5AFFFFFFFFFFFFFF": AppMain.t("90_DAY", "TASK_MANAGER"),
+        "FFFDFFFFB4FFFFFFFFFFFFFF": AppMain.t("180_DAY", "TASK_MANAGER")
+    };
+    /**
+     * type selector
+     * @type {{"cos:long-unsigned": String, "cos:enum": String, "cos:octet-string": String, "cos:integer": String}}
+     */
+    this.typeSelector = {
+        "cos:enum": AppMain.t("ENUM", "TASK_MANAGER"),
+        "cos:long": AppMain.t("LONG", "TASK_MANAGER"),
+        "cos:integer": AppMain.t("INTEGER", "TASK_MANAGER"),
+        "cos:boolean": AppMain.t("BOOLEAN", "TASK_MANAGER"),
+        "cos:unsigned": AppMain.t("UNSIGNED", "TASK_MANAGER"),
+        "cos:long-unsigned": AppMain.t("LONG_UNSIGNED", "TASK_MANAGER"),
+        "cos:double-long-unsigned": AppMain.t("DOUBLE_LONG_UNSIGNED", "TASK_MANAGER"),
+        "cos:octet-string": AppMain.t("OCTET_STRING", "TASK_MANAGER")
+    };
+
+    this.getAddCosemTableHTMLMap = {
+        "get": AppMain.t("ACCESS_SELECTION", "TASK_MANAGER"),
+        "set": AppMain.t("VALUE", "TASK_MANAGER"),
+        "action": AppMain.t("VALUE", "TASK_MANAGER"),
+        "time-sync": AppMain.t("TIME_SYNC", "TASK_MANAGER")
+    };
+
     this.isResourceUpgrade = function (node) {
         return defined(node.ResourceType) && node.ResourceType.toString() === "UPGRADE";
     };
@@ -243,34 +310,6 @@ module.exports.TaskManagerHelper = function () {
         return (defined(node.Duration))
             ? moment.duration(node.Duration).asMinutes() + " " + AppMain.t("MINUTES", "global")
             : "---";
-    };
-
-    this.repeatingMap = {
-        "P1D": AppMain.t("DAILY", "TASK_MANAGER"),
-        "P7D": AppMain.t("WEEKLY", "TASK_MANAGER"),
-        "P1M": AppMain.t("MONTHLY", "TASK_MANAGER"),
-        "P1Y": AppMain.t("YEARLY", "TASK_MANAGER"),
-        "PT1M": AppMain.t("PT1M", "TASK_MANAGER")
-    };
-
-
-    this.repeatValues = {
-        "": AppMain.t("NONE", "TASK_MANAGER"),
-        "P1D": AppMain.t("DAILY", "TASK_MANAGER"),
-        "P7D": AppMain.t("WEEKLY", "TASK_MANAGER"),
-        "P1M": AppMain.t("MONTHLY", "TASK_MANAGER"),
-        "P1Y": AppMain.t("YEARLY", "TASK_MANAGER"),
-        "PT1M": AppMain.t("PT1M", "TASK_MANAGER"),
-        "PT5M": AppMain.t("PT5M", "TASK_MANAGER"),
-        "PT10M": AppMain.t("PT10M", "TASK_MANAGER"),
-        "PT15M": AppMain.t("PT15M", "TASK_MANAGER"),
-        "PT30M": AppMain.t("PT30M", "TASK_MANAGER"),
-        "PT1H": AppMain.t("PT1H", "TASK_MANAGER"),
-        "PT2H": AppMain.t("PT2H", "TASK_MANAGER"),
-        "PT3H": AppMain.t("PT3H", "TASK_MANAGER"),
-        "PT5H": AppMain.t("PT5H", "TASK_MANAGER"),
-        "PT6H": AppMain.t("PT6H", "TASK_MANAGER"),
-        "PT12H": AppMain.t("PT12H", "TASK_MANAGER")
     };
 
     this.getResourceRepeatingTXT = function (node) {
@@ -685,37 +724,56 @@ module.exports.TaskManagerHelper = function () {
         return "";
     };
 
+    const setResourceScheduledOrNotificationProcessNodeUndefined = function (obj, node) {
+        if (node !== undefined) {
+            obj.isNodeNotification = defined(node.ResourceType) && node.ResourceType.toString() === "DATA-NOTIFICATION";
+        }
+    };
+    const setResourceScheduledOrNotificationProcessNodeNotNotificationPom = function (obj, node) {
+        if (node.Activates && node.Activates !== "") {
+            obj.isNodeScheduled = true;
+        }
+        if (node.RepeatingInterval && node.RepeatingInterval !== "") {
+            obj.isNodeScheduled = true;
+        }
+        if (node.Duration && node.Duration !== "") {
+            obj.isNodeScheduled = true;
+        }
+    };
+    const setResourceScheduledOrNotificationProcessNodeNotNotification = function (obj, node) {
+        if (!obj.isNodeNotification && node !== undefined) {
+            setResourceScheduledOrNotificationProcessNodeNotNotificationPom(obj, node);
+        }
+    };
+    const setResourceScheduledOrNotificationProcessNodeNotification = function (obj, jobType) {
+        if (jobType === "notification") {
+            obj.isNodeNotification = true;
+            obj.isNodeScheduled = false;
+        }
+    };
+    const setResourceScheduledOrNotificationProcessNodeScheduled = function (obj, jobType) {
+        if (jobType === "scheduled") {
+            obj.isNodeNotification = false;
+            obj.isNodeScheduled = true;
+        }
+    };
+    const setResourceScheduledOrNotificationProcessNodeOnDemand = function (obj, jobType) {
+        if (jobType === "on-demand") {
+            obj.isNodeNotification = false;
+            obj.isNodeScheduled = false;
+        }
+    };
+
     this.setResourceScheduledOrNotification = function (node, jobType) {
         let obj = {
             isNodeScheduled: false,
             isNodeNotification: false
         };
-        if (node !== undefined) {
-            obj.isNodeNotification = defined(node.ResourceType) && node.ResourceType.toString() === "DATA-NOTIFICATION";
-        }
-        if (!obj.isNodeNotification && node !== undefined) {
-            if (node.Activates && node.Activates !== "") {
-                obj.isNodeScheduled = true;
-            }
-            if (node.RepeatingInterval && node.RepeatingInterval !== "") {
-                obj.isNodeScheduled = true;
-            }
-            if (node.Duration && node.Duration !== "") {
-                obj.isNodeScheduled = true;
-            }
-        }
-        if (jobType === "notification") {
-            obj.isNodeNotification = true;
-            obj.isNodeScheduled = false;
-        }
-        if (jobType === "scheduled") {
-            obj.isNodeNotification = false;
-            obj.isNodeScheduled = true;
-        }
-        if (jobType === "on-demand") {
-            obj.isNodeNotification = false;
-            obj.isNodeScheduled = false;
-        }
+        setResourceScheduledOrNotificationProcessNodeUndefined(obj, node);
+        setResourceScheduledOrNotificationProcessNodeNotNotification(obj, node);
+        setResourceScheduledOrNotificationProcessNodeNotification(obj, jobType);
+        setResourceScheduledOrNotificationProcessNodeScheduled(obj, jobType);
+        setResourceScheduledOrNotificationProcessNodeOnDemand(obj, jobType);
         return obj;
     };
 
@@ -752,5 +810,200 @@ module.exports.TaskManagerHelper = function () {
             : jobType === "notification"
                 ? AppMain.t("CREATE", "global")
                 : AppMain.t("NEXT", "global");
+    };
+
+    const getInsertedPriority = function () {
+        const priority = $("input[name='priority']").val();
+        return priority !== ""
+            ? (Number.isNaN(parseInt(priority, 10))
+                ? 255
+                : parseInt(priority, 10))
+            : 255;
+    };
+    const getInsertedExpires = function () {
+        const expires = $("#dateExpires").val();
+        return (expires && expires !== "")
+            ? moment(expires).toISOString()
+            : "";
+    };
+    const getInsertedNotOlderThan = function () {
+        const dateNotOlderThan = $("#dateNotOlderThan").val();
+        return dateNotOlderThan !== ""
+            ? moment(dateNotOlderThan).toISOString()
+            : "";
+    };
+    const getInsertedStartTime = function () {
+        const startTime = $("#dateStart").val();
+        return startTime !== ""
+            ? moment(startTime).toISOString()
+            : "";
+    };
+    const getInsertedDuration = function () {
+        const dMinutes = parseInt($("#d-minutes").val(), 10);
+        const durObj = moment.duration({
+            seconds: 0,
+            minutes: (Number.isNaN(dMinutes) || dMinutes < 0)
+                ? 0
+                : dMinutes,
+            hours: 0,
+            days: 0,
+            months: 0,
+            years: 0
+        }).toISOString();
+        if (moment.duration(durObj).asSeconds() === 0) {
+            return "";
+        }
+        return durObj;
+    };
+
+    this.getAddJobSecondResourceObjectNotNotification = function (jobObj, jobType, obj, CtrlActionTaskManager) {
+        jobObj.Priority = getInsertedPriority();
+        if (jobObj.Priority > 255 || jobObj.Priority < 0) {
+            jobObj.Priority = 255;
+            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
+                    AppMain.t("PRIORITY_ERROR_TXT", "TASK_MANAGER"));
+            return false;
+        }
+        jobObj.Expires = getInsertedExpires();
+        jobObj.NotOlderThan = getInsertedNotOlderThan();
+        jobObj.AsyncReplyFlag = $("input[name=\"async-data-push\"]:checked").length > 0;
+        if (jobType === "scheduled" || obj.isNodeScheduled) {
+            jobObj.Activates = getInsertedStartTime();
+            jobObj.RepeatingInterval = $("#repeating").val();
+            jobObj.Duration = getInsertedDuration();
+        }
+    };
+
+    this.getAddJobSecondResourceObject = function (jobType, obj, CtrlActionTaskManager) {
+        let jobObj = {};
+        jobObj.jobType = jobType;
+        jobObj.ReplyAddress = $("input[name='reply-address']").val();
+        if (jobType === "notification" || obj.isNodeNotification) {
+            jobObj.AcceptDataNotification = true;
+            jobObj.AsyncReplyFlag = $("input[name=\"async-data-push\"]:checked").length > 0;
+        } else {
+            this.getAddJobSecondResourceObjectNotNotification(jobObj, jobType, obj, CtrlActionTaskManager);
+        }
+        return jobObj;
+    };
+    const isJobObjExpiresOk = function (jobObj) { //expires > start_time
+        return moment(jobObj.Expires).diff(moment(jobObj.Activates)) <= 0;
+    };
+    const isJobObjNotOlderThanOk = function (jobObj) {//Data Valid until > expires
+        return jobObj.NotOlderThan && jobObj.NotOlderThan !== "" && moment(jobObj.NotOlderThan).diff(moment(jobObj.Expires)) <= 0;
+    };
+    const isJobObjDurationOk = function (jobObj) {
+        return jobObj.Duration && moment.duration(jobObj.Duration).asSeconds() < 60;
+    };
+    const isJobObjRepeatingOK = function (jobObj) {
+        return jobObj.RepeatingInterval && moment.duration(jobObj.RepeatingInterval).asSeconds() < 60;
+    };
+    this.checkAddJobSecondManageAddRulesPom5 = function (jobObj, CtrlActionTaskManager) {
+        // manage add rules
+        if (isJobObjExpiresOk(jobObj)) { //expires > start_time
+            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
+                    AppMain.t("EXPIRES_START_TIME_GREATER_ERROR_TXT", "TASK_MANAGER"));
+            return false;
+        }
+        if (isJobObjNotOlderThanOk(jobObj)) { //Data Valid until > expires
+            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
+                    AppMain.t("EXPIRES_DATA_VALID_GREATER_ERROR_TXT", "TASK_MANAGER"));
+            return false;
+        }
+        return true;
+    };
+    this.checkAddJobSecondManageAddRulesPom4 = function (jobObj, CtrlActionTaskManager) {
+        // manage add rules
+        if (jobObj.Expires && jobObj.Expires !== "") {
+            return this.checkAddJobSecondManageAddRulesPom5(jobObj, CtrlActionTaskManager);
+        }
+        return true;
+    };
+    this.checkAddJobSecondManageAddRulesPom3 = function (jobObj, CtrlActionTaskManager) {
+        // manage add rules
+        if (!this.checkAddJobSecondManageAddRulesPom4(jobObj, CtrlActionTaskManager)) {
+            return false;
+        }
+        if (isJobObjDurationOk(jobObj)) {
+            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
+                    AppMain.t("DURATION_ERROR_TXT", "TASK_MANAGER"));
+            return false;
+        }
+        if (isJobObjRepeatingOK(jobObj)) {
+            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
+                    AppMain.t("REPEATING_ERROR_TXT", "TASK_MANAGER"));
+            return false;
+        }
+        return true;
+    };
+    this.checkAddJobSecondManageAddRulesPom2 = function (jobObj, CtrlActionTaskManager) {
+        // manage add rules
+        if (jobObj.Activates === "") {
+            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
+                    AppMain.t("START_TIME_ERROR_TXT", "TASK_MANAGER"));
+            return false;
+        }
+        return this.checkAddJobSecondManageAddRulesPom3(jobObj, CtrlActionTaskManager);
+    };
+    this.checkAddJobSecondManageAddRulesPom = function (jobObj, jobType, CtrlActionTaskManager) {
+        // manage add rules
+        let re = new RegExp("^[a-zA-Z\\d\\-:\/_.]+$");
+        if (jobObj.ReplyAddress && !re.test(jobObj.ReplyAddress)) {
+            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
+                    AppMain.t("PUSH_DEST_ERROR_TXT", "TASK_MANAGER"));
+            return false;
+        }
+        if (jobType === "scheduled") {
+            return this.checkAddJobSecondManageAddRulesPom2(jobObj, CtrlActionTaskManager);
+        }
+        return true;
+    };
+    this.checkAddJobSecondManageAddRules = function (jobObj, jobType, CtrlActionTaskManager) {
+        // manage add rules
+        if (jobObj.NotOlderThan && jobObj.NotOlderThan !== "" && moment(jobObj.NotOlderThan).diff(moment()) <= 0) {
+            // Data Valid until  > current
+            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
+                    AppMain.t("DATA_VALID_ERROR_TXT", "TASK_MANAGER"));
+            return false;
+        }
+        return this.checkAddJobSecondManageAddRulesPom(jobObj, jobType, CtrlActionTaskManager);
+    };
+
+    this.getAddCosemHTMLForOnDemand = function (jobService, accessSelRowHtml, attrLabel, typeSelector, valueInput, timeSelRowHtml) {
+        switch (jobService) {
+        case "get":
+            return accessSelRowHtml;
+        case "action":
+            attrLabel.html(AppMain.t("METHOD_ID", "TASK_MANAGER") + " *");
+            return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
+        case "set":
+            return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
+        case "time-sync":
+            return timeSelRowHtml;
+        }
+    };
+    this.getAddCosemHTMLForScheduled = function (jobService, repeatingSelector, attrLabel, typeSelector, valueInput, timeSelRowHtml) {
+        switch (jobService) {
+        case "get":
+            return repeatingSelector;
+        case "action":
+            attrLabel.html(AppMain.t("METHOD_ID", "TASK_MANAGER") + " *");
+            return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
+        case "set":
+            return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
+        case "time-sync":
+            return timeSelRowHtml;
+        }
+    };
+    this.varTypeOnchangeForJustNumberCheck = function (varType, varVal) {
+        if (justNumberVarTypeValues.indexOf(varType.val()) !== -1) {
+            varVal.addClass("just-number");
+        } else {
+            varVal.removeClass("just-number");
+        }
+        if (varVal.hasClass("just-number")) {
+            const nonNumReg = /[^0-9]/g;
+            varVal.val(varVal.val().replace(nonNumReg, ""));
+        }
     };
 };
