@@ -111,6 +111,12 @@ CtrlActionTaskManager.updateResourceList = function (resourceList) {
     }
 };
 
+const checkResourceListResponse = function (resourceList) {
+    "use strict";
+    return resourceList.ResponseMessage.Reply && resourceList.ResponseMessage.Reply.Result
+            && resourceList.ResponseMessage.Reply.Result.toString() === "OK";
+};
+
 /**
  * helper function for building table html
  */
@@ -119,8 +125,7 @@ CtrlActionTaskManager.buildNodeListHTML = function (resourceList) {
 
     let listHtml = "";
     this.htmlTooltips = "";
-    if (resourceList && resourceList.ResponseMessage && resourceList.ResponseMessage.Reply && resourceList.ResponseMessage.Reply.Result
-            && resourceList.ResponseMessage.Reply.Result.toString() === "OK") {
+    if (resourceList && resourceList.ResponseMessage && checkResourceListResponse(resourceList)) {
         CtrlActionTaskManager.updateResourceList(resourceList);
     }
     const self = this;
@@ -270,6 +275,7 @@ CtrlActionTaskManager.export = function () {
     download("data:text/csv;charset=utf-8;base64," + btoa(csv), build.device + "_JobsTable_" + moment().format("YYYY-MM-DD-HH-mm-ss") + ".csv", "text/csv");
 };
 
+
 /**
  * function to display job details
  */
@@ -292,88 +298,7 @@ CtrlActionTaskManager.getReferenceDevice = function (e) {
     $.each(this.resourceList, function (ignore, node) {
         if (node.ID.toString() === nodeID) {
             $thisParent.attr("data-opened", 1);
-            let html = "<tr class='nodeListShowDetails'>";
-            html += "<td colspan='3'>" + AppMain.t("NOT_OLDER_THAN", "TASK_MANAGER") + "</td>";
-            html += "<td colspan='2' style='text-align: left'>" + (defined(node.NotOlderThan)
-                ? moment(node.NotOlderThan.toString()).format(AppMain.localization("DATETIME_FORMAT"))
-                : "---") + "</td>";
-            html += "<td colspan='2'>" + AppMain.t("LAST_ACTIVATION", "TASK_MANAGER") + "</td>";
-            html += "<td colspan='6' style='text-align: left'>" + (defined(node.LastActivation)
-                ? moment(node.LastActivation.toString()).format(AppMain.localization("DATETIME_FORMAT"))
-                : "---") + "</td>";
-            html += "</tr>";
-            html += "<tr class='nodeListShowDetails'>";
-            html += "<td colspan='3'>" + AppMain.t("DURATION", "TASK_MANAGER") + "</td>";
-            let dur = "---";
-            if (defined(node.Duration)) {
-                dur = moment.duration(node.Duration).asMinutes() + AppMain.t("MINUTES", "global");
-            }
-            html += "<td colspan='2' style='text-align: left'>" + dur + "</td>";
-            html += "<td colspan='2'>" + AppMain.t("REPLY_ADDRESS", "TASK_MANAGER") + "</td>";
-            html += "<td colspan='6' style='text-align: left'>" + (defined(node.ReplyAddress)
-                ? node.ReplyAddress.toString()
-                : "---") + "</td>";
-            html += "<tr class='nodeListShowDetails'>";
-            html += "<td colspan='3'>" + AppMain.t("DEVICE_REFERENCE", "TASK_MANAGER") + "</td>";
-            let devTXT = "";
-            let isMore = false;
-            let dType = "";
-            if (defined(node.DeviceReference)) {
-                if (node.DeviceReference.length === undefined) {
-                    node.DeviceReference = [node.DeviceReference];
-                }
-                devTXT += node.DeviceReference[0]._DeviceID;
-                if (node.DeviceReference.length > 1) {
-                    devTXT += " <i class=\"material-icons more-icon\">photo_size_select_small</i>";
-                    isMore = true;
-                    dType = "devices";
-                }
-            } else {
-                if (defined(node.GroupReference)) {
-                    if (node.GroupReference.length === undefined) {
-                        node.GroupReference = [node.GroupReference];
-                    }
-                    devTXT += node.GroupReference[0]._GroupID;
-                    if (node.GroupReference.length > 1) {
-                        devTXT += " <i class=\"material-icons more-icon\">photo_size_select_small</i>";
-                        isMore = true;
-                        dType = "group";
-                    }
-                } else {
-                    if (defined(node.ResourceType) && node.ResourceType.toString() === "DATA-NOTIFICATION") {
-                        devTXT = "DG_ALL_METERS";
-                        isMore = false;
-                    }
-                }
-            }
-            if (isMore) {
-                html += "<td colspan='2' data-node-id='" + nodeID + "' data-bind-method='CtrlActionTaskManager.cosemAttributeDescriptor' " +
-                        "data-bind-event='click' data-more-type='" + dType + "' class='cursor-pointer' style='text-align: left'>" + devTXT;
-                html += "</td>";
-            } else {
-                html += "<td colspan='2' style='text-align: left'>" + devTXT;
-                html += "</td>";
-            }
-            html += "<td colspan='2'>" + AppMain.t("OBJECT", "TASK_MANAGER") + "</td>";
-            let cosemTXT = "";
-            if (defined(node.CosemAttributeDescriptor)) {
-                if (node.CosemAttributeDescriptor.length === undefined) {
-                    node.CosemAttributeDescriptor = [node.CosemAttributeDescriptor];
-                }
-                cosemTXT += CtrlActionTaskManager.transformObject(node.CosemAttributeDescriptor[0]["class-id"], node.CosemAttributeDescriptor[0]["instance-id"],
-                        node.CosemAttributeDescriptor[0]["attribute-id"]);
-                if (node.CosemAttributeDescriptor.length > 1) {
-                    cosemTXT += " <i class=\"material-icons more-icon\">photo_size_select_small</i>";
-                }
-            } else {
-                cosemTXT = "---";
-            }
-            if (node.CosemAttributeDescriptor && node.CosemAttributeDescriptor.length > 1) {
-                html += "<td class='cursor-pointer' data-node-id='" + nodeID + "' data-bind-method='CtrlActionTaskManager.cosemAttributeDescriptor' " +
-                        "data-bind-event='click' data-more-type='cosem' colspan='7' style='text-align: left;' >" + cosemTXT + "</td> </tr>";
-            } else {
-                html += "<td colspan='6' style='text-align: left;' >" + cosemTXT + "</td> </tr>";
-            }
+            const html = CtrlActionTaskManager.helper.getDeviceReferenceTableLineHtml(node, nodeID);
             $thisParent.after(html);
             return false;
         }
@@ -407,7 +332,7 @@ CtrlActionTaskManager.cosemAttributeDescriptor = function (e) {
                             tableHTML += "</tr><tr>";
                         }
                     }
-                    tableHTML += "<td>" + CtrlActionTaskManager.transformObject(cosem["class-id"], cosem["instance-id"], cosem["attribute-id"]) + "</td>";
+                    tableHTML += "<td>" + CtrlActionTaskManager.helper.transformObject(cosem["class-id"], cosem["instance-id"], cosem["attribute-id"]) + "</td>";
                 });
                 if (node.CosemAttributeDescriptor && node.CosemAttributeDescriptor.length % 3 === 1) {
                     tableHTML += "<td></td><td></td></tr>";

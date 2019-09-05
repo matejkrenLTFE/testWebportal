@@ -358,4 +358,115 @@ module.exports.TaskManagerHelper = function () {
             this.manageDuration(node);
         }
     };
+    this.processDeviceReferenceTrHTML = function (node) {
+        let obj = {
+            devTXT: "",
+            isMore: false,
+            dType: ""
+        };
+        if (node.DeviceReference.length === undefined) {
+            node.DeviceReference = [node.DeviceReference];
+        }
+        obj.devTXT += node.DeviceReference[0]._DeviceID;
+        if (node.DeviceReference.length > 1) {
+            obj.devTXT += " <i class=\"material-icons more-icon\">photo_size_select_small</i>";
+            obj.isMore = true;
+            obj.dType = "devices";
+        }
+        return obj;
+    };
+    this.processGroupReferenceTrPom = function (node) {
+        let obj = {
+            devTXT: "",
+            isMore: false,
+            dType: ""
+        };
+        if (node.GroupReference.length === undefined) {
+            node.GroupReference = [node.GroupReference];
+        }
+        obj.devTXT += node.GroupReference[0]._GroupID;
+        if (node.GroupReference.length > 1) {
+            obj.devTXT += " <i class=\"material-icons more-icon\">photo_size_select_small</i>";
+            obj.isMore = true;
+            obj.dType = "group";
+        }
+        return obj;
+    };
+    this.processGroupReferenceTrHTML = function (node) {
+        let obj = {
+            devTXT: "",
+            isMore: false,
+            dType: ""
+        };
+        if (defined(node.GroupReference)) {
+            obj = this.processGroupReferenceTrPom(node);
+        } else {
+            if (defined(node.ResourceType) && node.ResourceType.toString() === "DATA-NOTIFICATION") {
+                obj.devTXT = "DG_ALL_METERS";
+                obj.isMore = false;
+            }
+        }
+        return obj;
+    };
+
+    this.getDeviceReferenceTableTRHtml = function (node, nodeID) {
+        let obj;
+        if (defined(node.DeviceReference)) {
+            obj = this.processDeviceReferenceTrHTML(node);
+        } else {
+            obj = this.processGroupReferenceTrHTML(node);
+        }
+        if (obj.isMore) {
+            return "<td colspan='2' data-node-id='" + nodeID + "' data-bind-method='CtrlActionTaskManager.cosemAttributeDescriptor' " +
+                    "data-bind-event='click' data-more-type='" + obj.dType + "' class='cursor-pointer' style='text-align: left'>" + obj.devTXT + "</td>";
+        }
+        return "<td colspan='2' style='text-align: left'>" + obj.devTXT + "</td>";
+    };
+
+    this.manageCosemAttributeDescriptor = function (node) {
+        let cosemTXT = "";
+        if (node.CosemAttributeDescriptor.length === undefined) {
+            node.CosemAttributeDescriptor = [node.CosemAttributeDescriptor];
+        }
+        cosemTXT += this.transformObject(node.CosemAttributeDescriptor[0]["class-id"], node.CosemAttributeDescriptor[0]["instance-id"],
+                node.CosemAttributeDescriptor[0]["attribute-id"]);
+        if (node.CosemAttributeDescriptor.length > 1) {
+            cosemTXT += " <i class=\"material-icons more-icon\">photo_size_select_small</i>";
+        }
+        return cosemTXT;
+    };
+
+    this.getDeviceReferenceTableCosemTRHtml = function (node, nodeID) {
+        let cosemTXT = "";
+        if (defined(node.CosemAttributeDescriptor)) {
+            cosemTXT = this.manageCosemAttributeDescriptor(node);
+        } else {
+            cosemTXT = "---";
+        }
+        if (node.CosemAttributeDescriptor && node.CosemAttributeDescriptor.length > 1) {
+            return "<td class='cursor-pointer' data-node-id='" + nodeID + "' data-bind-method='CtrlActionTaskManager.cosemAttributeDescriptor' " +
+                    "data-bind-event='click' data-more-type='cosem' colspan='7' style='text-align: left;' >" + cosemTXT + "</td> </tr>";
+        }
+        return "<td colspan='6' style='text-align: left;' >" + cosemTXT + "</td> </tr>";
+    };
+
+    this.getDeviceReferenceTableLineHtml = function (node, nodeID) {
+        let html = "<tr class='nodeListShowDetails'>";
+        html += "<td colspan='3'>" + AppMain.t("NOT_OLDER_THAN", "TASK_MANAGER") + "</td>";
+        html += "<td colspan='2' style='text-align: left'>" + this.getResourceOlderTXT(node) + "</td>";
+        html += "<td colspan='2'>" + AppMain.t("LAST_ACTIVATION", "TASK_MANAGER") + "</td>";
+        html += "<td colspan='6' style='text-align: left'>" + this.getResourceActivationTXT(node) + "</td>";
+        html += "</tr>";
+        html += "<tr class='nodeListShowDetails'>";
+        html += "<td colspan='3'>" + AppMain.t("DURATION", "TASK_MANAGER") + "</td>";
+        html += "<td colspan='2' style='text-align: left'>" + this.getResourceDurationTXT(node) + "</td>";
+        html += "<td colspan='2'>" + AppMain.t("REPLY_ADDRESS", "TASK_MANAGER") + "</td>";
+        html += "<td colspan='6' style='text-align: left'>" + this.getResourceReplyTXT(node) + "</td>";
+        html += "<tr class='nodeListShowDetails'>";
+        html += "<td colspan='3'>" + AppMain.t("DEVICE_REFERENCE", "TASK_MANAGER") + "</td>";
+        html += this.getDeviceReferenceTableTRHtml(node, nodeID);
+        html += "<td colspan='2'>" + AppMain.t("OBJECT", "TASK_MANAGER") + "</td>";
+        html += this.getDeviceReferenceTableCosemTRHtml(node, nodeID);
+        return html;
+    };
 };
