@@ -841,7 +841,7 @@ module.exports.TaskManagerHelper = function () {
             ? moment(dateNotOlderThan).toISOString()
             : "";
     };
-    const getInsertedStartTime = function () {
+    this.getInsertedStartTime = function () {
         const startTime = $("#dateStart").val();
         return startTime !== ""
             ? moment(startTime).toISOString()
@@ -881,7 +881,7 @@ module.exports.TaskManagerHelper = function () {
         jobObj.NotOlderThan = getInsertedNotOlderThan();
         jobObj.AsyncReplyFlag = $("input[name=\"async-data-push\"]:checked").length > 0;
         if (jobType === "scheduled" || obj.isNodeScheduled) {
-            jobObj.Activates = getInsertedStartTime();
+            jobObj.Activates = this.getInsertedStartTime();
             jobObj.RepeatingInterval = $("#repeating").val();
             jobObj.Duration = getInsertedDuration();
         }
@@ -1029,5 +1029,95 @@ module.exports.TaskManagerHelper = function () {
             const nonNumReg = /[^0-9]/g;
             varVal.val(varVal.val().replace(nonNumReg, ""));
         }
+    };
+    this.initListForCheckDesc = function (service, objectList) {
+        let list = [];
+        switch (service) {
+        case "get":
+            list = objectList.get;
+            break;
+        case "time-sync":
+            list = objectList.timeSync;
+            break;
+        }
+        return list;
+    };
+    this.checkDescRelativeSelector = function (classId, attrId, instanceId) {
+        if (classId === 7 && attrId === 2) {
+            if (instanceId === "1.0.99.1.0.0") {
+                $("#relative-selector").val("FFFDFFFF07FFFFFFFFFFFFFF");
+            } else {
+                $("#relative-selector").val("FFFDFFFF1EFFFFFFFFFFFFFF");
+            }
+        }
+    };
+
+    this.restObjSetStartEndTimeAndLastValidData = function (restObj, getDataObj) {
+        if (getDataObj.startTime) {
+            restObj["mes:Request"]["mes:StartTime"] = getDataObj.startTime;
+        }
+        if (getDataObj.endTime) {
+            restObj["mes:Request"]["mes:EndTime"] = getDataObj.endTime;
+        }
+        if (getDataObj.lastValidData) {
+            restObj["mes:Request"]["mes:LastValidData"] = "true";
+        }
+    };
+    this.restObjSetDeviceAndGroupReference = function (restObj, getDataObj) {
+        if (getDataObj.deviceReference.length > 0) {
+            restObj["mes:Payload"]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:DeviceReference"] = getDataObj.deviceReference;
+        }
+        if (getDataObj.groupReference > 0) {
+            restObj["mes:Payload"]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:GroupReference"] = getDataObj.deviceReference;
+        }
+    };
+    const getDataPopUpReferenceTableHeader = function (node) {
+        if (node.DeviceReference) {
+            return "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("DEVICE_TITLE", "TASK_MANAGER") + "</th>";
+        }
+        return "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("GROUP_ID", "TASK_MANAGER") + "</th>";
+    };
+    const getDataPopUpReferenceDevicePart = function (node) {
+        let allHtml = "";
+        if (!node.DeviceReference.length) {
+            node.DeviceReference = [node.DeviceReference];
+        }
+        $.each(node.DeviceReference, function (ignore, title) {
+            allHtml += "<tr>";
+            allHtml += "<td><input type='checkbox' name='selectTitle' class='selectTitle' data-node-title='" + title._DeviceID + "'/></td>";
+            allHtml += "<td class='deviceTitleTxT'>" + title._DeviceID + "</td>" + "</tr>";
+        });
+        return allHtml;
+    };
+    const getDataPopUpReferenceGroupPart = function (node) {
+        let allHtml = "";
+        if (!node.GroupReference.length) {
+            node.GroupReference = [node.GroupReference];
+        }
+        $.each(node.GroupReference, function (ignore, title) {
+            allHtml += "<tr>";
+            allHtml += "<td><input type='checkbox' name='selectTitle' class='selectTitle' data-node-title='" + title._GroupID + "'/></td>";
+            allHtml += "<td class='deviceTitleTxT'>" + title._GroupID + "</td>" + "</tr>";
+        });
+        return allHtml;
+    };
+    this.getDataPopUpReferenceHtml = function (node) {
+        let allHtml = "";
+        if (node.DeviceReference || node.GroupReference) {
+            allHtml += "<table id='devices-table' class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">" +
+                    "<thead class=\"th-color-grey text-align-left\">" +
+                    "<tr>" +
+                    "<th style='width: 30px;padding-left: 18px'><input class=\"selectAllTitles\" name=\"selectAllTitles\" type=\"checkbox\"/></th>";
+            allHtml += getDataPopUpReferenceTableHeader(node);
+            allHtml += "</tr>" + "</thead><tbody>";
+
+            if (node.DeviceReference) {
+                allHtml += getDataPopUpReferenceDevicePart(node);
+            } else {
+                allHtml += getDataPopUpReferenceGroupPart(node);
+            }
+            allHtml += "</table>";
+        }
+        return allHtml;
     };
 };

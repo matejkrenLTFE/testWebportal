@@ -376,4 +376,39 @@ module.exports.IControllerAction = function () {
         }
         return obj;
     };
+
+    const getGroupsFromRestResponse = function (response) {
+        let groups = response.ResponseMessage.Payload.DeviceGroup.DeviceGroup;
+        if (groups.length === undefined) {
+            groups = [groups];
+        }
+        return groups;
+    };
+    const isGroupRestResponseOk = function (response) {
+        return (response.ResponseMessage.Reply && response.ResponseMessage.Reply.Result && response.ResponseMessage.Reply.Result.toString() === "OK");
+    };
+
+    this.getGroups = function () {
+        let response = AppMain.wsMes().exec("RequestMessage", {
+            "mes:Header": {
+                "mes:Verb": "get",
+                "mes:Noun": "DeviceGroup",
+                "mes:Timestamp": moment().toISOString(),
+                "mes:MessageID": "78465521",
+                "mes:CorrelationID": "78465521"
+            }
+        }).getResponse(false);
+
+        if (response && response.ResponseMessage && isGroupRestResponseOk(response)) {
+            let groups = getGroupsFromRestResponse(response);
+            let rez = [];
+            $.each(groups, function (ignore, group) {
+                rez.push({
+                    id: group._GroupID
+                });
+            });
+            return rez;
+        }
+        return [];
+    };
 };

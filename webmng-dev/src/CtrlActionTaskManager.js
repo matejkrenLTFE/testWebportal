@@ -555,6 +555,18 @@ CtrlActionTaskManager.addJobFirstStep = function () {
     }, 200);
 };
 
+CtrlActionTaskManager.addJobFileUploadProcessNext = function (jobObj) {
+    "use strict";
+    if (jobObj.fileName && jobObj.fileName !== "") {
+        CtrlActionTaskManager.addJobThirdStep(jobObj);
+        return true;
+    } else {
+        CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
+                AppMain.t("ADD_JOB_UPLOAD_FILE_ERR_TXT", "TASK_MANAGER"));
+        return false;
+    }
+};
+
 /**
  * function for pop up add job: upload file
  */
@@ -608,25 +620,14 @@ CtrlActionTaskManager.addJobFileUpload = function (jobType, node) {
                 action: function () {
                     jobObj.jobType = jobType;
                     jobObj.jobService = "upgrade";
-                    const startTime = $("#dateStart").val();
                     jobObj.imageIdentifier = $("#imgIdent").val();
-                    jobObj.Activates = startTime !== ""
-                        ? moment(startTime).toISOString()
-                        : "";
+                    jobObj.Activates = CtrlActionTaskManager.helper.getInsertedStartTime();
                     if (jobObj.imageIdentifier === "") {
                         CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
                                 AppMain.t("IMAGE_IDENTIFIER_ERROR_TXT", "TASK_MANAGER"));
                         return false;
                     }
-
-                    if (jobObj.fileName && jobObj.fileName !== "") {
-                        CtrlActionTaskManager.addJobThirdStep(jobObj);
-                    } else {
-                        CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                                AppMain.t("ADD_JOB_UPLOAD_FILE_ERR_TXT", "TASK_MANAGER"));
-                        return false;
-                    }
-                    return true;
+                    CtrlActionTaskManager.addJobFileUploadProcessNext(jobObj);
                 }
             },
             cancel: {
@@ -1325,7 +1326,7 @@ CtrlActionTaskManager.getAddCosemHTML = function (jobType, jobService) {
 CtrlActionTaskManager.getAddCosemTableHTML = function (jobService) {
     "use strict";
     if (defined(this.helper.getAddCosemTableHTMLMap[`${jobService}`])) {
-        return this.helper.getAddCosemTableHTMLMap[jobService];
+        return this.helper.getAddCosemTableHTMLMap[`${jobService}`];
     }
     return "";
 };
@@ -1769,15 +1770,7 @@ CtrlActionTaskManager.checkDesc = function () {
             $("input[name='inst5']").val() + "." + $("input[name='inst6']").val();
     const attrId = parseInt($("#add-attr").val(), 10);
     const service = $("#job-service").val();
-    let list = [];
-    switch (service) {
-    case "get":
-        list = objectList.get;
-        break;
-    case "time-sync":
-        list = objectList.timeSync;
-        break;
-    }
+    let list = this.helper.initListForCheckDesc(service, objectList);
     let isDesc = true;
     $.each(list, function (index, cosem) {
         if (cosem.classId === classId && cosem.instanceId === instanceId /*&& cosem.attributeId === attrId*/) {
@@ -1785,13 +1778,7 @@ CtrlActionTaskManager.checkDesc = function () {
             $("#job-object").val(index + 1);
         }
     });
-    if (classId === 7 && attrId === 2) {
-        if (instanceId === "1.0.99.1.0.0") {
-            $("#relative-selector").val("FFFDFFFF07FFFFFFFFFFFFFF");
-        } else {
-            $("#relative-selector").val("FFFDFFFF1EFFFFFFFFFFFFFF");
-        }
-    }
+    this.helper.checkDescRelativeSelector(classId, attrId, instanceId);
     if (isDesc) {
         $("#job-object").val("0");
     }
@@ -2444,38 +2431,6 @@ CtrlActionTaskManager.arrangeNodeCosemStat = function (nodesCosemStat) {
     this.nodesTitle = nodesTitle;
 };
 
-
-/**
- * function for getting groups
- * @returns {Array} array of groups
- */
-CtrlActionTaskManager.getGroups = function () {
-    "use strict";
-
-    let response = AppMain.wsMes().exec("RequestMessage", {
-        "mes:Header": {
-            "mes:Verb": "get",
-            "mes:Noun": "DeviceGroup",
-            "mes:Timestamp": moment().toISOString(),
-            "mes:MessageID": "78465521",
-            "mes:CorrelationID": "78465521"
-        }
-    }).getResponse(false);
-
-    if (response && response.ResponseMessage && isResourceRestResponseOk(response)) {
-        let groups = response.ResponseMessage.Payload.DeviceGroup.DeviceGroup;
-        let rez = [];
-        if (groups.length === undefined) {
-            groups = [groups];
-        }
-        $.each(groups, function (ignore, group) {
-            rez.push(group._GroupID);
-        });
-        return rez;
-    }
-    return [];
-};
-
 /**
  * read file chunks function, helper for upload file
  * @param file
@@ -2594,58 +2549,23 @@ CtrlActionTaskManager.getDataPopUp = function (e) {
 
     $.each(this.resourceList, function (ignore, node) {
         if (node.ID.toString() === nodeID) {
-
             const startHtml = "<tr><td>" + AppMain.t("START_TIME", "TASK_MANAGER") + "</td>" +
                     "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-js-textfield-datepicker textfield-short-175\">" +
                     "<input class=\"mdl-textfield__input\" type=\"text\" id=\"dateStart\"></div>" +
                     "</td></tr>";
-
             const endHtml = "<tr> <td>" + AppMain.t("END_TIME", "TASK_MANAGER") + "</td>" +
                     "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-js-textfield-datepicker textfield-short-175\">" +
                     "<input class=\"mdl-textfield__input\" type=\"text\" id=\"dateEnd\"></div>" +
                     "</td></tr>";
-
             const lastValidData = "<tr> <td>" + AppMain.t("LAST_VALID_DATA", "TASK_MANAGER") + "</td>" +
                     "<td style='text-align: left'><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield textfield-short-145\">" +
                     "<input class=\"mdl-textfield__input\" type=\"checkbox\" name=\"last-valid-data\"/></div></td>" +
                     "</tr>";
-
             let allHtml = AppMain.t("INSERT_GET_JOB_PARAMS", "TASK_MANAGER") + "</br>" +
                     "<table class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">"
                     + startHtml + endHtml + lastValidData + "</table>";
-            if (node.DeviceReference || node.GroupReference) {
-                allHtml += "<table id='devices-table' class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">" +
-                        "<thead class=\"th-color-grey text-align-left\">" +
-                        "<tr>" +
-                        "<th style='width: 30px;padding-left: 18px'><input class=\"selectAllTitles\" name=\"selectAllTitles\" type=\"checkbox\"/></th>";
-                if (node.DeviceReference) {
-                    allHtml += "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("DEVICE_TITLE", "TASK_MANAGER") + "</th>";
-                } else {
-                    allHtml += "<th class=\"mdl-data-table__cell--non-numeric\">" + AppMain.t("GROUP_ID", "TASK_MANAGER") + "</th>";
-                }
-                allHtml += "</tr>" + "</thead><tbody>";
 
-                if (node.DeviceReference) {
-                    if (!node.DeviceReference.length) {
-                        node.DeviceReference = [node.DeviceReference];
-                    }
-                    $.each(node.DeviceReference, function (ignore, title) {
-                        allHtml += "<tr>";
-                        allHtml += "<td><input type='checkbox' name='selectTitle' class='selectTitle' data-node-title='" + title._DeviceID + "'/></td>";
-                        allHtml += "<td class='deviceTitleTxT'>" + title._DeviceID + "</td>" + "</tr>";
-                    });
-                } else {
-                    if (!node.GroupReference.length) {
-                        node.GroupReference = [node.GroupReference];
-                    }
-                    $.each(node.GroupReference, function (ignore, title) {
-                        allHtml += "<tr>";
-                        allHtml += "<td><input type='checkbox' name='selectTitle' class='selectTitle' data-node-title='" + title._GroupID + "'/></td>";
-                        allHtml += "<td class='deviceTitleTxT'>" + title._GroupID + "</td>" + "</tr>";
-                    });
-                }
-                allHtml += "</table>";
-            }
+            allHtml += CtrlActionTaskManager.helper.getDataPopUpReferenceHtml(node);
 
             $.confirm({
                 title: AppMain.t("GET_JOB_DATA_TITLE", "TASK_MANAGER", [nodeID]),
@@ -2759,30 +2679,12 @@ CtrlActionTaskManager.getJobDataRest = function (getDataObj) {
             }
         }
     };
-    if (getDataObj.startTime) {
-        restObj["mes:Request"]["mes:StartTime"] = getDataObj.startTime;
-    }
-    if (getDataObj.endTime) {
-        restObj["mes:Request"]["mes:EndTime"] = getDataObj.endTime;
-    }
-    if (getDataObj.lastValidData) {
-        restObj["mes:Request"]["mes:LastValidData"] = "true";
-    }
-
-    if (getDataObj.deviceReference.length > 0) {
-        restObj["mes:Payload"]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:DeviceReference"] = getDataObj.deviceReference;
-    }
-    if (getDataObj.groupReference > 0) {
-        restObj["mes:Payload"]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:GroupReference"] = getDataObj.deviceReference;
-    }
-
+    this.helper.restObjSetStartEndTimeAndLastValidData(restObj, getDataObj);
+    this.helper.restObjSetDeviceAndGroupReference(restObj, getDataObj);
     let response = AppMain.wsMes().exec("RequestMessage", restObj).getResponse(true);
-
     response = vkbeautify.xml(new XMLSerializer().serializeToString(response), 2);
-
     download("data:text/xml;charset=utf-8;base64," + btoa(response), build.device + "_JobData_ID_" + getDataObj.id + "_" +
             moment().format("YYYY-MM-DD-HH-mm-ss") + ".xml", "text/xml");
-
     return true;
 };
 
