@@ -521,7 +521,22 @@ module.exports.TaskManagerHelper = function () {
     const dividableby3is2 = function (node) {
         return node.CosemAttributeDescriptor && node.CosemAttributeDescriptor.length % 3 === 2;
     };
-
+    this.getCosemAttributeDescriptorCaseCosemPopUpHTMLMaster = function (node, type) {
+        let obj = {
+            title: "",
+            allHtml: ""
+        };
+        if (type === "cosem") {
+            return this.getCosemAttributeDescriptorCaseCosemPopUpHTML(node);
+        }
+        if (type === "devices") {
+            return this.getCosemAttributeDescriptorCaseDevicesPopUpHTML(node);
+        }
+        if (type === "group") {
+            return this.getCosemAttributeDescriptorCaseGroupPopUpHTML(node);
+        }
+        return obj;
+    };
     this.getCosemAttributeDescriptorCaseCosemPopUpHTML = function (node) {
         let obj = {
             title: AppMain.t("JOB_OBJECTS", "TASK_MANAGER").toString(),
@@ -1119,5 +1134,159 @@ module.exports.TaskManagerHelper = function () {
             allHtml += "</table>";
         }
         return allHtml;
+    };
+
+    this.addAttrPressGetInsertedDescTXT = function (objectList) {
+        const descVal = $("#job-object").val();
+        const service = $("#job-service").val();
+        let descTXT = "---";
+        switch (service) {
+        case "get":
+            descTXT = (defined(descVal) && descVal !== "0" && descVal !== "")
+                ? objectList.get[parseInt(descVal, 10) - 1].description
+                : "---";
+            break;
+        case "time-sync":
+            descTXT = (defined(descVal) && descVal !== "0" && descVal !== "")
+                ? objectList.timeSync[parseInt(descVal, 10) - 1].description
+                : "---";
+            break;
+        }
+        return descTXT;
+    };
+
+    this.addAttrPressCheckDataIsOkInstaID1 = function (instaID1, CtrlActionTaskManager) {
+        if (Number.isNaN(instaID1) || instaID1 < 0 || instaID1 > 255) {
+            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
+                    AppMain.t("ATTRIBUTE_ID_ERROR_TXT", "TASK_MANAGER"));
+            return false;
+        }
+        return true;
+    };
+    this.addAttrPressCheckDataIsOkClassId = function (classID, CtrlActionTaskManager) {
+        if (Number.isNaN(classID) || classID < 0 || classID > 65536) {
+            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
+                    AppMain.t("CLASS_ID_ERROR_TXT", "TASK_MANAGER"));
+            return false;
+        }
+        return true;
+    };
+    this.addAttrPressCheckDataIsOkAttrID = function (attrID, CtrlActionTaskManager) {
+        if (Number.isNaN(attrID) || attrID < 0 || attrID > 127) {
+            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
+                    AppMain.t("ATTRIBUTE_ID_ERROR_TXT", "TASK_MANAGER"));
+            return false;
+        }
+        return true;
+    };
+    this.addAttrPressCheckAccessFromAndToIsAccessSelection = function (accessFrom, accessTo, CtrlActionTaskManager) {
+        if (accessFrom === "") {
+            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
+                    AppMain.t("FROM_ERROR_TXT", "TASK_MANAGER"));
+            return false;
+        }
+        if (accessTo === "") {
+            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
+                    AppMain.t("TO_ERROR_TXT", "TASK_MANAGER"));
+            return false;
+        }
+        if (moment(accessFrom).isAfter(accessTo)) {
+            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
+                    AppMain.t("FROM_TO_ERROR_TXT", "TASK_MANAGER"));
+            return false;
+        }
+        return true;
+    };
+    this.addAttrPressCheckAccessFromAndTo = function (accessFrom, accessTo, CtrlActionTaskManager) {
+        if ((accessFrom && accessFrom !== "") || (accessTo && accessTo !== "")) {// isAccessSel
+            return this.addAttrPressCheckAccessFromAndToIsAccessSelection(accessFrom, accessTo, CtrlActionTaskManager);
+        }
+        return true;
+    };
+    this.addAttrPressCheckAccessMinDiffMaxDiff = function (minDiff, maxDiff, CtrlActionTaskManager) {
+        if (minDiff !== "" || maxDiff !== "") {
+            const minDiffInt = Number.parseInt(minDiff, 10);
+            const maxDiffInt = Number.parseInt(maxDiff, 10);
+            if (!Number.isNaN(minDiffInt) && !Number.isNaN(maxDiffInt) && minDiffInt > maxDiffInt) {
+                CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
+                        AppMain.t("MAXMINDIF_ERROR_TXT", "TASK_MANAGER"));
+                return false;
+            }
+        }
+        return true;
+    };
+    this.addAttrPressCheckDataIsOkPom3 = function (addObj, CtrlActionTaskManager) {
+        return this.addAttrPressCheckAccessMinDiffMaxDiff(addObj.minDiff, addObj.maxDiff, CtrlActionTaskManager);
+    };
+    this.addAttrPressCheckDataIsOkPom2 = function (addObj, CtrlActionTaskManager) {
+        return this.addAttrPressCheckDataIsOkInstaID1(addObj.instaID6, CtrlActionTaskManager) &&
+                this.addAttrPressCheckDataIsOkAttrID(addObj.attrID, CtrlActionTaskManager) &&
+                this.addAttrPressCheckAccessFromAndTo(addObj.accessFrom, addObj.accessTo, CtrlActionTaskManager) &&
+                this.addAttrPressCheckDataIsOkPom3(addObj, CtrlActionTaskManager);
+    };
+    this.addAttrPressCheckDataIsOkPom1 = function (addObj, CtrlActionTaskManager) {
+        return this.addAttrPressCheckDataIsOkInstaID1(addObj.instaID3, CtrlActionTaskManager) &&
+                this.addAttrPressCheckDataIsOkInstaID1(addObj.instaID4, CtrlActionTaskManager) &&
+                this.addAttrPressCheckDataIsOkInstaID1(addObj.instaID5, CtrlActionTaskManager) &&
+                this.addAttrPressCheckDataIsOkPom2(addObj, CtrlActionTaskManager);
+    };
+    this.addAttrPressCheckDataIsOk = function (addObj, CtrlActionTaskManager) {
+        return this.addAttrPressCheckDataIsOkClassId(addObj.classID, CtrlActionTaskManager) &&
+                this.addAttrPressCheckDataIsOkInstaID1(addObj.instaID1, CtrlActionTaskManager) &&
+                this.addAttrPressCheckDataIsOkInstaID1(addObj.instaID2, CtrlActionTaskManager) &&
+                this.addAttrPressCheckDataIsOkPom1(addObj, CtrlActionTaskManager);
+    };
+    this.updateInstaIDstring = function (instaIDString) {
+        if (instaIDString.toString(16).length === 2) {
+            return instaIDString.toString(16);
+        }
+        return "0" + instaIDString.toString(16);
+    };
+    this.addAttrPressGetAccessFrom = function () {
+        let accessFrom = $("#add-access-from").val();
+        return (defined(accessFrom) && accessFrom !== "")
+            ? moment(accessFrom).toISOString()
+            : "";
+    };
+    this.addAttrPressGetRelAccessFrom = function () {
+        let relAccessFrom = $("#relative-selector").val();
+        return (defined(relAccessFrom) && relAccessFrom !== "0")
+            ? relAccessFrom
+            : "";
+    };
+    this.addAttrPressGetRelAccessTo = function (relAccessFrom) {
+        if (relAccessFrom && relAccessFrom !== "") { // is relative access sel
+            return "FFFEFFFFFFFFFFFFFFFFFFFF";
+        }
+        return "";
+    };
+    this.addAttrPressGetMaxMindif = function (addObj) {
+        const maxDiffInt = parseInt($("#max-time-diff").val(), 10);
+        addObj.maxDiff = "";
+        const minDiffInt = parseInt($("#min-time-diff").val(), 10);
+        addObj.minDiff = "";
+        if (!Number.isNaN(maxDiffInt) || !Number.isNaN(minDiffInt)) { //is time sync
+            if (!Number.isNaN(maxDiffInt)) {
+                addObj.maxDiff = maxDiffInt + "";
+            }
+            if (!Number.isNaN(minDiffInt)) {
+                addObj.minDiff = minDiffInt + "";
+            }
+        }
+    };
+    this.addAttrPressGetVarTypeAndValue = function (addObj) {
+        addObj.varType = "";
+        addObj.varValue = "";
+        addObj.vType = $("#variable-type");
+        if (addObj.vType.length) {
+            addObj.varType = addObj.vType.val();
+            addObj.varValue = $("#variable-value").val();
+        }
+    };
+    this.addAttrPressGetAccessTo = function () {
+        let accessTo = $("#add-access-to").val();
+        return (defined(accessTo) && accessTo !== "")
+            ? moment(accessTo).toISOString()
+            : "";
     };
 };

@@ -322,20 +322,9 @@ CtrlActionTaskManager.cosemAttributeDescriptor = function (e) {
     };
     $.each(this.resourceList, function (ignore, node) {
         if (node.ID.toString() === nodeID) {
-            switch (type) {
-            case "cosem":
-                obj = CtrlActionTaskManager.helper.getCosemAttributeDescriptorCaseCosemPopUpHTML(node);
-                break;
-            case "devices":
-                obj = CtrlActionTaskManager.helper.getCosemAttributeDescriptorCaseDevicesPopUpHTML(node);
-                break;
-            case "group":
-                obj = CtrlActionTaskManager.helper.getCosemAttributeDescriptorCaseGroupPopUpHTML(node);
-                break;
-            }
+            obj = CtrlActionTaskManager.helper.getCosemAttributeDescriptorCaseCosemPopUpHTMLMaster(node, type);
         }
     });
-
 
     $.confirm({
         title: obj.title,
@@ -560,11 +549,10 @@ CtrlActionTaskManager.addJobFileUploadProcessNext = function (jobObj) {
     if (jobObj.fileName && jobObj.fileName !== "") {
         CtrlActionTaskManager.addJobThirdStep(jobObj);
         return true;
-    } else {
-        CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                AppMain.t("ADD_JOB_UPLOAD_FILE_ERR_TXT", "TASK_MANAGER"));
-        return false;
     }
+    CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
+            AppMain.t("ADD_JOB_UPLOAD_FILE_ERR_TXT", "TASK_MANAGER"));
+    return false;
 };
 
 /**
@@ -1181,8 +1169,8 @@ CtrlActionTaskManager.addJobGroup = function (jobObj) {
     if (this.groups.length > 0) {
         $.each(this.groups, function (ignore, group) {
             allHtml += "<tr>" +
-                    "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + group + "'/></td>" +
-                    "<td>" + group + "</td>" +
+                    "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + group.id + "'/></td>" +
+                    "<td>" + group.id + "</td>" +
                     "</tr>";
         });
     }
@@ -1790,300 +1778,89 @@ CtrlActionTaskManager.checkDesc = function () {
  */
 CtrlActionTaskManager.addAttrPress = function () {
     "use strict";
-
-    const descVal = $("#job-object").val();
-    const service = $("#job-service").val();
-    let descTXT = "---";
-    switch (service) {
-    case "get":
-        descTXT = (defined(descVal) && descVal !== "0" && descVal !== "")
-            ? objectList.get[parseInt(descVal, 10) - 1].description
-            : "---";
-        break;
-    case "time-sync":
-        descTXT = (defined(descVal) && descVal !== "0" && descVal !== "")
-            ? objectList.timeSync[parseInt(descVal, 10) - 1].description
-            : "---";
-        break;
-    }
-    const classID = parseInt($("#add-class").val(), 10);
-    if (Number.isNaN(classID) || classID < 0 || classID > 65536) {
-        CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                AppMain.t("CLASS_ID_ERROR_TXT", "TASK_MANAGER"));
-        return false;
-    }
+    let addObj = {};
+    addObj.descTXT = this.helper.addAttrPressGetInsertedDescTXT(objectList);
+    addObj.classID = parseInt($("#add-class").val(), 10);
 
     let instaID = "";
     let instaIDshort = "";
-    const instaID1 = parseInt($("input[name='inst1']").val(), 10);
-    if (Number.isNaN(instaID1) || instaID1 < 0 || instaID1 > 255) {
-        CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                AppMain.t("ATTRIBUTE_ID_ERROR_TXT", "TASK_MANAGER"));
+    addObj.instaID1 = parseInt($("input[name='inst1']").val(), 10);
+    instaIDshort += addObj.instaID1 + ".";
+    instaID += this.helper.updateInstaIDstring(addObj.instaID1);
+
+    addObj.instaID2 = parseInt($("input[name='inst2']").val(), 10);
+    instaIDshort += addObj.instaID2 + ".";
+    instaID += this.helper.updateInstaIDstring(addObj.instaID2);
+
+    addObj.instaID3 = parseInt($("input[name='inst3']").val(), 10);
+    instaIDshort += addObj.instaID3 + ".";
+    instaID += this.helper.updateInstaIDstring(addObj.instaID3);
+
+    addObj.instaID4 = parseInt($("input[name='inst4']").val(), 10);
+    instaIDshort += addObj.instaID4 + ".";
+    instaID += this.helper.updateInstaIDstring(addObj.instaID4);
+
+    addObj.instaID5 = parseInt($("input[name='inst5']").val(), 10);
+    instaIDshort += addObj.instaID5 + ".";
+    instaID += this.helper.updateInstaIDstring(addObj.instaID5);
+
+    addObj.instaID6 = parseInt($("input[name='inst6']").val(), 10);
+    instaIDshort += addObj.instaID6;
+    instaID += this.helper.updateInstaIDstring(addObj.instaID6);
+    addObj.instaID = instaID.toUpperCase();
+    addObj.instaIDshort = instaIDshort;
+
+    addObj.attrID = parseInt($("#add-attr").val(), 10);
+
+    addObj.accessFrom = this.helper.addAttrPressGetAccessFrom();
+    addObj.accessTo = this.helper.addAttrPressGetAccessTo();
+    addObj.accessFromTXT = addObj.accessFrom;
+    addObj.accessToTXT = addObj.accessTo;
+
+    addObj.relAccessFrom = this.helper.addAttrPressGetRelAccessFrom();
+    addObj.relAccessTo = this.helper.addAttrPressGetRelAccessTo();
+    this.helper.addAttrPressGetMaxMindif(addObj);
+    this.helper.addAttrPressGetVarTypeAndValue(addObj);
+
+    if (!this.helper.addAttrPressCheckDataIsOk(addObj, CtrlActionTaskManager)) {
         return false;
     }
-    instaIDshort += instaID1 + ".";
-    if (instaID1.toString(16).length === 2) {
-        instaID += instaID1.toString(16);
-    } else {
-        instaID += "0" + instaID1.toString(16);
-    }
-
-    const instaID2 = parseInt($("input[name='inst2']").val(), 10);
-    if (Number.isNaN(instaID2) || instaID2 < 0 || instaID2 > 255) {
-        CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
-        return false;
-    }
-    instaIDshort += instaID2 + ".";
-    if (instaID2.toString(16).length === 2) {
-        instaID += instaID2.toString(16);
-    } else {
-        instaID += "0" + instaID2.toString(16);
-    }
-
-    const instaID3 = parseInt($("input[name='inst3']").val(), 10);
-    if (Number.isNaN(instaID3) || instaID3 < 0 || instaID3 > 255) {
-        CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
-        return false;
-    }
-    instaIDshort += instaID3 + ".";
-    if (instaID3.toString(16).length === 2) {
-        instaID += instaID3.toString(16);
-    } else {
-        instaID += "0" + instaID3.toString(16);
-    }
-
-    const instaID4 = parseInt($("input[name='inst4']").val(), 10);
-    if (Number.isNaN(instaID4) || instaID4 < 0 || instaID4 > 255) {
-        CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
-        return false;
-    }
-    instaIDshort += instaID4 + ".";
-    if (instaID4.toString(16).length === 2) {
-        instaID += instaID4.toString(16);
-    } else {
-        instaID += "0" + instaID4.toString(16);
-    }
-
-    const instaID5 = parseInt($("input[name='inst5']").val(), 10);
-    if (Number.isNaN(instaID5) || instaID5 < 0 || instaID5 > 255) {
-        CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
-        return false;
-    }
-    instaIDshort += instaID5 + ".";
-    if (instaID5.toString(16).length === 2) {
-        instaID += instaID5.toString(16);
-    } else {
-        instaID += "0" + instaID5.toString(16);
-    }
-
-    const instaID6 = parseInt($("input[name='inst6']").val(), 10);
-    if (Number.isNaN(instaID6) || instaID6 < 0 || instaID6 > 255) {
-        CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                AppMain.t("INSTANCE_ID_ERROR_TXT", "TASK_MANAGER"));
-        return false;
-    }
-    instaIDshort += instaID6;
-    if (instaID6.toString(16).length === 2) {
-        instaID += instaID6.toString(16);
-    } else {
-        instaID += "0" + instaID6.toString(16);
-    }
-
-    instaID = instaID.toUpperCase();
-
-    const attrID = parseInt($("#add-attr").val(), 10);
-    if (Number.isNaN(attrID) || attrID < 0 || attrID > 127) {
-        CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                AppMain.t("ATTRIBUTE_ID_ERROR_TXT", "TASK_MANAGER"));
-        return false;
-    }
-    let accessFrom = $("#add-access-from").val();
-    accessFrom = (defined(accessFrom) && accessFrom !== "")
-        ? moment(accessFrom).toISOString()
-        : "";
-    let accessTo = $("#add-access-to").val();
-    accessTo = (defined(accessTo) && accessTo !== "")
-        ? moment(accessTo).toISOString()
-        : "";
-    let accessFromTXT = accessFrom;
-    let accessToTXT = accessTo;
-    if ((accessFrom && accessFrom !== "") || (accessTo && accessTo !== "")) {// isAccessSel
-        if (accessFrom === "") {
-            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                    AppMain.t("FROM_ERROR_TXT", "TASK_MANAGER"));
-            return false;
-        }
-        if (accessTo === "") {
-            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                    AppMain.t("TO_ERROR_TXT", "TASK_MANAGER"));
-            return false;
-        }
-        if (moment(accessFrom).isAfter(accessTo)) {
-            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                    AppMain.t("FROM_TO_ERROR_TXT", "TASK_MANAGER"));
-            return false;
-        }
-    }
-    let relAccessFrom = $("#relative-selector").val();
-    relAccessFrom = (defined(relAccessFrom) && relAccessFrom !== "0")
-        ? relAccessFrom
-        : "";
-    let relAccessTo = "";
-    if (relAccessFrom && relAccessFrom !== "") { // is relative access sel
-        relAccessTo = "FFFEFFFFFFFFFFFFFFFFFFFF";
-    }
-
-    const maxDiffInt = parseInt($("#max-time-diff").val(), 10);
-    let maxDiff = "";
-    const minDiffInt = parseInt($("#min-time-diff").val(), 10);
-    let minDiff = "";
-    if (!Number.isNaN(maxDiffInt) || !Number.isNaN(minDiffInt)) { //is time sync
-        if (Number.isNaN(maxDiffInt)) {
-            maxDiff = "";
-        } else {
-            maxDiff = maxDiffInt + "";
-        }
-        if (Number.isNaN(minDiffInt)) {
-            minDiff = "";
-        } else {
-            minDiff = minDiffInt + "";
-        }
-        if (!Number.isNaN(minDiffInt) && !Number.isNaN(maxDiffInt) && minDiffInt > maxDiffInt) {
-            CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
-                    AppMain.t("MAXMINDIF_ERROR_TXT", "TASK_MANAGER"));
-            return false;
-        }
-    } else {
-        maxDiff = "";
-        minDiff = "";
-    }
-
-    let varType = "";
-    let varValue = "";
-    const vType = $("#variable-type");
-    if (vType.length) {
-        varType = vType.val();
-        varValue = $("#variable-value").val();
-    }
-    CtrlActionTaskManager.addAttrHtml({
-        classID: classID,
-        instaID: instaID,
-        attrID: attrID,
-        accessFrom: accessFrom,
-        accessFromTXT: accessFromTXT,
-        accessTo: accessTo,
-        accessToTXT: accessToTXT,
-        maxDiff: maxDiff,
-        minDiff: minDiff,
-        relAccessFrom: relAccessFrom,
-        relAccessTo: relAccessTo,
-        varType: varType,
-        varValue: varValue,
-        descTXT: descTXT,
-        instaIDshort: instaIDshort,
-        vType: vType
-    });
-    if (classID === 4 && attrID === 2) {
-        CtrlActionTaskManager.addAttrHtml({
-            classID: classID,
-            instaID: instaID,
-            attrID: 4,
-            accessFrom: accessFrom,
-            accessFromTXT: accessFromTXT,
-            accessTo: accessTo,
-            accessToTXT: accessToTXT,
-            maxDiff: maxDiff,
-            minDiff: minDiff,
-            relAccessFrom: relAccessFrom,
-            relAccessTo: relAccessTo,
-            varType: varType,
-            varValue: varValue,
-            descTXT: descTXT,
-            instaIDshort: instaIDshort,
-            vType: vType
-        });
-        CtrlActionTaskManager.addAttrHtml({
-            classID: classID,
-            instaID: instaID,
-            attrID: 5,
-            accessFrom: accessFrom,
-            accessFromTXT: accessFromTXT,
-            accessTo: accessTo,
-            accessToTXT: accessToTXT,
-            maxDiff: maxDiff,
-            minDiff: minDiff,
-            relAccessFrom: relAccessFrom,
-            relAccessTo: relAccessTo,
-            varType: varType,
-            varValue: varValue,
-            descTXT: descTXT,
-            instaIDshort: instaIDshort,
-            vType: vType
-        });
-    }
-    if (classID === 5 && attrID === 2) {
-        CtrlActionTaskManager.addAttrHtml({
-            classID: classID,
-            instaID: instaID,
-            attrID: 5,
-            accessFrom: accessFrom,
-            accessFromTXT: accessFromTXT,
-            accessTo: accessTo,
-            accessToTXT: accessToTXT,
-            maxDiff: maxDiff,
-            minDiff: minDiff,
-            relAccessFrom: relAccessFrom,
-            relAccessTo: relAccessTo,
-            varType: varType,
-            varValue: varValue,
-            descTXT: descTXT,
-            instaIDshort: instaIDshort,
-            vType: vType
-        });
-    }
-    if (classID === 5 && attrID === 3) {
-        CtrlActionTaskManager.addAttrHtml({
-            classID: classID,
-            instaID: instaID,
-            attrID: 5,
-            accessFrom: accessFrom,
-            accessFromTXT: accessFromTXT,
-            accessTo: accessTo,
-            accessToTXT: accessToTXT,
-            maxDiff: maxDiff,
-            minDiff: minDiff,
-            relAccessFrom: relAccessFrom,
-            relAccessTo: relAccessTo,
-            varType: varType,
-            varValue: varValue,
-            descTXT: descTXT,
-            instaIDshort: instaIDshort,
-            vType: vType
-        });
-        CtrlActionTaskManager.addAttrHtml({
-            classID: classID,
-            instaID: instaID,
-            attrID: 6,
-            accessFrom: accessFrom,
-            accessFromTXT: accessFromTXT,
-            accessTo: accessTo,
-            accessToTXT: accessToTXT,
-            maxDiff: maxDiff,
-            minDiff: minDiff,
-            relAccessFrom: relAccessFrom,
-            relAccessTo: relAccessTo,
-            varType: varType,
-            varValue: varValue,
-            descTXT: descTXT,
-            instaIDshort: instaIDshort,
-            vType: vType
-        });
-    }
+    CtrlActionTaskManager.addAttrPressProcess(addObj, addObj.classID, addObj.attrID);
     return true;
+};
+
+const isCombination4and2 = function (classID, attrID) {
+    "use strict";
+    return classID === 4 && attrID === 2;
+};
+const isCombination5and2 = function (classID, attrID) {
+    "use strict";
+    return classID === 5 && attrID === 2;
+};
+const isCombination5and3 = function (classID, attrID) {
+    "use strict";
+    return classID === 5 && attrID === 3;
+};
+
+CtrlActionTaskManager.addAttrPressProcess = function (addObj, classID, attrID) {
+    "use strict";
+    CtrlActionTaskManager.addAttrHtml(addObj);
+    if (isCombination4and2(classID, attrID)) {
+        addObj.attrID = 4;
+        CtrlActionTaskManager.addAttrHtml(addObj);
+        addObj.attrID = 5;
+        CtrlActionTaskManager.addAttrHtml(addObj);
+    }
+    if (isCombination5and2(classID, attrID)) {
+        addObj.attrID = 3;
+        CtrlActionTaskManager.addAttrHtml(addObj);
+    }
+    if (isCombination5and3(classID, attrID)) {
+        addObj.attrID = 5;
+        CtrlActionTaskManager.addAttrHtml(addObj);
+        addObj.attrID = 6;
+        CtrlActionTaskManager.addAttrHtml(addObj);
+    }
 };
 
 CtrlActionTaskManager.addAttrHtml = function (attrObj) {
