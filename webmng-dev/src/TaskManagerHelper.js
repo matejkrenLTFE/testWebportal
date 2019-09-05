@@ -3,7 +3,7 @@
  * @class TaskManagerHelper helper
  */
 
-/* global AppMain, $ */
+/* global AppMain, defined, $ */
 /* jshint maxstatements: false */
 /* jslint browser:true, node:true*/
 /* eslint es6:0, no-undefined:0, control-has-associated-label:0  */
@@ -283,7 +283,42 @@ module.exports.TaskManagerHelper = function () {
         return "---";
     };
 
-
+    this.manageExpires = function (node, dateExpires) {
+        if (node.Expires) {
+            dateExpires.val(moment(node.Expires.toString()).format(AppMain.localization("DATETIME_FORMAT")));
+        }
+    };
+    this.manageDateNotOlderThan = function (node, dateNotOlderThan) {
+        if (node.NotOlderThan) {
+            dateNotOlderThan.val(moment(node.NotOlderThan.toString()).format(AppMain.localization("DATETIME_FORMAT")));
+        }
+    };
+    this.manageDataNotification = function (node) {
+        if (node.AcceptDataNotification && (node.AcceptDataNotification.toString() === "true" || node.AcceptDataNotification === true)) {
+            $("input[name=\"push-meter-alarms\"]").prop("checked", true);
+        }
+    };
+    this.manageAsyncDataPush = function (node) {
+        if (node.AsyncReplyFlag && (node.AsyncReplyFlag.toString() === "true" || node.AsyncReplyFlag === true)) {
+            $("input[name=\"async-data-push\"]").prop("checked", true);
+        }
+    };
+    this.manageReplyAddress = function (node) {
+        if (node.ReplyAddress) {
+            $("input[name='reply-address']").val(node.ReplyAddress);
+        }
+    };
+    this.manageActivates = function (node, dateStart) {
+        if (node.Activates) {
+            dateStart.val(moment(node.Activates.toString()).format(AppMain.localization("DATETIME_FORMAT")));
+        }
+    };
+    this.manageDuration = function (node) {
+        if (node.Duration) {
+            let dur = moment.duration(node.Duration);
+            $("#d-minutes").val(dur.asMinutes());
+        }
+    };
     /**
      * helper function for init form
      * @param node
@@ -314,28 +349,13 @@ module.exports.TaskManagerHelper = function () {
         });
         if (node !== undefined) {
             $("input[name='priority']").val(node.Priority);
-            if (node.Expires) {
-                dateExpires.val(moment(node.Expires.toString()).format(AppMain.localization("DATETIME_FORMAT")));
-            }
-            if (node.NotOlderThan) {
-                dateNotOlderThan.val(moment(node.NotOlderThan.toString()).format(AppMain.localization("DATETIME_FORMAT")));
-            }
-            if (node.AcceptDataNotification && (node.AcceptDataNotification.toString() === "true" || node.AcceptDataNotification === true)) {
-                $("input[name=\"push-meter-alarms\"]").prop("checked", true);
-            }
-            if (node.AsyncReplyFlag && (node.AsyncReplyFlag.toString() === "true" || node.AsyncReplyFlag === true)) {
-                $("input[name=\"async-data-push\"]").prop("checked", true);
-            }
-            if (node.ReplyAddress) {
-                $("input[name='reply-address']").val(node.ReplyAddress);
-            }
-            if (node.Activates) {
-                dateStart.val(moment(node.Activates.toString()).format(AppMain.localization("DATETIME_FORMAT")));
-            }
-            if (node.Duration) {
-                let dur = moment.duration(node.Duration);
-                $("#d-minutes").val(dur.asMinutes());
-            }
+            this.manageExpires(node, dateExpires);
+            this.manageDateNotOlderThan(node, dateNotOlderThan);
+            this.manageDataNotification(node);
+            this.manageAsyncDataPush(node);
+            this.manageReplyAddress(node);
+            this.manageActivates(node, dateStart);
+            this.manageDuration(node);
         }
     };
 };

@@ -262,6 +262,15 @@ CtrlActionGroupTable.displayGroupHtml = function (groups, $thisParent, prefix) {
     }
 };
 
+CtrlActionGroupTable.manageGetGroupDevicesResponse = function (response, $thisParent) {
+    "use strict";
+    if (response && response.ResponseMessage && isGroupRestResponseOk(response)) {
+        let groups = response.ResponseMessage.Payload.DeviceGroup.DeviceGroup.DeviceReference;
+        let prefix = getPrefixFromResponse(response);
+        CtrlActionGroupTable.displayGroupHtml(groups, $thisParent, prefix);
+    }
+};
+
 CtrlActionGroupTable.getGroupDevices = function (e) {
     "use strict";
 
@@ -295,11 +304,7 @@ CtrlActionGroupTable.getGroupDevices = function (e) {
             }
         }
     }).getResponse(false);
-    if (response && response.ResponseMessage && isGroupRestResponseOk(response)) {
-        let groups = response.ResponseMessage.Payload.DeviceGroup.DeviceGroup.DeviceReference;
-        let prefix = getPrefixFromResponse(response);
-        CtrlActionGroupTable.displayGroupHtml(groups, $thisParent, prefix);
-    }
+    CtrlActionGroupTable.manageGetGroupDevicesResponse(response, $thisParent);
     CtrlActionGroupTable.view.rebindElementEvents();
     return true;
 };
@@ -449,22 +454,42 @@ const processSingleNode = function (devices, title) {
     return allHtml;
 };
 
+CtrlActionGroupTable.hasNodesTitle = function () {
+    "use strict";
+    return this.nodesTitle && this.nodesTitle.length > 0;
+};
+
 CtrlActionGroupTable.addGroupExistingGroupDevicesHtml = function (devices) {
     "use strict";
     let allHtml = "";
-    if (this.nodesTitle && this.nodesTitle.length > 0) {
+    if (this.hasNodesTitle()) {
         $.each(this.nodesTitle, function (ignore, title) {
             allHtml += processSingleNode(devices, title);
         });
     }
     if (devices && devices.length > 0) {
-        $.each(devices, function (ignore, title) {
-            allHtml += "<tr>";
-            allHtml += "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + title + "' checked/></td>";
-            allHtml += "<td>" + title + "</td>" + "</tr>";
+        $.each(devices, function (ignore, device) {
+            if (device && device._DeviceID) {
+                allHtml += "<tr>";
+                allHtml += "<td><input type='checkbox' name='selectNode' class='selectNode' data-node-title='" + device._DeviceID + "' checked/></td>";
+                allHtml += "<td>" + device._DeviceID + "</td>" + "</tr>";
+            }
         });
     }
     return allHtml;
+};
+
+CtrlActionGroupTable.getAddEditGroupModalTitle = function (group) {
+    "use strict";
+    return group
+        ? AppMain.t("EDIT_GROUP", "GROUP_TABLE")
+        : AppMain.t("ADD_GROUP", "GROUP_TABLE");
+};
+CtrlActionGroupTable.getAddEditGroupModalConfirmText = function (group) {
+    "use strict";
+    return group
+        ? AppMain.t("OK", "global")
+        : AppMain.t("CREATE", "global");
 };
 
 CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
@@ -473,7 +498,7 @@ CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
     let selGroup = "";
     let selPrefix = "";
     let disabled = "";
-    if (group && devices) {
+    if (devices) {
         selGroup = group;
         selPrefix = prefix;
         disabled = "disabled";
@@ -522,18 +547,14 @@ CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
     allHtml += "</tbody></table>";
 
     $.confirm({
-        title: group
-            ? AppMain.t("EDIT_GROUP", "GROUP_TABLE")
-            : AppMain.t("ADD_GROUP", "GROUP_TABLE"),
+        title: CtrlActionGroupTable.getAddEditGroupModalTitle(group),
         content: allHtml,
         useBootstrap: false,
         draggable: false,
         theme: "material",
         buttons: {
             confirm: {
-                text: group
-                    ? AppMain.t("OK", "global")
-                    : AppMain.t("CREATE", "global"),
+                text: CtrlActionGroupTable.getAddEditGroupModalConfirmText(group),
                 action: function () {
                     let groupObj = CtrlActionGroupTable.getAddGroupObj(group);
                     if (!groupObj) {
@@ -564,11 +585,12 @@ CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
         }
     });
     let prefixPom;
+    const self = this;
     setTimeout(function () {
         $(".selectNode").on("click", function (e) {
             e.stopPropagation();
         });
-        this.initSelectAll("selectAllNodes");
+        self.initSelectAll("selectAllNodes");
         prefixPom = $("input[name='group-prefix']");
         if (prefixPom.val() !== "") {
             $(".dynamic-hide").hide();
@@ -613,6 +635,30 @@ CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
             return startInd;
         };
 
+        const processCsv = function (header, allTextLines, startInd) {
+            header = header.split(",");
+
+            const ind = header.indexOf("\"" + AppMain.t("DEVICE_TITLE", "NODES") + "\"");
+            if (ind === -1) {
+                CtrlActionGroupTable.importAlert(AppMain.t("IMPORT_ERR_TITLE_TXT", "GROUP_TABLE"),
+                        AppMain.t("IMPORT_ERROR", "GROUP_TABLE"));
+                return;
+            }
+            allTextLines.forEach(function (ignore, index) {
+                if (index >= startInd) {
+                    const line = allTextLines[`${index}`];
+                    if (line !== "") {
+                        CtrlActionGroupTable.addTitle(line.split(",")[`${ind}`]
+                            .replace("\"", "").replace("\"", ""));
+                    }
+                }
+            });
+        };
+
+        const contaisnNewLine = function (csv) {
+            return !csv.includes("\r\n") && !csv.includes("\n");
+        };
+
         const inputElement = document.getElementById("file");
         inputElement.addEventListener("change", function () {
             const uploadElement = this;
@@ -621,13 +667,12 @@ CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
 
             reader.onload = function (e) {
                 const csv = e.target.result;
-                if (!csv.includes("\r\n") && !csv.includes("\n")) {
+                if (contaisnNewLine(csv)) {
                     CtrlActionGroupTable.importAlert(AppMain.t("IMPORT_ERR_TITLE_TXT", "GROUP_TABLE"),
                             AppMain.t("IMPORT_CSV_ERROR", "GROUP_TABLE"));
                     return;
                 }
                 const allTextLines = csv.split(/\r\n|\n/);
-
                 let header = setHeader(allTextLines);
                 let startInd = setStartIndex(allTextLines);
                 if (!header.includes(",")) {
@@ -635,22 +680,7 @@ CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
                             AppMain.t("IMPORT_CSV_ERROR", "GROUP_TABLE"));
                     return;
                 }
-                header = header.split(",");
-
-                const ind = header.indexOf("\"" + AppMain.t("DEVICE_TITLE", "NODES") + "\"");
-                if (ind === -1) {
-                    CtrlActionGroupTable.importAlert(AppMain.t("IMPORT_ERR_TITLE_TXT", "GROUP_TABLE"),
-                            AppMain.t("IMPORT_ERROR", "GROUP_TABLE"));
-                }
-                allTextLines.forEach(function (ignore, index) {
-                    if (index >= startInd) {
-                        const line = allTextLines[`${index}`];
-                        if (line !== "") {
-                            CtrlActionGroupTable.addTitle(line.split(",")[`${ind}`]
-                                .replace("\"", "").replace("\"", ""));
-                        }
-                    }
-                });
+                processCsv(header, allTextLines, startInd);
 
             };
             reader.readAsText(uploadElement.files[0]);
@@ -660,6 +690,21 @@ CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
             $(".file-selected").hide();
         }, false);
     }, 300);
+};
+
+CtrlActionGroupTable.getMesVerbRestJson = function (groupObj) {
+    "use strict";
+    return groupObj.isEdit
+        ? "change"
+        : "create";
+};
+
+CtrlActionGroupTable.managePrefixRestJson = function (obj, groupObj) {
+    "use strict";
+    if (groupObj.isEdit && groupObj.prefix) {
+        obj["mes:Payload"]["mes:DeviceGroup"]["mes:DeviceGroup"]._Type = "PREFIX";
+        obj["mes:Payload"]["mes:DeviceGroup"]["mes:DeviceGroup"]._Prefix = groupObj.prefix;
+    }
 };
 
 CtrlActionGroupTable.getRestJson = function (groupObj) {
@@ -673,9 +718,7 @@ CtrlActionGroupTable.getRestJson = function (groupObj) {
     });
     let obj = {
         "mes:Header": {
-            "mes:Verb": groupObj.isEdit
-                ? "change"
-                : "create",
+            "mes:Verb": CtrlActionGroupTable.getMesVerbRestJson(groupObj),
             "mes:Noun": "DeviceGroup",
             "mes:Timestamp": moment().toISOString(),
             "mes:MessageID": "78465521",
@@ -692,17 +735,21 @@ CtrlActionGroupTable.getRestJson = function (groupObj) {
     if (!groupObj.isEdit && groupObj.prefix) {
         obj["mes:Payload"]["mes:DeviceGroup"]["mes:DeviceGroup"]._Prefix = groupObj.prefix;
     }
-
-    if (groupObj.isEdit && groupObj.prefix) {
-        obj["mes:Payload"]["mes:DeviceGroup"]["mes:DeviceGroup"]._Type = "PREFIX";
-        obj["mes:Payload"]["mes:DeviceGroup"]["mes:DeviceGroup"]._Prefix = groupObj.prefix;
-    }
+    CtrlActionGroupTable.managePrefixRestJson(obj, groupObj);
     if (groupObj.devices.length > 0) {
         obj["mes:Payload"]["mes:DeviceGroup"]["mes:DeviceGroup"]["mes:DeviceReference"] = devicesArr;
     }
     return obj;
 };
 
+CtrlActionGroupTable.showAddEditSuccessDialog = function (groupObj) {
+    "use strict";
+    if (groupObj.isEdit) {
+        AppMain.dialog("GROUP_UPDATED", "success");
+    } else {
+        AppMain.dialog("GROUP_CREATED", "success");
+    }
+};
 
 CtrlActionGroupTable.addGroupRest = function (groupObj) {
     "use strict";
@@ -712,11 +759,7 @@ CtrlActionGroupTable.addGroupRest = function (groupObj) {
     let response = AppMain.wsMes().exec("RequestMessage", obj).getResponse(false);
 
     if (response && response.ResponseMessage && isGroupRestResponseOk(response)) {
-        if (groupObj.isEdit) {
-            AppMain.dialog("GROUP_UPDATED", "success");
-        } else {
-            AppMain.dialog("GROUP_CREATED", "success");
-        }
+        this.showAddEditSuccessDialog(groupObj);
         this.exec();
     }
     return true;
