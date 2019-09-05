@@ -729,14 +729,23 @@ module.exports.TaskManagerHelper = function () {
             obj.isNodeNotification = defined(node.ResourceType) && node.ResourceType.toString() === "DATA-NOTIFICATION";
         }
     };
+    const isNodeActivatesSet = function (node) {
+        return node.Activates && node.Activates !== "";
+    };
+    const isNodeRepeatingSet = function (node) {
+        return node.RepeatingInterval && node.RepeatingInterval !== "";
+    };
+    const isNodeDurationSet = function (node) {
+        return node.Duration && node.Duration !== "";
+    };
     const setResourceScheduledOrNotificationProcessNodeNotNotificationPom = function (obj, node) {
-        if (node.Activates && node.Activates !== "") {
+        if (isNodeActivatesSet(node)) {
             obj.isNodeScheduled = true;
         }
-        if (node.RepeatingInterval && node.RepeatingInterval !== "") {
+        if (isNodeRepeatingSet(node)) {
             obj.isNodeScheduled = true;
         }
-        if (node.Duration && node.Duration !== "") {
+        if (isNodeDurationSet(node)) {
             obj.isNodeScheduled = true;
         }
     };
@@ -856,9 +865,13 @@ module.exports.TaskManagerHelper = function () {
         return durObj;
     };
 
+    const isPriorityInRange = function (jobObj) {
+        return jobObj.Priority > 255 || jobObj.Priority < 0;
+    };
+
     this.getAddJobSecondResourceObjectNotNotification = function (jobObj, jobType, obj, CtrlActionTaskManager) {
         jobObj.Priority = getInsertedPriority();
-        if (jobObj.Priority > 255 || jobObj.Priority < 0) {
+        if (isPriorityInRange(jobObj)) {
             jobObj.Priority = 255;
             CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
                     AppMain.t("PRIORITY_ERROR_TXT", "TASK_MANAGER"));
@@ -969,31 +982,42 @@ module.exports.TaskManagerHelper = function () {
         return this.checkAddJobSecondManageAddRulesPom(jobObj, jobType, CtrlActionTaskManager);
     };
 
-    this.getAddCosemHTMLForOnDemand = function (jobService, accessSelRowHtml, attrLabel, typeSelector, valueInput, timeSelRowHtml) {
-        switch (jobService) {
-        case "get":
-            return accessSelRowHtml;
-        case "action":
-            attrLabel.html(AppMain.t("METHOD_ID", "TASK_MANAGER") + " *");
+    this.getAddCosemHTMLForOnDemandPom = function (jobService, typeSelector, valueInput, timeSelRowHtml) {
+        if (jobService === "set") {
             return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
-        case "set":
-            return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
-        case "time-sync":
+        }
+        if (jobService === "time-sync") {
             return timeSelRowHtml;
         }
     };
-    this.getAddCosemHTMLForScheduled = function (jobService, repeatingSelector, attrLabel, typeSelector, valueInput, timeSelRowHtml) {
-        switch (jobService) {
-        case "get":
-            return repeatingSelector;
-        case "action":
+    this.getAddCosemHTMLForOnDemand = function (jobService, accessSelRowHtml, attrLabel, typeSelector, valueInput, timeSelRowHtml) {
+        if (jobService === "get") {
+            return accessSelRowHtml;
+        }
+        if (jobService === "action") {
             attrLabel.html(AppMain.t("METHOD_ID", "TASK_MANAGER") + " *");
             return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
-        case "set":
+        }
+        return this.getAddCosemHTMLForOnDemandPom(jobService, typeSelector, valueInput, timeSelRowHtml);
+    };
+    this.getAddCosemHTMLForScheduledPom = function (jobService, typeSelector, valueInput, timeSelRowHtml) {
+        if (jobService === "set") {
             return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
-        case "time-sync":
+        }
+        if (jobService === "time-sync") {
             return timeSelRowHtml;
         }
+    };
+
+    this.getAddCosemHTMLForScheduled = function (jobService, repeatingSelector, attrLabel, typeSelector, valueInput, timeSelRowHtml) {
+        if (jobService === "get") {
+            return repeatingSelector;
+        }
+        if (jobService === "action") {
+            attrLabel.html(AppMain.t("METHOD_ID", "TASK_MANAGER") + " *");
+            return typeSelector + "<span style='margin-left: 15px'>" + valueInput + "</span>";
+        }
+        return this.getAddCosemHTMLForScheduledPom(jobService, typeSelector, valueInput, timeSelRowHtml);
     };
     this.varTypeOnchangeForJustNumberCheck = function (varType, varVal) {
         if (justNumberVarTypeValues.indexOf(varType.val()) !== -1) {
