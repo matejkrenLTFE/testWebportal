@@ -82,7 +82,7 @@ CtrlActionSystemUsers.htmlUserList = function (users) {
     return all;
 };
 
-const getHtmlForPassParams = function (allHtml, pass1Html, pass2Html, passOldHtml, username) {
+CtrlActionSystemUsers.getHtmlForPassParams = function (allHtml, pass1Html, pass2Html, passOldHtml, username) {
     "use strict";
     allHtml += AppMain.t("INSERT_PASS_PARAMS", "SYS_USER_MNG", [username]) + "</br>" +
             "<table class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">";
@@ -91,6 +91,7 @@ const getHtmlForPassParams = function (allHtml, pass1Html, pass2Html, passOldHtm
     } else {
         allHtml += passOldHtml + pass1Html + pass2Html;
     }
+    allHtml += "</table><br/><br/>";
     return allHtml;
 };
 
@@ -174,11 +175,10 @@ CtrlActionSystemUsers.addNewUser = function (username) {
         allHtml += AppMain.t("INSERT_USER_PARAMS", "SYS_USER_MNG") + "</br>" +
                 "<table class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">";
         allHtml += usernameHtml + pass1Html + pass2Html + roleHtml;
+        allHtml += "</table><br/><br/>";
     } else {
-        getHtmlForPassParams(allHtml, pass1Html, pass2Html, passOldHtml, username);
+        allHtml += CtrlActionSystemUsers.getHtmlForPassParams(allHtml, pass1Html, pass2Html, passOldHtml, username);
     }
-
-    allHtml += "</table><br/><br/>";
 
     $.confirm({
         title: username.event

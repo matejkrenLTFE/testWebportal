@@ -131,7 +131,7 @@ module.exports.AppController = function () {
             dmp("AppMain.exec controller action exception message: Module not found.");
         }
         return controlleractioncomponent;
-    }// eslint-disable-line import/no-dynamic-require
+    }
 
     this.executeCtrl = function () {
         let controlleractioncomponent = getControllerActionComponent(this.action);
@@ -150,8 +150,13 @@ module.exports.AppController = function () {
 
     this.test = function () {
         // Check if user has permission to execute action
-        if (this.action !== "Login" && !AppMain.rbac.hasExecCtrlActionPermission(this.action)) {
-            return this.actionForbidden();
+        if (this.action !== "Login") {
+            if (!AppMain.user.hasUserSession()) {
+                return AppMain.user.logout();
+            }
+            if (!AppMain.rbac.hasExecCtrlActionPermission(this.action)) {
+                return this.actionForbidden();
+            }
         }
         this.executeCtrl();
     };

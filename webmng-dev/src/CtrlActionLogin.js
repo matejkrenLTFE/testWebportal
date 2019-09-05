@@ -52,7 +52,8 @@ CtrlActionLogin.onBeforeExecute = function () {
     "use strict";
     // Redirect logged-in user back to Dashboard
     if (AppMain.user.loggedIn()) {
-        AppMain.user.logout();
+        localStorage.clear();
+        sessionStorage.clear();
     }
 
     if (AppMain.getConfigParams("authType") === AppMain.AUTH_TYPE_CERT) {

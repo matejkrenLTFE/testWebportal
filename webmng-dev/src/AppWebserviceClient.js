@@ -99,12 +99,8 @@ module.exports.AppWebserviceClient = function () {
             : "http://" + this.host;
     };
 
-    const beforeSendFunction = function (req, soapMessage) {
-        // req.setRequestHeader("Access-Control-Request-Headers", "x-requested-with");
+    const beforeSendFunction = function (req) {
         if (AppMain.authBasic === true) {
-            if (localStorage.getItem("authDigest") === null) {
-                dmp("authDigest: " + localStorage.getItem("authDigest") + "  " + soapMessage);
-            }
             req.setRequestHeader("Authorization", "Basic " + localStorage.getItem("authDigest"));
         }
         AppMain.view.loadingIndicator();
@@ -145,7 +141,7 @@ module.exports.AppWebserviceClient = function () {
             dataType: "xml",
             async: false,
             beforeSend: function (req) {
-                beforeSendFunction(req, soapMessage);
+                beforeSendFunction(req);
             }
         }).done(function (data) {
             lastResponse = data;
@@ -176,6 +172,9 @@ module.exports.AppWebserviceClient = function () {
      * @return {Object} AppWS
      */
     this.exec = function (method, prm) {
+        if (AppMain.controller.action !== "Login" && !AppMain.user.hasUserSession()) {
+            return AppMain.user.logout();
+        }
 
         const params = (!defined(prm))
             ? {}
@@ -203,7 +202,7 @@ module.exports.AppWebserviceClient = function () {
             dataType: "xml",
             async: true,
             beforeSend: function (req) {
-                beforeSendFunction(req, soapMessage);
+                beforeSendFunction(req);
             }
         })
             .done(function (data) {

@@ -24,7 +24,6 @@ global.defined = function (variable) {
     return (variable !== undefined && variable !== null);
 };
 
-
 /**
  * Generate random string.
  * @param len Default: 7
@@ -318,10 +317,6 @@ global.AppMain = function (conf) {
         _stateChanged(this, this.STATE_LOADED);
 
         this.setMenuListners();
-    };
-
-    this.loggedIn = function () {
-        return (sessionStorage.getItem("loggedIn") === true);
     };
 
     this.getProtocol = function () {

@@ -31,6 +31,14 @@ module.exports.AppUser = function () {
     };
 
     /**
+     * Get user data.
+     */
+    this.hasUserSession = function () {
+        const session = JSON.parse(localStorage.getItem("userData"));
+        return !!(session && session.username);
+    };
+
+    /**
      * Set user session data object.
      */
     this.setUserData = function (data) {
@@ -64,7 +72,9 @@ module.exports.AppUser = function () {
      * Get RBAC map for current user.
      */
     this.getRBACMap = function () {
-        return AppMain.user.getUserData("role");
+        const role = AppMain.user.getUserData("role");
+
+        return role;
     };
 
     /**
