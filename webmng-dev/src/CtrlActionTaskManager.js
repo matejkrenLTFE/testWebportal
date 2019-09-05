@@ -275,7 +275,6 @@ CtrlActionTaskManager.export = function () {
     download("data:text/csv;charset=utf-8;base64," + btoa(csv), build.device + "_JobsTable_" + moment().format("YYYY-MM-DD-HH-mm-ss") + ".csv", "text/csv");
 };
 
-
 /**
  * function to display job details
  */
@@ -317,81 +316,30 @@ CtrlActionTaskManager.cosemAttributeDescriptor = function (e) {
     const nodeID = $this.attr("data-node-id");
     const type = $this.attr("data-more-type");
 
-    let tableHTML = "";
-    let title = "";
+    let obj = {
+        title: "",
+        allHtml: ""
+    };
     $.each(this.resourceList, function (ignore, node) {
         if (node.ID.toString() === nodeID) {
             switch (type) {
             case "cosem":
-                title = AppMain.t("JOB_OBJECTS", "TASK_MANAGER").toString();
-                $.each(node.CosemAttributeDescriptor, function (index, cosem) {
-                    if (index === 0) {
-                        tableHTML += "<tr>";
-                    } else {
-                        if (index % 3 === 0) {
-                            tableHTML += "</tr><tr>";
-                        }
-                    }
-                    tableHTML += "<td>" + CtrlActionTaskManager.helper.transformObject(cosem["class-id"], cosem["instance-id"], cosem["attribute-id"]) + "</td>";
-                });
-                if (node.CosemAttributeDescriptor && node.CosemAttributeDescriptor.length % 3 === 1) {
-                    tableHTML += "<td></td><td></td></tr>";
-                }
-                if (node.CosemAttributeDescriptor && node.CosemAttributeDescriptor.length % 3 === 2) {
-                    tableHTML += "<td></td></tr>";
-                }
+                obj = CtrlActionTaskManager.helper.getCosemAttributeDescriptorCaseCosemPopUpHTML(node);
                 break;
             case "devices":
-                title = AppMain.t("JOB_DEVICE_REFERENCES", "TASK_MANAGER").toString();
-                $.each(node.DeviceReference, function (index, node) {
-                    if (index === 0) {
-                        tableHTML += "<tr>";
-                    } else {
-                        if (index % 3 === 0) {
-                            tableHTML += "</tr><tr>";
-                        }
-                    }
-                    tableHTML += "<td>" + node._DeviceID + "</td>";
-                });
-                if (node.DeviceReference.length % 3 === 1) {
-                    tableHTML += "<td></td><td></td></tr>";
-                }
-                if (node.DeviceReference.length % 3 === 2) {
-                    tableHTML += "<td></td></tr>";
-                }
+                obj = CtrlActionTaskManager.helper.getCosemAttributeDescriptorCaseDevicesPopUpHTML(node);
                 break;
             case "group":
-                title = AppMain.t("JOB_GROUP_REFERENCES", "TASK_MANAGER").toString();
-                $.each(node.GroupReference, function (index, node) {
-                    if (index === 0) {
-                        tableHTML += "<tr>";
-                    } else {
-                        if (index % 3 === 0) {
-                            tableHTML += "</tr><tr>";
-                        }
-                    }
-                    tableHTML += "<td>" + node._GroupID + "</td>";
-                });
-                if (node.GroupReference.length % 3 === 1) {
-                    tableHTML += "<td></td><td></td></tr>";
-                }
-                if (node.GroupReference.length % 3 === 2) {
-                    tableHTML += "<td></td></tr>";
-                }
+                obj = CtrlActionTaskManager.helper.getCosemAttributeDescriptorCaseGroupPopUpHTML(node);
                 break;
             }
         }
     });
 
-    let allHtml = "<table id='devices-table' class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">" +
-            "<thead class=\"th-color-grey text-align-left\"><tbody>";
-    allHtml += tableHTML;
-    allHtml += "</tbody></table>";
-
 
     $.confirm({
-        title: title,
-        content: allHtml,
+        title: obj.title,
+        content: obj.allHtml,
         useBootstrap: false,
         draggable: false,
         backgroundDismiss: true,

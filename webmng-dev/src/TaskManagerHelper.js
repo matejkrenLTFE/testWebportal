@@ -469,4 +469,83 @@ module.exports.TaskManagerHelper = function () {
         html += this.getDeviceReferenceTableCosemTRHtml(node, nodeID);
         return html;
     };
+
+    this.getCosemAttributeDescriptorCaseCosemPopUpHTML = function (node) {
+        let obj = {
+            title: AppMain.t("JOB_OBJECTS", "TASK_MANAGER").toString(),
+            tableHTML: ""
+        };
+        const self = this;
+        $.each(node.CosemAttributeDescriptor, function (index, cosem) {
+            if (index === 0) {
+                obj.tableHTML += "<tr>";
+            } else {
+                if (index % 3 === 0) {
+                    obj.tableHTML += "</tr><tr>";
+                }
+            }
+            obj.tableHTML += "<td>" + self.transformObject(cosem["class-id"], cosem["instance-id"], cosem["attribute-id"]) + "</td>";
+        });
+        if (node.CosemAttributeDescriptor && node.CosemAttributeDescriptor.length % 3 === 1) {
+            obj.tableHTML += "<td></td><td></td></tr>";
+        }
+        if (node.CosemAttributeDescriptor && node.CosemAttributeDescriptor.length % 3 === 2) {
+            obj.tableHTML += "<td></td></tr>";
+        }
+        return this.getCosemAttributeDescriptorPopUpHTML(obj);
+    };
+    this.getCosemAttributeDescriptorCaseDevicesPopUpHTML = function (node) {
+        let obj = {
+            title: AppMain.t("JOB_DEVICE_REFERENCES", "TASK_MANAGER").toString(),
+            tableHTML: ""
+        };
+        $.each(node.DeviceReference, function (index, node) {
+            if (index === 0) {
+                obj.tableHTML += "<tr>";
+            } else {
+                if (index % 3 === 0) {
+                    obj.tableHTML += "</tr><tr>";
+                }
+            }
+            obj.tableHTML += "<td>" + node._DeviceID + "</td>";
+        });
+        if (node.DeviceReference.length % 3 === 1) {
+            obj.tableHTML += "<td></td><td></td></tr>";
+        }
+        if (node.DeviceReference.length % 3 === 2) {
+            obj.tableHTML += "<td></td></tr>";
+        }
+        return this.getCosemAttributeDescriptorPopUpHTML(obj);
+    };
+    this.getCosemAttributeDescriptorCaseGroupPopUpHTML = function (node) {
+        let obj = {
+            title: AppMain.t("JOB_GROUP_REFERENCES", "TASK_MANAGER").toString(),
+            tableHTML: ""
+        };
+        $.each(node.GroupReference, function (index, node) {
+            if (index === 0) {
+                obj.tableHTML += "<tr>";
+            } else {
+                if (index % 3 === 0) {
+                    obj.tableHTML += "</tr><tr>";
+                }
+            }
+            obj.tableHTML += "<td>" + node._GroupID + "</td>";
+        });
+        if (node.GroupReference.length % 3 === 1) {
+            obj.tableHTML += "<td></td><td></td></tr>";
+        }
+        if (node.GroupReference.length % 3 === 2) {
+            obj.tableHTML += "<td></td></tr>";
+        }
+        return this.getCosemAttributeDescriptorPopUpHTML(obj);
+    };
+    this.getCosemAttributeDescriptorPopUpHTML = function (obj) {
+        let allHtml = "<table id='devices-table' class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">" +
+                "<thead class=\"th-color-grey text-align-left\"><tbody>";
+        allHtml += obj.tableHTML;
+        allHtml += "</tbody></table>";
+        obj.allHtml = allHtml;
+        return obj;
+    };
 };
