@@ -443,122 +443,6 @@ CtrlActionTaskManager.deleteResourceRest = function (resourceID) {
     return false;
 };
 
-CtrlActionTaskManager.addJobNotificationsStepsHtml = function (html, position) {
-    "use strict";
-    if (position === 1) {
-        html += "<div class='mdl-card mdl-cell--5-col active'>";
-    } else {
-        html += "<div class='mdl-card mdl-cell--5-col'>";
-    }
-    html += "<span class=\"mdl-chip\">" +
-            "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_TYPE", "TASK_MANAGER") + "</span>" +
-            "</span></div>";
-    if (position === 2) {
-        html += "<div class='mdl-card mdl-cell--5-col active'>";
-    } else {
-        html += "<div class='mdl-card mdl-cell--5-col'>";
-    }
-    html += "<span class=\"mdl-chip\">" +
-            "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_PARAMETERS", "TASK_MANAGER") + "</span>" +
-            "</span></div>";
-    return html;
-};
-CtrlActionTaskManager.addJobStepsFirsStepHtml = function (position) {
-    "use strict";
-    let html = "";
-    if (position === 1) {
-        html += "<div class='mdl-card mdl-cell--2-col active'>";
-    } else {
-        html += "<div class='mdl-card mdl-cell--2-col'>";
-    }
-
-    html += "<span class=\"mdl-chip\">" +
-            "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_TYPE", "TASK_MANAGER") + "</span>" +
-            "</span></div>";
-    return html;
-};
-CtrlActionTaskManager.addJobStepsSecondStepHtml = function (position) {
-    "use strict";
-    let html = "";
-    if (position === 2) {
-        html += "<div class='mdl-card mdl-cell--3-col active'>";
-    } else {
-        html += "<div class='mdl-card mdl-cell--3-col'>";
-    }
-
-    html += "<span class=\"mdl-chip\">" +
-            "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_PARAMETERS", "TASK_MANAGER") + "</span>" +
-            "</span></div>";
-    return html;
-};
-CtrlActionTaskManager.addJobStepsThirdStepHtml = function (position) {
-    "use strict";
-    let html = "";
-    if (position === 3) {
-        html += "<div class='mdl-card mdl-cell--3-col active'>";
-    } else {
-        html += "<div class='mdl-card mdl-cell--3-col'>";
-    }
-
-    html += "<span class=\"mdl-chip\">" +
-            "<span class=\"mdl-chip__text\">" + AppMain.t("REFERENCE_TYPE", "TASK_MANAGER") + "</span>" +
-            "</span></div>";
-    return html;
-};
-CtrlActionTaskManager.addJobStepsFourthStepHtml = function (position) {
-    "use strict";
-    let html = "";
-    if (position === 4) {
-        html += "<div class='mdl-card mdl-cell--2-col active'>";
-    } else {
-        html += "<div class='mdl-card mdl-cell--2-col'>";
-    }
-
-    html += "<span class=\"mdl-chip\">" +
-            "<span class=\"mdl-chip__text\">" + AppMain.t("REFERENCE", "TASK_MANAGER") + "</span>" +
-            "</span></div>";
-    return html;
-};
-CtrlActionTaskManager.addJobStepsFifthStepHtml = function (position) {
-    "use strict";
-    let html = "";
-    if (position === 5) {
-        html += "<div class='mdl-card mdl-cell--2-col cosem active'>";
-    } else {
-        html += "<div class='mdl-card mdl-cell--2-col cosem'>";
-    }
-
-    html += "<span class=\"mdl-chip cosem-chip\">" +
-            "<span class=\"mdl-chip__text\">" + AppMain.t("COSEM", "TASK_MANAGER") + "</span>" +
-            "</span></div>";
-    return html;
-};
-
-/**
- * helper function getting top html in add job wizard
- */
-CtrlActionTaskManager.addJobStepsHtml = function (position, jobType) {
-    "use strict";
-
-    let html =
-            "<div class='mdl-slider-wizard'>" +
-            "<hr class='wizard-line'/>" +
-            "</div>" +
-            "<div class='mdl-grid wizard-chips'>" +
-            "<div class='mdl-card mdl-cell--1-col'></div>";
-
-    if (jobType === "notification") {
-        CtrlActionTaskManager.addJobNotificationsStepsHtml(html, position);
-    }
-    html += CtrlActionTaskManager.addJobStepsFirsStepHtml(position);
-    html += CtrlActionTaskManager.addJobStepsSecondStepHtml(position);
-    html += CtrlActionTaskManager.addJobStepsThirdStepHtml(position);
-    html += CtrlActionTaskManager.addJobStepsFourthStepHtml(position);
-    html += CtrlActionTaskManager.addJobStepsFifthStepHtml(position);
-    html += "" + "</div>";
-    return html;
-};
-
 /**
  * function for pop up add job: first step
  */
@@ -574,7 +458,6 @@ CtrlActionTaskManager.addJobFirstStep = function () {
             "<td>\n    " +
             AppMain.t("ON_DEMAND_JOB", "TASK_MANAGER") +
             "</td>" +
-            // "<td rowspan='3' style='background-color: #fff!important;'><span id='service-txt'>" + serviceSelector + "</span></td>" +
             "</tr>";
     const scheduled = "<tr>\n    " +
             "<td class=\"mdl-data-table__cell--non-numeric\" style='width: 30px'>\n        " +
@@ -609,7 +492,7 @@ CtrlActionTaskManager.addJobFirstStep = function () {
             "</td>" +
             "</tr>";
 
-    let allHtml = "<span id='headerWizRow'>" + this.addJobStepsHtml(1, undefined) + "</span>" +
+    let allHtml = "<span id='headerWizRow'>" + this.helper.addJobStepsHtml(1, undefined) + "</span>" +
             AppMain.t("SELECT_JOB_TYPE", "TASK_MANAGER") + "</br>" +
             "<table id='job-type-table' class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">" +
             onDemand +
@@ -658,7 +541,7 @@ CtrlActionTaskManager.addJobFirstStep = function () {
 
         $("input[name='job-type']").on("click", function () {
             const value = $("input[type='radio']:checked").val();
-            $("#headerWizRow").html(CtrlActionTaskManager.addJobStepsHtml(1, value));
+            $("#headerWizRow").html(CtrlActionTaskManager.helper.addJobStepsHtml(1, value));
             if (value === "notification" && CtrlActionTaskManager.hasNotificationJob() && !CtrlActionTaskManager.hasNotify) {
                 $(".nextBtn").addClass("is-disabled");
                 CtrlActionTaskManager.hasNotify = true;
@@ -669,7 +552,6 @@ CtrlActionTaskManager.addJobFirstStep = function () {
                 $(".nextBtn").removeClass("is-disabled");
             }
         });
-
     }, 200);
 };
 
@@ -691,8 +573,7 @@ CtrlActionTaskManager.addJobFileUpload = function (jobType, node) {
             "<input class=\"mdl-textfield__input\" type=\"text\" id=\"imgIdent\"></div>" +
             "</td></tr>";
 
-
-    let allHtml = this.addJobStepsHtml(2, jobType) + AppMain.t("FILE_FOR_UPGRADE", "TASK_MANAGER");
+    let allHtml = this.helper.addJobStepsHtml(2, jobType) + AppMain.t("FILE_FOR_UPGRADE", "TASK_MANAGER");
     allHtml += "<table class='mdl-data-table table-no-borders' style=\"width: 100%\"><tbody>" +
             "<tr>" +
             "<td>" + AppMain.t("FILE", "TASK_MANAGER") + " *<div id=\"fileUploadProgressSpinner\" class=\"mdl-spinner mdl-spinner--single-color mdl-js-spinner hidden\"></div></td>" +
@@ -877,20 +758,14 @@ CtrlActionTaskManager.addJobSecond = function (jobType, node) {
             "<td><div class=\"mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-js-textfield-datepicker textfield-short-175\">" +
             "<input class=\"mdl-textfield__input\" type=\"text\" id=\"dateStart\"></div>" +
             "</td></tr>";
+    this.helper.arrangeRepeatingInterval(node);
 
-    if (node && node.RepeatingInterval) {
-        if (!defined(this.helper.repeatValues[node.RepeatingInterval.toString()])) {
-            this.helper.repeatValues[node.RepeatingInterval.toString()] = moment.duration(node.RepeatingInterval).asMinutes() + " " + AppMain.t("MINUTES", "global");
-        }
-    }
     const repeatingSelector = AppMain.html.formElementSelect("repeating", this.helper.repeatValues, {
         label: "",
-        elementSelected: (node && node.RepeatingInterval)
-            ? node.RepeatingInterval.toString()
-            : ""
+        elementSelected: this.helper.getResourceRepeatingInterval(node)
     }, undefined, "textfield-short-175");
 
-    const repeatingHtml = "<tr> <td>" + AppMain.t("REPEATING_INTERVAL", "TASK_MANAGER") + "</td>" +
+    const repeatingHtml = "<tr><td>" + AppMain.t("REPEATING_INTERVAL", "TASK_MANAGER") + "</td>" +
             "<td>" + repeatingSelector + "</td></tr>";
 
     const duration = "<tr> <td>" + AppMain.t("DURATION", "TASK_MANAGER") + "</td>" +
@@ -898,59 +773,18 @@ CtrlActionTaskManager.addJobSecond = function (jobType, node) {
             "<input class=\"mdl-textfield__input input-short\" style='width: 138px !important;' type=\"number\" maxlength='2' id=\"d-minutes\"> " +
             AppMain.t("MINUTES", "global") + "</div>" + "</td></tr>";
 
-    let allHtml = "";
-    if (!(node && node.back !== true)) {
-        allHtml += this.addJobStepsHtml(2, jobType);
-    }
-
+    let allHtml = this.helper.setAddJobSecondHeader(node, jobType);
     allHtml += AppMain.t("INSERT_JOB_PARAMS", "TASK_MANAGER") + "</br>" +
             "<table class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">";
 
-    let isNodeScheduled = false;
-    let isNodeNotification = false;
-    if (node !== undefined) {
-        isNodeNotification = defined(node.ResourceType) && node.ResourceType.toString() === "DATA-NOTIFICATION";
-    }
-    if (!isNodeNotification && node !== undefined) {
-        if (node.Activates && node.Activates !== "") {
-            isNodeScheduled = true;
-        }
-        if (node.RepeatingInterval && node.RepeatingInterval !== "") {
-            isNodeScheduled = true;
-        }
-        if (node.Duration && node.Duration !== "") {
-            isNodeScheduled = true;
-        }
-    }
-    if (jobType === "notification") {
-        isNodeNotification = true;
-        isNodeScheduled = false;
-    }
-    if (jobType === "scheduled") {
-        isNodeNotification = false;
-        isNodeScheduled = true;
-    }
-    if (jobType === "on-demand") {
-        isNodeNotification = false;
-        isNodeScheduled = false;
-    }
-
-    if (jobType === "scheduled" || isNodeScheduled) {
-        allHtml += startHtml + expiresHtml + repeatingHtml + duration;
-    }
-    if (!(jobType === "notification" || isNodeNotification)) {
-        allHtml += notOlderThanHtml + priorityHtml + asyncDataPush + replyHtml;
-    }
-    if (jobType === "notification" || isNodeNotification) {
-        allHtml += asyncDataPush + replyHtml;
-    }
-
+    let obj = this.helper.setResourceScheduledOrNotification(node, jobType);
+    allHtml += this.helper.setIsResourceScheduledSecondStepHtml(jobType, obj, startHtml, expiresHtml, repeatingHtml, duration);
+    allHtml += this.helper.setIsResourceNotNotificationSecondStepHtml(jobType, obj, notOlderThanHtml, priorityHtml, asyncDataPush, replyHtml);
+    allHtml += this.helper.setIsResourceNotificationSecondStepHtml(jobType, obj, asyncDataPush, replyHtml);
     allHtml = allHtml + "</table><br/><br/>";
 
     $.confirm({
-        title: (node && node.back !== true)
-            ? AppMain.t("EDIT_JOB", "TASK_MANAGER")
-            : AppMain.t("ADD_JOB", "TASK_MANAGER"),
+        title: this.helper.getAddJobSecondTitle(node),
         content: allHtml,
         useBootstrap: false,
         draggable: false,
@@ -965,16 +799,12 @@ CtrlActionTaskManager.addJobSecond = function (jobType, node) {
                 }
             },
             confirm: {
-                text: (node && node.back === undefined)
-                    ? AppMain.t("SAVE", "global")
-                    : jobType === "notification"
-                        ? AppMain.t("CREATE", "global")
-                        : AppMain.t("NEXT", "global"),
+                text: this.helper.getAddJobSecondConfirmText(node, jobType),
                 action: function () {
                     let jobObj = {};
                     jobObj.jobType = jobType;
                     jobObj.ReplyAddress = $("input[name='reply-address']").val();
-                    if (jobType === "notification" || isNodeNotification) {
+                    if (jobType === "notification" || obj.isNodeNotification) {
                         jobObj.AcceptDataNotification = true;
                         jobObj.AsyncReplyFlag = $("input[name=\"async-data-push\"]:checked").length > 0;
                     } else {
@@ -1002,7 +832,7 @@ CtrlActionTaskManager.addJobSecond = function (jobType, node) {
 
                         jobObj.AsyncReplyFlag = $("input[name=\"async-data-push\"]:checked").length > 0;
 
-                        if (jobType === "scheduled" || isNodeScheduled) {
+                        if (jobType === "scheduled" || obj.isNodeScheduled) {
                             const startTime = $("#dateStart").val();
                             jobObj.Activates = startTime !== ""
                                 ? moment(startTime).toISOString()
@@ -1129,7 +959,7 @@ CtrlActionTaskManager.addJobThirdStep = function (jobObj) {
             "</td>" +
             "</tr>";
 
-    let allHtml = this.addJobStepsHtml(3, jobObj.jobType) +
+    let allHtml = this.helper.addJobStepsHtml(3, jobObj.jobType) +
             AppMain.t("SELECT_REFERENCE", "TASK_MANAGER") + "</br></br>" +
             "<table id='reference-type' class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">" +
             deviceRef +
@@ -1246,7 +1076,7 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
             "<div style=\"display: none;float:right; margin-right: 15px;margin-top: 3px;\" class=\"file-selected\" id=\"file-name\"></div>" +
             "</div><br/>";
 
-    let allHtml = this.addJobStepsHtml(4, jobObj.jobType) +
+    let allHtml = this.helper.addJobStepsHtml(4, jobObj.jobType) +
             AppMain.t("SELECT_DEVICE_REFERENCE", "TASK_MANAGER") + "</br></br>" +
             addHtml +
             importHtml +
@@ -1370,6 +1200,23 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
         };
 
         const inputElement = document.getElementById("file");
+        const processImportCSVfile = function (header, allTextLines, startInd) {
+            header = header.split(",");
+            const ind = header.indexOf("\"" + AppMain.t("DEVICE_TITLE", "NODES") + "\"");
+            if (ind === -1) {
+                CtrlActionTaskManager.importAlert(AppMain.t("IMPORT_ERR_TITLE_TXT", "TASK_MANAGER"),
+                        AppMain.t("IMPORT_ERROR", "TASK_MANAGER"));
+            }
+            allTextLines.forEach(function (line, index) {
+                if (index < startInd) {
+                    return;
+                }
+                if (line !== "") {
+                    CtrlActionTaskManager.addTitle(line.split(",")[`${ind}`]
+                        .replace("\"", "").replace("\"", ""));
+                }
+            });
+        };
         inputElement.addEventListener("change", function () {
             const uploadElement = this;
 
@@ -1392,22 +1239,7 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
                             AppMain.t("IMPORT_CSV_ERROR", "TASK_MANAGER"));
                     return;
                 }
-                header = header.split(",");
-
-                const ind = header.indexOf("\"" + AppMain.t("DEVICE_TITLE", "NODES") + "\"");
-                if (ind === -1) {
-                    CtrlActionTaskManager.importAlert(AppMain.t("IMPORT_ERR_TITLE_TXT", "TASK_MANAGER"),
-                            AppMain.t("IMPORT_ERROR", "TASK_MANAGER"));
-                }
-                allTextLines.forEach(function (line, index) {
-                    if (index < startInd) {
-                        return;
-                    }
-                    if (line !== "") {
-                        CtrlActionTaskManager.addTitle(line.split(",")[`${ind}`]
-                            .replace("\"", "").replace("\"", ""));
-                    }
-                });
+                processImportCSVfile(header, allTextLines, startInd);
             };
             reader.readAsText(uploadElement.files[0]);
             $("#file").val("");
@@ -1418,32 +1250,6 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
     }, 500);
 };
 
-
-/**
- * helper function for devices import
- * @param title
- * @param content
- */
-CtrlActionTaskManager.importAlert = function (title, content) {
-    "use strict";
-
-    $.alert({
-        useBootstrap: false,
-        theme: "material",
-        title: title,
-        content: content,
-        buttons: {
-            confirm: {
-                text: AppMain.t("OK", "global")
-            }
-        }
-    });
-    $("#file").val("");
-    $(".select-file").show();
-    $("#file-name").html("");
-    $(".file-selected").hide();
-};
-
 /**
  * function for pop up add job: fourth-group step
  * @param jobObj
@@ -1451,7 +1257,7 @@ CtrlActionTaskManager.importAlert = function (title, content) {
 CtrlActionTaskManager.addJobGroup = function (jobObj) {
     "use strict";
 
-    let allHtml = this.addJobStepsHtml(4, jobObj.jobType) +
+    let allHtml = this.helper.addJobStepsHtml(4, jobObj.jobType) +
             AppMain.t("SELECT_GROUP_REFERENCE", "TASK_MANAGER") + "</br></br>" +
             "<table id='groups-table' class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">" +
             "<thead class=\"th-color-grey text-align-left\">" +
@@ -1685,10 +1491,10 @@ const updateJobService = function (jobObj) {
 CtrlActionTaskManager.initAllhtml1 = function (jobObj, serviceSelector) {
     "use strict";
     if (jobObj.jobType === "upgrade") {
-        return this.addJobStepsHtml(5, jobObj.jobType) + AppMain.t("INSERT_COSEM_ATTRS_FOR_UP", "TASK_MANAGER") + "</br>" +
+        return this.helper.addJobStepsHtml(5, jobObj.jobType) + AppMain.t("INSERT_COSEM_ATTRS_FOR_UP", "TASK_MANAGER") + "</br>" +
                 "<div style='width: 100%;padding: 0;' class='mdl-grid'>";
     }
-    return this.addJobStepsHtml(5, jobObj.jobType) + AppMain.t("INSERT_COSEM_ATTRS", "TASK_MANAGER") + "</br>" +
+    return this.helper.addJobStepsHtml(5, jobObj.jobType) + AppMain.t("INSERT_COSEM_ATTRS", "TASK_MANAGER") + "</br>" +
             "<div style='width: 100%;padding: 0;' class='mdl-grid'>" +
             "<div class='mdl-cell' style='width: 100%;'>" + serviceSelector + "</div>";
 };

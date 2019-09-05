@@ -283,6 +283,12 @@ module.exports.TaskManagerHelper = function () {
         return "---";
     };
 
+    this.getResourceRepeatingInterval = function (node) {
+        return (node && node.RepeatingInterval)
+            ? node.RepeatingInterval.toString()
+            : "";
+    };
+
     this.manageExpires = function (node, dateExpires) {
         if (node.Expires) {
             dateExpires.val(moment(node.Expires.toString()).format(AppMain.localization("DATETIME_FORMAT")));
@@ -470,6 +476,13 @@ module.exports.TaskManagerHelper = function () {
         return html;
     };
 
+    const dividableby3is1 = function (node) {
+        return node.CosemAttributeDescriptor && node.CosemAttributeDescriptor.length % 3 === 1;
+    };
+    const dividableby3is2 = function (node) {
+        return node.CosemAttributeDescriptor && node.CosemAttributeDescriptor.length % 3 === 2;
+    };
+
     this.getCosemAttributeDescriptorCaseCosemPopUpHTML = function (node) {
         let obj = {
             title: AppMain.t("JOB_OBJECTS", "TASK_MANAGER").toString(),
@@ -486,10 +499,10 @@ module.exports.TaskManagerHelper = function () {
             }
             obj.tableHTML += "<td>" + self.transformObject(cosem["class-id"], cosem["instance-id"], cosem["attribute-id"]) + "</td>";
         });
-        if (node.CosemAttributeDescriptor && node.CosemAttributeDescriptor.length % 3 === 1) {
+        if (dividableby3is1(node)) {
             obj.tableHTML += "<td></td><td></td></tr>";
         }
-        if (node.CosemAttributeDescriptor && node.CosemAttributeDescriptor.length % 3 === 2) {
+        if (dividableby3is2(node)) {
             obj.tableHTML += "<td></td></tr>";
         }
         return this.getCosemAttributeDescriptorPopUpHTML(obj);
@@ -547,5 +560,197 @@ module.exports.TaskManagerHelper = function () {
         allHtml += "</tbody></table>";
         obj.allHtml = allHtml;
         return obj;
+    };
+
+    this.addJobNotificationsStepsHtml = function (html, position) {
+        if (position === 1) {
+            html += "<div class='mdl-card mdl-cell--5-col active'>";
+        } else {
+            html += "<div class='mdl-card mdl-cell--5-col'>";
+        }
+        html += "<span class=\"mdl-chip\">" +
+                "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_TYPE", "TASK_MANAGER") + "</span>" +
+                "</span></div>";
+        if (position === 2) {
+            html += "<div class='mdl-card mdl-cell--5-col active'>";
+        } else {
+            html += "<div class='mdl-card mdl-cell--5-col'>";
+        }
+        html += "<span class=\"mdl-chip\">" +
+                "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_PARAMETERS", "TASK_MANAGER") + "</span>" +
+                "</span></div>";
+        return html;
+    };
+    this.addJobStepsFirsStepHtml = function (position) {
+        let html = "";
+        if (position === 1) {
+            html += "<div class='mdl-card mdl-cell--2-col active'>";
+        } else {
+            html += "<div class='mdl-card mdl-cell--2-col'>";
+        }
+
+        html += "<span class=\"mdl-chip\">" +
+                "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_TYPE", "TASK_MANAGER") + "</span>" +
+                "</span></div>";
+        return html;
+    };
+    this.addJobStepsSecondStepHtml = function (position) {
+        let html = "";
+        if (position === 2) {
+            html += "<div class='mdl-card mdl-cell--3-col active'>";
+        } else {
+            html += "<div class='mdl-card mdl-cell--3-col'>";
+        }
+
+        html += "<span class=\"mdl-chip\">" +
+                "<span class=\"mdl-chip__text\">" + AppMain.t("JOB_PARAMETERS", "TASK_MANAGER") + "</span>" +
+                "</span></div>";
+        return html;
+    };
+    this.addJobStepsThirdStepHtml = function (position) {
+        let html = "";
+        if (position === 3) {
+            html += "<div class='mdl-card mdl-cell--3-col active'>";
+        } else {
+            html += "<div class='mdl-card mdl-cell--3-col'>";
+        }
+
+        html += "<span class=\"mdl-chip\">" +
+                "<span class=\"mdl-chip__text\">" + AppMain.t("REFERENCE_TYPE", "TASK_MANAGER") + "</span>" +
+                "</span></div>";
+        return html;
+    };
+    this.addJobStepsFourthStepHtml = function (position) {
+        let html = "";
+        if (position === 4) {
+            html += "<div class='mdl-card mdl-cell--2-col active'>";
+        } else {
+            html += "<div class='mdl-card mdl-cell--2-col'>";
+        }
+
+        html += "<span class=\"mdl-chip\">" +
+                "<span class=\"mdl-chip__text\">" + AppMain.t("REFERENCE", "TASK_MANAGER") + "</span>" +
+                "</span></div>";
+        return html;
+    };
+    this.addJobStepsFifthStepHtml = function (position) {
+        let html = "";
+        if (position === 5) {
+            html += "<div class='mdl-card mdl-cell--2-col cosem active'>";
+        } else {
+            html += "<div class='mdl-card mdl-cell--2-col cosem'>";
+        }
+
+        html += "<span class=\"mdl-chip cosem-chip\">" +
+                "<span class=\"mdl-chip__text\">" + AppMain.t("COSEM", "TASK_MANAGER") + "</span>" +
+                "</span></div>";
+        return html;
+    };
+
+    /**
+     * helper function getting top html in add job wizard
+     */
+    this.addJobStepsHtml = function (position, jobType) {
+        let html =
+                "<div class='mdl-slider-wizard'>" +
+                "<hr class='wizard-line'/>" +
+                "</div>" +
+                "<div class='mdl-grid wizard-chips'>" +
+                "<div class='mdl-card mdl-cell--1-col'></div>";
+
+        if (jobType === "notification") {
+            this.addJobNotificationsStepsHtml(html, position);
+        }
+        html += this.addJobStepsFirsStepHtml(position);
+        html += this.addJobStepsSecondStepHtml(position);
+        html += this.addJobStepsThirdStepHtml(position);
+        html += this.addJobStepsFourthStepHtml(position);
+        html += this.addJobStepsFifthStepHtml(position);
+        html += "" + "</div>";
+        return html;
+    };
+
+    this.arrangeRepeatingInterval = function (node) {
+        if (node && node.RepeatingInterval) {
+            if (!defined(this.repeatValues[node.RepeatingInterval.toString()])) {
+                this.repeatValues[node.RepeatingInterval.toString()] = moment.duration(node.RepeatingInterval).asMinutes() + " " + AppMain.t("MINUTES", "global");
+            }
+        }
+    };
+
+    this.setAddJobSecondHeader = function (node, jobType) {
+        if (!(node && node.back !== true)) {
+            return this.addJobStepsHtml(2, jobType);
+        }
+        return "";
+    };
+
+    this.setResourceScheduledOrNotification = function (node, jobType) {
+        let obj = {
+            isNodeScheduled: false,
+            isNodeNotification: false
+        };
+        if (node !== undefined) {
+            obj.isNodeNotification = defined(node.ResourceType) && node.ResourceType.toString() === "DATA-NOTIFICATION";
+        }
+        if (!obj.isNodeNotification && node !== undefined) {
+            if (node.Activates && node.Activates !== "") {
+                obj.isNodeScheduled = true;
+            }
+            if (node.RepeatingInterval && node.RepeatingInterval !== "") {
+                obj.isNodeScheduled = true;
+            }
+            if (node.Duration && node.Duration !== "") {
+                obj.isNodeScheduled = true;
+            }
+        }
+        if (jobType === "notification") {
+            obj.isNodeNotification = true;
+            obj.isNodeScheduled = false;
+        }
+        if (jobType === "scheduled") {
+            obj.isNodeNotification = false;
+            obj.isNodeScheduled = true;
+        }
+        if (jobType === "on-demand") {
+            obj.isNodeNotification = false;
+            obj.isNodeScheduled = false;
+        }
+        return obj;
+    };
+
+    this.setIsResourceScheduledSecondStepHtml = function (jobType, obj, startHtml, expiresHtml, repeatingHtml, duration) {
+        if (jobType === "scheduled" || obj.isNodeScheduled) {
+            return startHtml + expiresHtml + repeatingHtml + duration;
+        }
+        return "";
+    };
+
+    this.setIsResourceNotNotificationSecondStepHtml = function (jobType, obj, notOlderThanHtml, priorityHtml, asyncDataPush, replyHtml) {
+        if (!(jobType === "notification" || obj.isNodeNotification)) {
+            return notOlderThanHtml + priorityHtml + asyncDataPush + replyHtml;
+        }
+        return "";
+    };
+
+    this.setIsResourceNotificationSecondStepHtml = function (jobType, obj, asyncDataPush, replyHtml) {
+        if (jobType === "notification" || obj.isNodeNotification) {
+            return asyncDataPush + replyHtml;
+        }
+        return "";
+    };
+
+    this.getAddJobSecondTitle = function (node) {
+        return (node && node.back !== true)
+            ? AppMain.t("EDIT_JOB", "TASK_MANAGER")
+            : AppMain.t("ADD_JOB", "TASK_MANAGER");
+    };
+
+    this.getAddJobSecondConfirmText = function (node, jobType) {
+        return (node && node.back === undefined)
+            ? AppMain.t("SAVE", "global")
+            : jobType === "notification"
+                ? AppMain.t("CREATE", "global")
+                : AppMain.t("NEXT", "global");
     };
 };
