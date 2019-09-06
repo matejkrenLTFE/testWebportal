@@ -100,6 +100,12 @@ module.exports.TaskManagerHelper = function () {
     this.isResourceOnDemand = function (isScheduled, isUpgrade, isNotification) {
         return !isScheduled && !isNotification && !isUpgrade;
     };
+    this.hasResourceAsyncReplyFlag = function (node) {
+        return defined(node.AsyncReplyFlag) && node.AsyncReplyFlag.toString() === "true";
+    };
+    this.canEditResource = function (node, isUpgrade) {
+        return node.ResourceStatus.toString() !== "FINISHED" && !isUpgrade;
+    };
     this.getResourceTypeTxtNotScheduled = function (isOndemand, isNotification, isUpgrade) {
         let typeTxt = "";
         if (isOndemand) {
@@ -1135,22 +1141,25 @@ module.exports.TaskManagerHelper = function () {
         }
         return allHtml;
     };
-
+    this.addAttrPressGetInsertedDescTXTForGet = function (descVal, objectList) {
+        return (defined(descVal) && descVal !== "0" && descVal !== "")
+            ? objectList.get[parseInt(descVal, 10) - 1].description
+            : "---";
+    };
+    this.addAttrPressGetInsertedDescTXTForTimeSync = function (descVal, objectList) {
+        return (defined(descVal) && descVal !== "0" && descVal !== "")
+            ? objectList.timeSync[parseInt(descVal, 10) - 1].description
+            : "---";
+    };
     this.addAttrPressGetInsertedDescTXT = function (objectList) {
         const descVal = $("#job-object").val();
         const service = $("#job-service").val();
         let descTXT = "---";
-        switch (service) {
-        case "get":
-            descTXT = (defined(descVal) && descVal !== "0" && descVal !== "")
-                ? objectList.get[parseInt(descVal, 10) - 1].description
-                : "---";
-            break;
-        case "time-sync":
-            descTXT = (defined(descVal) && descVal !== "0" && descVal !== "")
-                ? objectList.timeSync[parseInt(descVal, 10) - 1].description
-                : "---";
-            break;
+        if (service === "get") {
+            descTXT = this.addAttrPressGetInsertedDescTXTForGet(descVal, objectList);
+        }
+        if (service === "time-sync") {
+            descTXT = this.addAttrPressGetInsertedDescTXTForTimeSync(descVal, objectList);
         }
         return descTXT;
     };
@@ -1198,16 +1207,20 @@ module.exports.TaskManagerHelper = function () {
         return true;
     };
     this.addAttrPressCheckAccessFromAndTo = function (accessFrom, accessTo, CtrlActionTaskManager) {
-        if ((accessFrom && accessFrom !== "") || (accessTo && accessTo !== "")) {// isAccessSel
+        const isAccess = (accessFrom && accessFrom !== "") || (accessTo && accessTo !== "");
+        if (isAccess) {// isAccessSel
             return this.addAttrPressCheckAccessFromAndToIsAccessSelection(accessFrom, accessTo, CtrlActionTaskManager);
         }
         return true;
+    };
+    this.isTimeSynchroCheckValues = function (minDiffInt, maxDiffInt) {
+        return !Number.isNaN(minDiffInt) && !Number.isNaN(maxDiffInt) && minDiffInt > maxDiffInt;
     };
     this.addAttrPressCheckAccessMinDiffMaxDiff = function (minDiff, maxDiff, CtrlActionTaskManager) {
         if (minDiff !== "" || maxDiff !== "") {
             const minDiffInt = Number.parseInt(minDiff, 10);
             const maxDiffInt = Number.parseInt(maxDiff, 10);
-            if (!Number.isNaN(minDiffInt) && !Number.isNaN(maxDiffInt) && minDiffInt > maxDiffInt) {
+            if (this.isTimeSynchroCheckValues(minDiffInt, maxDiffInt)) {
                 CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
                         AppMain.t("MAXMINDIF_ERROR_TXT", "TASK_MANAGER"));
                 return false;
@@ -1260,12 +1273,15 @@ module.exports.TaskManagerHelper = function () {
         }
         return "";
     };
+    this.isTimeSynchro = function (maxDiffInt, minDiffInt) {
+        return !Number.isNaN(maxDiffInt) || !Number.isNaN(minDiffInt);
+    };
     this.addAttrPressGetMaxMindif = function (addObj) {
         const maxDiffInt = parseInt($("#max-time-diff").val(), 10);
         addObj.maxDiff = "";
         const minDiffInt = parseInt($("#min-time-diff").val(), 10);
         addObj.minDiff = "";
-        if (!Number.isNaN(maxDiffInt) || !Number.isNaN(minDiffInt)) { //is time sync
+        if (this.isTimeSynchro(maxDiffInt, minDiffInt)) { //is time sync
             if (!Number.isNaN(maxDiffInt)) {
                 addObj.maxDiff = maxDiffInt + "";
             }
@@ -1288,5 +1304,15 @@ module.exports.TaskManagerHelper = function () {
         return (defined(accessTo) && accessTo !== "")
             ? moment(accessTo).toISOString()
             : "";
+    };
+
+    this.hasResourceAccessFromTo = function (attrObj) {
+        return (attrObj.accessFrom && attrObj.accessFrom !== "") || (attrObj.accessTo && attrObj.accessTo !== "");
+    };
+    this.hasResourceRelativeAccessFromTo = function (attrObj) {
+        return attrObj.relAccessFrom && attrObj.relAccessFrom !== "";
+    };
+    this.hasResourceMinMaxDiff = function (attrObj) {
+        return (attrObj.maxDiff !== "") || (attrObj.minDiff !== "");
     };
 };

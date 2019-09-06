@@ -178,13 +178,13 @@ CtrlActionTaskManager.buildNodeListHTML = function (resourceList) {
         listHtml += "<td" + clickHTML + "><span class='mdl-chip " + node.ResourceStatus.toString() + "'><span class='mdl-chip__text ResourceStatus'>"
                 + statusTXT + "</span></span></td>";
 
-        if (defined(node.AsyncReplyFlag) && node.AsyncReplyFlag.toString() === "true") {
+        if (this.helper.hasResourceAsyncReplyFlag(node)) {
             listHtml += "<td" + clickHTML + "><input type='checkbox' checked disabled/></td>";
         } else {
             listHtml += "<td" + clickHTML + "><input type='checkbox' disabled/></td>";
         }
         listHtml += "<td>";
-        if (node.ResourceStatus.toString() !== "FINISHED" && !isUpgrade) {
+        if (this.helper.canEditResource(node, isUpgrade)) {
             listHtml += "<i id='edit_" + node.ID.toString() + "' data-rbac='taskManager.edit' class=\"material-icons cursor-pointer\"" +
                     " data-bind-event=\"click\" data-bind-method=\"CtrlActionTaskManager.editResource\" data-node-id='" + node.ID.toString() +
                     "'>edit</i>";
@@ -1878,12 +1878,12 @@ CtrlActionTaskManager.addAttrHtml = function (attrObj) {
             "<td>" + attrObj.classID + "</td>" +
             "<td>" + attrObj.instaIDshort + "</td>" +
             "<td>" + attrObj.attrID + "</td>";
-    if ((attrObj.accessFrom && attrObj.accessFrom !== "") || (attrObj.accessTo && attrObj.accessTo !== "")) {
+    if (this.helper.hasResourceAccessFromTo(attrObj)) {
         devHtml += "<td colspan='2'>" + AppMain.t("ACCESS_SELECTION_FROM", "TASK_MANAGER") + ": " + attrObj.accessFromTXT + " <br/> "
                 + AppMain.t("ACCESS_SELECTION_TO", "TASK_MANAGER") + ": " + attrObj.accessToTXT + "</td>";
-    } else if (attrObj.relAccessFrom && attrObj.relAccessFrom !== "") {
+    } else if (this.helper.hasResourceRelativeAccessFromTo(attrObj)) {
         devHtml += "<td colspan='2'>" + CtrlActionTaskManager.helper.relativeSelector[`${attrObj.relAccessFrom}`] + "</td>";
-    } else if ((attrObj.maxDiff !== "") || (attrObj.minDiff !== "")) {
+    } else if (this.helper.hasResourceMinMaxDiff(attrObj)) {
         devHtml += "<td colspan='2'>" + AppMain.t("MAX_TIME_DIFF", "TASK_MANAGER") + ": " + attrObj.maxDiff + " <br/> "
                 + AppMain.t("MIN_TIME_DIFF", "TASK_MANAGER") + ": " + attrObj.minDiff + "</td>";
     } else if (attrObj.vType.length) {
@@ -1909,6 +1909,14 @@ CtrlActionTaskManager.addResourceXML = function (resource) {
     download("data:text/xml;charset=utf-8;base64," + btoa(responseXML), build.device + "_Job_" + moment().format("YYYY-MM-DD-HH-mm-ss") + ".xml", "text/xml");
 };
 
+CtrlActionTaskManager.showAddResourceCreatedSuccesDialog = function (isEdit, response, resource) {
+    "use strict";
+    if (!isEdit) {
+        AppMain.dialog("JOB_CREATED", "success", [response.ResponseMessage.Reply.ID.toString()]);
+    } else {
+        AppMain.dialog("JOB_UPDATED", "success", [resource.ID.toString()]);
+    }
+};
 /**
  * add resource rest function
  * @param resource
@@ -1922,11 +1930,7 @@ CtrlActionTaskManager.addResourceRest = function (resource, isEdit) {
     let response = AppMain.wsMes().exec("RequestMessage", addJson).getResponse(false);
     if (response && response.ResponseMessage && isResourceRestResponseOk(response)) {
         CtrlActionTaskManager.exec();
-        if (!isEdit) {
-            AppMain.dialog("JOB_CREATED", "success", [response.ResponseMessage.Reply.ID.toString()]);
-        } else {
-            AppMain.dialog("JOB_UPDATED", "success", [resource.ID.toString()]);
-        }
+        CtrlActionTaskManager.showAddResourceCreatedSuccesDialog(isEdit, response, resource);
     }
     return true;
 };
