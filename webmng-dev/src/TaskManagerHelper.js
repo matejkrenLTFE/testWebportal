@@ -1387,8 +1387,14 @@ module.exports.TaskManagerHelper = function () {
             obj["dev:CosemAccessDescriptor"]["dev:CosemTimeSync"]["dev:max-time-diff"] = elm.cMaxDiff;
         }
     };
+    this.cosemAttributeDescriptorHasAccessFromOrTo = function (elm) {
+        return defined(elm.cAccessFrom) && elm.cAccessFrom !== "" && defined(elm.cAccessTo) && elm.cAccessTo !== "";
+    };
+    this.cosemAttributeDescriptorHasRelAccessFromOrTo = function (elm) {
+        return defined(elm.cRelAccessFrom) && elm.cRelAccessFrom !== "" && defined(elm.cRelAccessTo) && elm.cRelAccessTo !== "";
+    };
     this.getCosemAttributeDescriptorForUpgradeAccessUpdate = function (obj, elm) {
-        if (defined(elm.cAccessFrom) && elm.cAccessFrom !== "" && defined(elm.cAccessTo) && elm.cAccessTo !== "") {
+        if (this.cosemAttributeDescriptorHasAccessFromOrTo(elm)) {
             obj["dev:CosemAccessDescriptor"]["dev:CosemXDLMSDescriptor"]["cos:get-request"]["cos:get-request-normal"]["cos:access-selection"] = {
                 "cos:access-selector": 1,
                 "cos:access-parameters": {
@@ -1405,7 +1411,7 @@ module.exports.TaskManagerHelper = function () {
         }
     };
     this.getCosemAttributeDescriptorForUpgradeRelAccessUpdate = function (obj, elm) {
-        if (defined(elm.cRelAccessFrom) && elm.cRelAccessFrom !== "" && defined(elm.cRelAccessTo) && elm.cRelAccessTo !== "") {
+        if (this.cosemAttributeDescriptorHasRelAccessFromOrTo(elm)) {
             obj["dev:CosemAccessDescriptor"]["dev:CosemXDLMSDescriptor"]["cos:get-request"]["cos:get-request-normal"]["cos:access-selection"] = {
                 "cos:access-selector": 1,
                 "cos:access-parameters": {

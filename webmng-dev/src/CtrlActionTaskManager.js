@@ -1966,7 +1966,7 @@ CtrlActionTaskManager.getResourceJson = function (resource, isEdit) {
     if (isEdit) {
         addJson["mes:Request"] = {};
         addJson["mes:Request"]["mes:ID"] = resource.ID.toString();
-        addJson["mes:Request"]["mes:DeviceAccess"]._ID = resource.ID.toString();
+        addJson["mes:Payload"]["mes:DeviceAccess"]._ID = resource.ID.toString();
     } else {
         this.helper.updateAddJsonReferences(addJson, resource);
         this.helper.updateAddJsonCosemAccessList(addJson, resource);
