@@ -178,13 +178,13 @@ CtrlActionTaskManager.buildNodeListHTML = function (resourceList) {
         listHtml += "<td" + clickHTML + "><span class='mdl-chip " + node.ResourceStatus.toString() + "'><span class='mdl-chip__text ResourceStatus'>"
                 + statusTXT + "</span></span></td>";
 
-        if (this.helper.hasResourceAsyncReplyFlag(node)) {
+        if (self.helper.hasResourceAsyncReplyFlag(node)) {
             listHtml += "<td" + clickHTML + "><input type='checkbox' checked disabled/></td>";
         } else {
             listHtml += "<td" + clickHTML + "><input type='checkbox' disabled/></td>";
         }
         listHtml += "<td>";
-        if (this.helper.canEditResource(node, isUpgrade)) {
+        if (self.helper.canEditResource(node, isUpgrade)) {
             listHtml += "<i id='edit_" + node.ID.toString() + "' data-rbac='taskManager.edit' class=\"material-icons cursor-pointer\"" +
                     " data-bind-event=\"click\" data-bind-method=\"CtrlActionTaskManager.editResource\" data-node-id='" + node.ID.toString() +
                     "'>edit</i>";
@@ -1959,233 +1959,25 @@ CtrlActionTaskManager.addResourceXMLRest = function (resourceTXT) {
 CtrlActionTaskManager.getResourceJson = function (resource, isEdit) {
     "use strict";
 
-    let addJson = {
-        "mes:Header": {
-            "mes:Verb": "create",
-            "mes:Noun": "DeviceAccess",
-            "mes:Timestamp": moment().toISOString(),
-            "mes:MessageID": "78465521",
-            "mes:CorrelationID": "78465521"
-        }
-    };
-    if (isEdit) {
-        addJson = {
-            "mes:Header": {
-                "mes:Verb": "change",
-                "mes:Noun": "DeviceAccess",
-                "mes:Timestamp": moment().toISOString(),
-                "mes:MessageID": "78465521",
-                "mes:CorrelationID": "78465521"
-            }
-        };
-    }
-    if (resource.AsyncReplyFlag && resource.AsyncReplyFlag !== "") {
-        addJson["mes:Header"]["mes:AsyncReplyFlag"] = resource.AsyncReplyFlag;
-    }
-    if (resource.ReplyAddress && resource.ReplyAddress !== "") {
-        addJson["mes:Header"]["mes:ReplyAddress"] = resource.ReplyAddress;
-    }
-
-
-    const xmlMainEl = "mes:Payload";
-    addJson[`${xmlMainEl}`] = {};
-    addJson[`${xmlMainEl}`]["mes:DeviceAccess"] = {};
+    let addJson = this.helper.initializeAddJson(isEdit, resource);
+    addJson["mes:Payload"] = {};
+    addJson["mes:Payload"]["mes:DeviceAccess"] = {};
 
     if (isEdit) {
         addJson["mes:Request"] = {};
         addJson["mes:Request"]["mes:ID"] = resource.ID.toString();
-        addJson[`${xmlMainEl}`]["mes:DeviceAccess"]._ID = resource.ID.toString();
+        addJson["mes:Request"]["mes:DeviceAccess"]._ID = resource.ID.toString();
+    } else {
+        this.helper.updateAddJsonReferences(addJson, resource);
+        this.helper.updateAddJsonCosemAccessList(addJson, resource);
     }
-
-    if (!isEdit) {
-        if (resource.devices && resource.devices.length > 0) {
-            addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:DevicesReferenceList"] = {};
-            addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:DeviceReference"] = [];
-            $.each(resource.devices, function (ignore, elm) {
-                addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:DeviceReference"].push({
-                    "_DeviceID": elm
-                });
-            });
-        } else {
-            if (resource.groups && resource.groups.length > 0) {
-                addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:DevicesReferenceList"] = {};
-                addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:GroupReference"] = [];
-                $.each(resource.groups, function (ignore, elm) {
-                    addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:DevicesReferenceList"]["dev:GroupReference"].push({
-                        "_GroupID": elm
-                    });
-                });
-            }
-        }
-
-        if (resource.jobType !== "notification") {  //cosem access list
-            addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:CosemAccessList"] = {};
-            addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:CosemAccessList"]["dev:CosemAccess"] = [];
-            $.each(resource.attrs, function (ignore, elm) {
-                let obj;
-                if (resource.jobService === "time-sync") {
-                    obj = {
-                        "dev:CosemAccessDescriptor": {
-                            "dev:CosemTimeSync": {
-                                "dev:cosem-object": {
-                                    "cos:class-id": elm.cClass,
-                                    "cos:instance-id": elm.cInstance,
-                                    "cos:attribute-id": elm.cAttr
-                                }
-                            }
-                        }
-                    };
-                    if (elm.cMinDiff) {
-                        obj["dev:CosemAccessDescriptor"]["dev:CosemTimeSync"]["dev:min-time-diff"] = elm.cMinDiff;
-                    }
-                    if (elm.cMaxDiff) {
-                        obj["dev:CosemAccessDescriptor"]["dev:CosemTimeSync"]["dev:max-time-diff"] = elm.cMaxDiff;
-                    }
-                    addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:CosemAccessList"]["dev:CosemAccess"].push(obj);
-
-                } else {
-                    obj = {};
-                    if (resource.jobService === "set") {
-                        obj = {
-                            "dev:CosemAccessDescriptor": {
-                                "dev:CosemXDLMSDescriptor": {
-                                    "cos:set-request": {
-                                        "cos:set-request-normal": {
-                                            "cos:invoke-id-and-priority": 64,
-                                            "cos:cosem-attribute-descriptor": {
-                                                "cos:class-id": elm.cClass,
-                                                "cos:instance-id": elm.cInstance,
-                                                "cos:attribute-id": elm.cAttr
-                                            },
-                                            "cos:value": {}
-                                        }
-                                    }
-                                }
-                            }
-                        };
-                        obj["dev:CosemAccessDescriptor"]["dev:CosemXDLMSDescriptor"]["cos:set-request"]["cos:set-request-normal"]["cos:value"][elm.cVarType] = elm.cVarValue;
-                    } else {
-                        if (resource.jobService === "action") {
-                            obj = {
-                                "dev:CosemAccessDescriptor": {
-                                    "dev:CosemXDLMSDescriptor": {
-                                        "cos:action-request": {
-                                            "cos:action-request-normal": {
-                                                "cos:invoke-id-and-priority": 64,
-                                                "cos:cosem-method-descriptor": {
-                                                    "cos:class-id": elm.cClass,
-                                                    "cos:instance-id": elm.cInstance,
-                                                    "cos:method-id": elm.cAttr
-                                                },
-                                                "cos:method-invocation-parameters": {}
-                                            }
-                                        }
-                                    }
-                                }
-                            };
-                            obj["dev:CosemAccessDescriptor"]["dev:CosemXDLMSDescriptor"]["cos:action-request"]["cos:action-request-normal"]
-                                ["cos:method-invocation-parameters"][elm.cVarType] = elm.cVarValue;
-                        } else {
-                            if (resource.jobType === "upgrade") {
-                                obj = {
-                                    "dev:CosemAccessDescriptor": {
-                                        "dev:CosemUpgrade": {
-                                            "dev:upgrade-file": resource.fileName,
-                                            "dev:image-identifier": resource.imageIdentifier,
-                                            "dev:image-size": resource.fileSize,
-                                            "dev:cosem-object": {
-                                                "cos:class-id": elm.cClass,
-                                                "cos:instance-id": elm.cInstance,
-                                                "cos:attribute-id": elm.cAttr
-                                            }
-                                        }
-                                    }
-                                };
-                            } else {
-                                obj = {
-                                    "dev:CosemAccessDescriptor": {
-                                        "dev:CosemXDLMSDescriptor": {
-                                            "cos:get-request": {
-                                                "cos:get-request-normal": {
-                                                    "cos:invoke-id-and-priority": 64,
-                                                    "cos:cosem-attribute-descriptor": {
-                                                        "cos:class-id": elm.cClass,
-                                                        "cos:instance-id": elm.cInstance,
-                                                        "cos:attribute-id": elm.cAttr
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                };
-                                if (defined(elm.cAccessFrom) && elm.cAccessFrom !== "" && defined(elm.cAccessTo) && elm.cAccessTo !== "") {
-                                    obj["dev:CosemAccessDescriptor"]["dev:CosemXDLMSDescriptor"]["cos:get-request"]["cos:get-request-normal"]["cos:access-selection"] = {
-                                        "cos:access-selector": 1,
-                                        "cos:access-parameters": {
-                                            "cos:structure": {
-                                                "cos:structure": {
-                                                    "cos:octet-string": "0000010000FF",
-                                                    "cos:integer": 2,
-                                                    "cos:long-unsigned": [8, 0]
-                                                },
-                                                "cos:date-time": [elm.cAccessFrom, elm.cAccessTo]
-                                            }
-                                        }
-                                    };
-                                }
-                                if (defined(elm.cRelAccessFrom) && elm.cRelAccessFrom !== "" && defined(elm.cRelAccessTo) && elm.cRelAccessTo !== "") {
-                                    obj["dev:CosemAccessDescriptor"]["dev:CosemXDLMSDescriptor"]["cos:get-request"]["cos:get-request-normal"]["cos:access-selection"] = {
-                                        "cos:access-selector": 1,
-                                        "cos:access-parameters": {
-                                            "cos:structure": {
-                                                "cos:structure": {
-                                                    "cos:octet-string": "0000010000FF",
-                                                    "cos:integer": 2,
-                                                    "cos:long-unsigned": [8, 0]
-                                                },
-                                                "cos:octet-string": [elm.cRelAccessFrom, elm.cRelAccessTo]
-                                            }
-                                        }
-                                    };
-                                }
-                            }
-                        }
-                    }
-                    addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:CosemAccessList"]["dev:CosemAccess"].push(obj);
-                }
-
-            });
-        }
-    }
-
-    if (defined(resource.Priority)) {
-        addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:Priority"] = resource.Priority;
-    }
-
-    if (resource.Expires && resource.Expires !== "") {
-        addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:Expires"] = resource.Expires;
-    }
-
-    if (resource.NotOlderThan && resource.NotOlderThan !== "") {
-        addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:NotOlderThan"] = resource.NotOlderThan;
-    }
-
-    if (resource.AcceptDataNotification && resource.AcceptDataNotification !== "") {
-        addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:AcceptDataNotification"] = resource.AcceptDataNotification;
-    }
-
-    if (resource.Activates && resource.Activates !== "") {
-        addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:Activates"] = resource.Activates;
-    }
-
-    if (resource.RepeatingInterval && resource.RepeatingInterval !== "") {
-        addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:RepeatingInterval"] = resource.RepeatingInterval;
-    }
-
-    if (resource.Duration && resource.Duration !== "") {
-        addJson[`${xmlMainEl}`]["mes:DeviceAccess"]["dev:Duration"] = resource.Duration;
-    }
-
+    this.helper.updateAddJsonPriority(addJson, resource);
+    this.helper.updateAddJsonExpires(addJson, resource);
+    this.helper.updateAddJsonNotOlderThan(addJson, resource);
+    this.helper.updateAddJsonAcceptDataNotification(addJson, resource);
+    this.helper.updateAddJsonActivates(addJson, resource);
+    this.helper.updateAddJsonRepeatinginterval(addJson, resource);
+    this.helper.updateAddJsonDuration(addJson, resource);
     return addJson;
 };
 
