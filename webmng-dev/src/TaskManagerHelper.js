@@ -1577,4 +1577,40 @@ module.exports.TaskManagerHelper = function () {
             addJson["mes:Payload"]["mes:DeviceAccess"]["dev:Duration"] = resource.Duration;
         }
     };
+    this.selectAllNodesOnClickSetup = function () {
+        $(".selectAllNodes").on("click", function (e) {
+            e.stopPropagation();
+            const selectNode = $(".selectNode");
+            if (e.target.checked === true) {
+                selectNode.attr("checked", "checked");
+                selectNode.prop("checked", true);
+            } else {
+                selectNode.removeAttr("checked");
+                selectNode.prop("checked", false);
+            }
+        });
+    };
+    this.addAttrHtmlHasResourceForMinMaxDif = function (attrObj) {
+        let devHtml = "";
+        if (this.hasResourceMinMaxDiff(attrObj)) {
+            devHtml += "<td colspan='2'>" + AppMain.t("MAX_TIME_DIFF", "TASK_MANAGER") + ": " + attrObj.maxDiff + " <br/> "
+                    + AppMain.t("MIN_TIME_DIFF", "TASK_MANAGER") + ": " + attrObj.minDiff + "</td>";
+        } else {
+            if (attrObj.vType.length) {
+                devHtml += "<td colspan='2'>" + this.typeSelector[`${attrObj.varType}`] + "(" + attrObj.varValue + ")</td>";
+            } else {
+                devHtml += "<td></td>";
+            }
+        }
+        return devHtml;
+    };
+    this.addAttrHtmlHasResource = function (attrObj) {
+        let devHtml = "";
+        if (this.hasResourceRelativeAccessFromTo(attrObj)) {
+            devHtml += "<td colspan='2'>" + this.relativeSelector[`${attrObj.relAccessFrom}`] + "</td>";
+        } else {
+            this.addAttrHtmlHasResourceForMinMaxDif(attrObj);
+        }
+        return devHtml;
+    };
 };

@@ -1062,18 +1062,7 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
                 input[0].click();
             }
         });
-
-        $(".selectAllNodes").on("click", function (e) {
-            e.stopPropagation();
-            const selectNode = $(".selectNode");
-            if (e.target.checked === true) {
-                selectNode.attr("checked", "checked");
-                selectNode.prop("checked", true);
-            } else {
-                selectNode.removeAttr("checked");
-                selectNode.prop("checked", false);
-            }
-        });
+        CtrlActionTaskManager.helper.selectAllNodesOnClickSetup();
 
         $("#add-icon").on("click", function (e) {
             e.preventDefault();
@@ -1082,21 +1071,6 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
             AppMain.html.updateElements([".mdl-button"]);
             return false;
         });
-
-        const setHeader = function (allTextLines) {
-            let header = allTextLines[0];
-            if (allTextLines[0] === "SEP=,") { //second line is header line
-                header = allTextLines[1];
-            }
-            return header;
-        };
-        const setStartIndex = function (allTextLines) {
-            let startInd = 1;
-            if (allTextLines[0] === "SEP=,") { //second line is header line
-                startInd = 2;
-            }
-            return startInd;
-        };
 
         const inputElement = document.getElementById("file");
         const processImportCSVfile = function (header, allTextLines, startInd) {
@@ -1131,8 +1105,8 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
                 }
                 const allTextLines = csv.split(/\r\n|\n/);
 
-                let header = setHeader(allTextLines);
-                let startInd = setStartIndex(allTextLines);
+                let header = CtrlActionTaskManager.setHeader(allTextLines);
+                let startInd = CtrlActionTaskManager.setStartIndex(allTextLines);
                 if (!header.includes(",")) {
                     CtrlActionTaskManager.importAlert(AppMain.t("IMPORT_ERR_TITLE_TXT", "TASK_MANAGER"),
                             AppMain.t("IMPORT_CSV_ERROR", "TASK_MANAGER"));
@@ -1237,17 +1211,7 @@ CtrlActionTaskManager.addJobGroup = function (jobObj) {
         $(".selectNode").on("click", function (e) {
             e.stopPropagation();
         });
-        $(".selectAllNodes").on("click", function (e) {
-            e.stopPropagation();
-            const selectNode = $(".selectNode");
-            if (e.target.checked === true) {
-                selectNode.attr("checked", "checked");
-                selectNode.prop("checked", true);
-            } else {
-                selectNode.removeAttr("checked");
-                selectNode.prop("checked", false);
-            }
-        });
+        CtrlActionTaskManager.helper.selectAllNodesOnClickSetup();
     }, 300);
 };
 
@@ -1507,17 +1471,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
         $(".selectNode").on("click", function (e) {
             e.stopPropagation();
         });
-        $(".selectAllNodes").on("click", function (e) {
-            e.stopPropagation();
-            const selectNode = $(".selectNode");
-            if (e.target.checked === true) {
-                selectNode.attr("checked", "checked");
-                selectNode.prop("checked", true);
-            } else {
-                selectNode.removeAttr("checked");
-                selectNode.prop("checked", false);
-            }
-        });
+        CtrlActionTaskManager.helper.selectAllNodesOnClickSetup();
         $(".desc-check").on("input", function () {
             CtrlActionTaskManager.checkDesc();
         });
@@ -1881,15 +1835,8 @@ CtrlActionTaskManager.addAttrHtml = function (attrObj) {
     if (this.helper.hasResourceAccessFromTo(attrObj)) {
         devHtml += "<td colspan='2'>" + AppMain.t("ACCESS_SELECTION_FROM", "TASK_MANAGER") + ": " + attrObj.accessFromTXT + " <br/> "
                 + AppMain.t("ACCESS_SELECTION_TO", "TASK_MANAGER") + ": " + attrObj.accessToTXT + "</td>";
-    } else if (this.helper.hasResourceRelativeAccessFromTo(attrObj)) {
-        devHtml += "<td colspan='2'>" + CtrlActionTaskManager.helper.relativeSelector[`${attrObj.relAccessFrom}`] + "</td>";
-    } else if (this.helper.hasResourceMinMaxDiff(attrObj)) {
-        devHtml += "<td colspan='2'>" + AppMain.t("MAX_TIME_DIFF", "TASK_MANAGER") + ": " + attrObj.maxDiff + " <br/> "
-                + AppMain.t("MIN_TIME_DIFF", "TASK_MANAGER") + ": " + attrObj.minDiff + "</td>";
-    } else if (attrObj.vType.length) {
-        devHtml += "<td colspan='2'>" + CtrlActionTaskManager.helper.typeSelector[`${attrObj.varType}`] + "(" + attrObj.varValue + ")</td>";
     } else {
-        devHtml += "<td></td>";
+        devHtml += this.helper.addAttrHtmlHasResource(attrObj);
     }
     devHtml += "</tr>";
     const body = $("table#cosem-table > tbody");

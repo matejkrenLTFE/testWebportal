@@ -411,4 +411,18 @@ module.exports.IControllerAction = function () {
         }
         return [];
     };
+    this.setHeader = function (allTextLines) {
+        let header = allTextLines[0];
+        if (allTextLines[0] === "SEP=,") { //second line is header line
+            header = allTextLines[1];
+        }
+        return header;
+    };
+    this.setStartIndex = function (allTextLines) {
+        let startInd = 1;
+        if (allTextLines[0] === "SEP=,") { //second line is header line
+            startInd = 2;
+        }
+        return startInd;
+    };
 };

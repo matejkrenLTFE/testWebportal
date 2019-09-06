@@ -587,21 +587,6 @@ CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
             return false;
         });
 
-        const setHeader = function (allTextLines) {
-            let header = allTextLines[0];
-            if (allTextLines[0] === "SEP=,") { //second line is header line
-                header = allTextLines[1];
-            }
-            return header;
-        };
-        const setStartIndex = function (allTextLines) {
-            let startInd = 1;
-            if (allTextLines[0] === "SEP=,") { //second line is header line
-                startInd = 2;
-            }
-            return startInd;
-        };
-
         const processCsv = function (header, allTextLines, startInd) {
             header = header.split(",");
 
@@ -640,8 +625,8 @@ CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
                     return;
                 }
                 const allTextLines = csv.split(/\r\n|\n/);
-                let header = setHeader(allTextLines);
-                let startInd = setStartIndex(allTextLines);
+                let header = CtrlActionGroupTable.setHeader(allTextLines);
+                let startInd = CtrlActionGroupTable.setStartIndex(allTextLines);
                 if (!header.includes(",")) {
                     CtrlActionGroupTable.importAlert(AppMain.t("IMPORT_ERR_TITLE_TXT", "GROUP_TABLE"),
                             AppMain.t("IMPORT_CSV_ERROR", "GROUP_TABLE"));
