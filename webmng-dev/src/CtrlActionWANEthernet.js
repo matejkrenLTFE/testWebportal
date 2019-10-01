@@ -24,9 +24,17 @@ CtrlActionWANEthernet.exec = function () {
         ? params.GetParametersResponse.wan2
         : {};
 
+    let generalInfo = {
+        wan: {}
+    };
+    // Get infos
+    const info = AppMain.ws().exec("GetInfos", undefined).getResponse(false);
+    generalInfo = this.prepareGeneralInfoParams(generalInfo, info);
+
     this.view.render(this.controller.action, {
         title: AppMain.t("WAN2", "WAN_ETHERNET"),
         params: params,
+        statusParams: generalInfo.wan,
         elements: {
             enable: AppMain.html.formElementSwitch("enable", "true", {
                 checked: params.enable === "true",
@@ -52,6 +60,11 @@ CtrlActionWANEthernet.exec = function () {
         },
         labels: {
             "apply": AppMain.t("APPLY", "global"),
+            "ethSettings": AppMain.t("WAN2_SETTINGS", "WAN_ETHERNET"),
+            "ethStatus": AppMain.t("WAN2_STATUS", "WAN_ETHERNET"),
+            "ipV4Address": AppMain.t("IPV4ADDRESS", "WAN_ETHERNET"),
+            "netmaskSettings": AppMain.t("MASK", "WAN_ETHERNET"),
+            "defaultGateway": AppMain.t("GATEWAY", "WAN_ETHERNET"),
             "exportParams": AppMain.t("EXP_PARAMS", "global"),
             "importParams": AppMain.t("IMP_PARAMS", "global"),
             "connectionType": AppMain.t("CONN_TYPE", "WAN_ETHERNET"),
@@ -146,7 +159,7 @@ CtrlActionWANEthernet.useDHCP = function () {
 
     const response = AppMain.ws().exec("SetParameters", {
         "wan2": {
-            "ip-config-client-dhcp": dhcpVal
+            "ip-config-client-dhcp": (!enabled) + ""
         }
     }).getResponse(false);
     if (defined(response.SetParametersResponse) && response.SetParametersResponse.toString() === "OK") {
@@ -154,8 +167,6 @@ CtrlActionWANEthernet.useDHCP = function () {
     } else {
         AppMain.dialog("Error occurred: " + response.SetParametersResponse.toString(), "error");
     }
-
-    // CtrlActionWANEthernet.setParams();
 };
 
 const processIPv6view = function () {
@@ -184,8 +195,8 @@ const processDHCPdisabledDNS = function () {
     if (AppMain.user.getRBACpermissionElement("wan2", "ip-config-dns2")) {
         $("input[type='text'][name='ip-config-dns2']").removeAttr("disabled");
     }
-    if (AppMain.user.getRBACpermissionElement("wan2", "ip-config-ipv6-addr")) {
-        $("input[type='text'][name='ip-config-ipv6-addr']").removeAttr("disabled");
+    if (AppMain.user.getRBACpermissionElement("wan2", "ip-config-gateway")) {
+        $("input[type='text'][name='ip-config-gateway']").removeAttr("disabled");
     }
 };
 

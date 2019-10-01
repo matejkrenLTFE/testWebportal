@@ -28,7 +28,7 @@ CtrlActionWANModem.getParamsRest = function () {
 
 CtrlActionWANModem.updateParamsWithInfos = function (params) {
     "use strict";
-    const infos = AppMain.ws().getResponseCache("GetInfos", undefined);
+    const infos = AppMain.ws().exec("GetInfos", undefined).getResponse(false);
     if (infos && defined(infos.GetInfosResponse)) {
         infos.GetInfosResponse.info.forEach(function (infoValue) {
             if (infoValue.category === "wan") {

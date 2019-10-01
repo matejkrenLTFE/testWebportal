@@ -365,7 +365,7 @@ CtrlActionWhiteList.processImportCsv = function (header, allTextLines, startInd)
             return;
         }
         if (line !== "") {
-            CtrlActionWhiteList.export.push(line.split(",")[`${ind}`].replace("\"", "").replace("\"", ""));
+            CtrlActionWhiteList.export.push(line.split(",")[ind].replace("\"", "").replace("\"", ""));
         }
     });
 };

@@ -25,8 +25,8 @@ module.exports.AppUser = function () {
         if (!defined(name)) {
             return _userData;
         }
-        return (defined(_userData) && defined(_userData[`${name}`]))
-            ? _userData[`${name}`]
+        return (defined(_userData) && defined(_userData[name]))
+            ? _userData[name]
             : null;
     };
 
@@ -82,7 +82,7 @@ module.exports.AppUser = function () {
      */
     this.getRBACpermissionElement = function (category, param) {
         const rbac = this.getRBACMap();
-        return !(defined(rbac[`${category}`]) && defined(rbac[`${category}`][`${param}`])
-                && (rbac[`${category}`][`${param}`].toLowerCase() === "h" || rbac[`${category}`][`${param}`].toLowerCase() === "r"));
+        return !(defined(rbac[category]) && defined(rbac[category][param])
+                && (rbac[category][param].toLowerCase() === "h" || rbac[category][param].toLowerCase() === "r"));
     };
 };

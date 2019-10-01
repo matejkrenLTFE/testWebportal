@@ -204,7 +204,9 @@ module.exports.IControllerAction = function () {
                     : obj.value;
             }
         });
-        generalInfo.system.DateTime = moment(generalInfo.system.DateTime).format(AppMain.localization("DATETIME_FORMAT"));
+        if (defined(generalInfo.system)) {
+            generalInfo.system.DateTime = moment(generalInfo.system.DateTime).format(AppMain.localization("DATETIME_FORMAT"));
+        }
         return generalInfo;
     };
 
@@ -250,10 +252,6 @@ module.exports.IControllerAction = function () {
                 }
             }
         });
-        $("#file").val("");
-        $(".select-file").show();
-        $("#file-name").html("");
-        $(".file-selected").hide();
     };
 
     const isNodesResponseListOk = function (nodes) {
@@ -321,7 +319,7 @@ module.exports.IControllerAction = function () {
         const unsucc = parseInt(nodesObj[node["mac-address"]]["unsuccessful-communications"], 10);
         return (!Number.isNaN(succ) && !Number.isNaN(unsucc) && succ + unsucc !== 0)
             ? parseInt((succ / (succ + unsucc)) * 100, 10)
-            : 100;
+            : undefined;
     };
     const getNodeLastSuccessfulCommTxt = function (nodesObj, node) {
         if (nodesObj[node["mac-address"]]["last-successful-communication"] && nodesObj[node["mac-address"]]["last-successful-communication"].toString() !== "0") {
@@ -356,7 +354,7 @@ module.exports.IControllerAction = function () {
                 node["last-unsuccessful-communication"] = getNodeLastUnsuccessfulCommTxt(nodesObj, node);
                 node["security-counter"] = getNodeSecurityCounter(nodesObj, node);
             } else {
-                node["dc-state"] = "METER-JOINED";
+                node["dc-state"] = "---";
             }
         });
         return nodes;

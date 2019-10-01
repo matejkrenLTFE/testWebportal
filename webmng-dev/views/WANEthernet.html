@@ -3,20 +3,43 @@
     $labels.exportParams$
 </div>
 
-<div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--6-col  mdl-cell--12-col-phone mdl-cell--6-short-view">
-    <form id="WANEthernetForm">
-        <div class="mdl-card__title mdl-color--blue-grey-200 enable-interface">        
-            <div style="width:100%;" class="content-grid mdl-grid main-row">
-                <div class="mdl-cell">
-                    <h2 class="mdl-card__title-text mdl-color-text--white">$title$</h2>
-                </div>
-                <div class="mdl-cell mdl-cell-icons
+<div style="width: 100%">
+    <div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--6-col  mdl-cell--12-col-phone mdl-cell--6-short-view">
+        <div class="mdl-card__title mdl-color--blue-grey-200">
+            <h2 class="mdl-card__title-text mdl-color-text--white mdl-color-text--white">$labels.ethStatus$</h2>
+        </div>
+        <table class="mdl-data-table mdl-js-data-table" style="width: 100%">
+            <tbody>
+            <tr data-rbac="info.device-type">
+                <td class="mdl-data-table__cell--non-numeric">$labels.ipV4Address$</td>
+                <td>$statusParams.WAN2_IP$</td>
+            </tr>
+            <tr data-rbac="info.serial-number">
+                <td class="mdl-data-table__cell--non-numeric">$labels.netmaskSettings$</td>
+                <td>$statusParams.WAN2_Netmask$</td>
+            </tr>
+            <tr data-rbac="info.hostname">
+                <td class="mdl-data-table__cell--non-numeric">$labels.defaultGateway$</td>
+                <td>$statusParams.WAN2_Gateway$</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--6-col  mdl-cell--12-col-phone mdl-cell--6-short-view">
+        <form id="WANEthernetForm">
+            <div class="mdl-card__title mdl-color--blue-grey-200 enable-interface">
+                <div style="width:100%;" class="content-grid mdl-grid main-row">
+                    <div class="mdl-cell">
+                        <h2 class="mdl-card__title-text mdl-color-text--white">$labels.ethSettings$</h2>
+                    </div>
+                    <div class="mdl-cell mdl-cell-icons
                             mdl-typography--text-right mdl-color-text--white" style="margin: 3px;">
                     <span data-rbac="wan2.enable" class="title_icon_span_enable">
                         $elements.enable$
                     </span>
 
-                    <span class="title_icon_span" style="margin-right: 10px;">
+                        <span class="title_icon_span" style="margin-right: 10px;">
                         <i id="export_icon" class="material-icons title_icon"
                            data-rbac="wan2.button-export"
                            data-bind-event="click"
@@ -24,32 +47,32 @@
 
                     </span>
 
+                    </div>
                 </div>
             </div>
-        </div>
-    
-        <table class="mdl-data-table mdl-js-data-table" style="width: 100%">			 
-            <tbody>
-                <tr class="th-color-grey">                    
+
+            <table class="mdl-data-table mdl-js-data-table" style="width: 100%">
+                <tbody>
+                <tr class="th-color-grey">
                     <td class="mdl-data-table__cell--non-numeric"><strong>$labels.groupTitleIPv4$</strong></td>
                     <td></td>
                 </tr>
 
                 <tr data-rbac="wan2.dhcp">
-                    <td class="mdl-data-table__cell--non-numeric">$labels.dhcpServer$</td>				
+                    <td class="mdl-data-table__cell--non-numeric">$labels.dhcpServer$</td>
                     <td>$elements.dhcp$</td>
-                </tr>        
+                </tr>
                 <tr data-rbac="wan2.ip-config-ip">
-                    <td class="mdl-data-table__cell--non-numeric">$labels.ipConfigIp$</td>				
+                    <td class="mdl-data-table__cell--non-numeric">$labels.ipConfigIp$</td>
                     <td>
                         <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-145">
                             <input class="mdl-textfield__input dhcp-enabled text-align-right" type="text" name="ip-config-ip" value="$params.ip-config-ip$" data-rbac-element="wan2.ip-config-ip"
                                    pattern="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"/>
                         </div>
                     </td>
-                </tr> 
+                </tr>
                 <tr data-rbac="wan2.netmask">
-                    <td class="mdl-data-table__cell--non-numeric">$labels.netmask$</td>				
+                    <td class="mdl-data-table__cell--non-numeric">$labels.netmask$</td>
                     <td>
                         <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-145">
                             <input class="mdl-textfield__input dhcp-enabled text-align-right" type="text" name="ip-config-net-mask" value="$params.ip-config-net-mask$" data-rbac-element="wan2.ip-config-net-mask"
@@ -67,16 +90,16 @@
                     </td>
                 </tr>
                 <tr data-rbac="wan2.ip-config-dns1">
-                    <td class="mdl-data-table__cell--non-numeric">$labels.ipConfigDns1$</td>				
+                    <td class="mdl-data-table__cell--non-numeric">$labels.ipConfigDns1$</td>
                     <td>
                         <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-145">
                             <input class="mdl-textfield__input dhcp-enabled text-align-right" type="text" name="ip-config-dns1" value="$params.ip-config-dns1$" data-rbac-element="wan2.ip-config-dns1"
                                    pattern="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"/>
                         </div>
                     </td>
-                </tr>   
+                </tr>
                 <tr data-rbac="wan2.ip-config-dns2">
-                    <td class="mdl-data-table__cell--non-numeric">$labels.ipConfigDns2$</td>				
+                    <td class="mdl-data-table__cell--non-numeric">$labels.ipConfigDns2$</td>
                     <td>
                         <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-145">
                             <input class="mdl-textfield__input dhcp-enabled text-align-right" type="text" name="ip-config-dns2" value="$params.ip-config-dns2$" data-rbac-element="wan2.ip-config-dns2"
@@ -85,17 +108,17 @@
                     </td>
                 </tr>
 
-                <tr class="th-color-grey">                    
+                <tr class="th-color-grey">
                     <td class="mdl-data-table__cell--non-numeric"><strong>$labels.groupTitleIPv6$</strong></td>
                     <td></td>
                 </tr>
-                
+
                 <tr data-rbac="wan2.ip-config-ipv6-addr">
-                    <td class="mdl-data-table__cell--non-numeric">$labels.ipConfigIpv6Addr$</td>				
+                    <td class="mdl-data-table__cell--non-numeric">$labels.ipConfigIpv6Addr$</td>
                     <td>
                         <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-145">
                             <input class="mdl-textfield__input text-align-right" type="text" name="ip-config-ipv6-addr" value="$params.ip-config-ipv6-addr$" data-rbac-element="wan2.ip-config-ipv6-addr"
-                            pattern="(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))"/>
+                                   pattern="(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))"/>
                         </div>
                     </td>
                 </tr>
@@ -103,13 +126,13 @@
                     <td class="mdl-data-table__cell--non-numeric">$labels.Ipv6netmask$</td>
                     <td>
                         <div class="mdl-textfield mdl-textfield-no-padding mdl-js-textfield mdl-textfield--floating-label textfield-short-145">
-                            <input class="mdl-textfield__input dhcp-enabled text-align-right just-number" type="text" name="ip-config-ipv6-subnet-prefix-len"
+                            <input class="mdl-textfield__input text-align-right just-number" type="text" name="ip-config-ipv6-subnet-prefix-len"
                                    value="$params.ip-config-ipv6-subnet-prefix-len$" data-rbac-element="wan2.ipv6-netmask"/>
                         </div>
                     </td>
                 </tr>
-            </tbody>
-            <tfoot data-rbac="wan2.actions">
+                </tbody>
+                <tfoot data-rbac="wan2.actions">
                 <tr id="FormActions">
                     <td>
                     </td>
@@ -119,7 +142,10 @@
                         </button>
                     </td>
                 </tr>
-            </tfoot>
-        </table> 
-    </form>
+                </tfoot>
+            </table>
+        </form>
+    </div>
 </div>
+
+

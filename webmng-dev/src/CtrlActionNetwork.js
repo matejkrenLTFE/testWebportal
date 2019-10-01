@@ -182,7 +182,7 @@ CtrlActionNetwork.buildNodeListHTML = function (nodes) {
 
 const getDestAddress = function (route, address) {
     "use strict";
-    let destAdd = parseInt(route[`${address}`], 10).toString(16).toUpperCase();
+    let destAdd = parseInt(route[address], 10).toString(16).toUpperCase();
     if (destAdd.length % 2 !== 0) {
         destAdd = "0" + destAdd;
     }
@@ -206,8 +206,8 @@ CtrlActionNetwork.processDestAddInd = function (destAddInd, destAdd, route) {
             }
         });
     } else {
-        CtrlActionNetwork.nodes[`${destAddInd}`].data.hopCount = route["hop-count"];
-        CtrlActionNetwork.nodes[`${destAddInd}`].data.routeCost = route["route-cost"];
+        CtrlActionNetwork.nodes[destAddInd].data.hopCount = route["hop-count"];
+        CtrlActionNetwork.nodes[destAddInd].data.routeCost = route["route-cost"];
     }
     return destAddInd;
 };
@@ -227,7 +227,7 @@ CtrlActionNetwork.processNextHopAddInd = function (destAddInd, nextHopAddInd, ro
         });
     } else {
         if (destAddInd !== nextHopAddInd) {
-            CtrlActionNetwork.nodes[`${nextHopAddInd}`].data.busyness += 1;
+            CtrlActionNetwork.nodes[nextHopAddInd].data.busyness += 1;
         }
     }
     return nextHopAddInd;
@@ -235,9 +235,9 @@ CtrlActionNetwork.processNextHopAddInd = function (destAddInd, nextHopAddInd, ro
 CtrlActionNetwork.addPathRoute = function (destAddInd, nextHopAddInd, route) {
     "use strict";
     if (parseInt(route["hop-count"], 10) === 1) {
-        CtrlActionNetwork.nodes[`${destAddInd}`].data.pathRouting = [0, destAddInd];
+        CtrlActionNetwork.nodes[destAddInd].data.pathRouting = [0, destAddInd];
     } else {
-        CtrlActionNetwork.nodes[`${destAddInd}`].data.pathRouting = [0, nextHopAddInd, destAddInd];
+        CtrlActionNetwork.nodes[destAddInd].data.pathRouting = [0, nextHopAddInd, destAddInd];
     }
 };
 CtrlActionNetwork.updatesEdgesDataPom = function (destAddInd, nextHopAddInd, route) {
@@ -359,7 +359,7 @@ CtrlActionNetwork.showHoverTooltip = function (node) {
     if (pathRouting && pathRouting.length) {
         path = "";
         pathRouting.forEach(function (value, i) {
-            path += CtrlActionNetwork.nodesTmp[`${value}`];
+            path += CtrlActionNetwork.nodesTmp[value];
             if (i !== pathRouting.length - 1) {
                 path += ", ";
             }
@@ -558,12 +558,12 @@ CtrlActionNetwork.runPLCforNode = function (node) {
 
 CtrlActionNetwork.addEdgeUpdate = function (edgeInd, type, edgeDistanceType) {
     "use strict";
-    CtrlActionNetwork.edges[`${edgeInd}`].data.linkCount += 1;
-    if (type < CtrlActionNetwork.edges[`${edgeInd}`].data.type) {
-        CtrlActionNetwork.edges[`${edgeInd}`].data.type = type;
+    CtrlActionNetwork.edges[edgeInd].data.linkCount += 1;
+    if (type < CtrlActionNetwork.edges[edgeInd].data.type) {
+        CtrlActionNetwork.edges[edgeInd].data.type = type;
     }
-    if (CtrlActionNetwork.edges[`${edgeInd}`].data.edgeDistanceType === 2 || CtrlActionNetwork.edges[`${edgeInd}`].data.edgeDistanceType === 4) {
-        CtrlActionNetwork.edges[`${edgeInd}`].data.edgeDistanceType = edgeDistanceType;
+    if (CtrlActionNetwork.edges[edgeInd].data.edgeDistanceType === 2 || CtrlActionNetwork.edges[edgeInd].data.edgeDistanceType === 4) {
+        CtrlActionNetwork.edges[edgeInd].data.edgeDistanceType = edgeDistanceType;
     }
 };
 
@@ -593,7 +593,7 @@ CtrlActionNetwork.checkForExistingPathDiscover = function (shortAddObj, node) {
     const nodeInd = CtrlActionNetwork.nodesTmp.indexOf(shortAddObj.shortAddress);
 
     if (nodeInd !== -1) {
-        const cvNode = CtrlActionNetwork.nodes[`${nodeInd}`];
+        const cvNode = CtrlActionNetwork.nodes[nodeInd];
 
         //first remove existing path
         let pathRouting = cvNode.data.pathRouting;
@@ -622,8 +622,8 @@ CtrlActionNetwork.checkForExistingPathDiscover = function (shortAddObj, node) {
                 if (edgeInd === -1) { //nova povezava
                     CtrlActionNetwork.addEdge(startInd, toInd, 1, 1);
                 } else { // samo spremenimo tip povezave
-                    CtrlActionNetwork.edges[`${edgeInd}`].data.type = 1;
-                    CtrlActionNetwork.edges[`${edgeInd}`].data.edgeDistanceType = 1;
+                    CtrlActionNetwork.edges[edgeInd].data.type = 1;
+                    CtrlActionNetwork.edges[edgeInd].data.edgeDistanceType = 1;
                 }
                 pathArr.push(toInd);
                 startInd = toInd;
@@ -648,7 +648,7 @@ CtrlActionNetwork.checkForExistingData = function (nodes) {
         if (node["ip-address"]) {
             const shortAddObj = CtrlActionNetwork.calculateNodeShortAddress(node);
             let nodeTitle = CtrlActionNetwork.setupNodeTitleFromNodesData(node);
-            CtrlActionNetwork.nodesInfo[`${shortAddObj.shortAddress}`] = {
+            CtrlActionNetwork.nodesInfo[shortAddObj.shortAddress] = {
                 ipAddress: node["ip-address"],
                 macAddress: node["mac-address"],
                 nodeState: node["node-state"],

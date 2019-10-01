@@ -24,8 +24,13 @@ module.exports.AppHTML = function () {
     const getInputClass = function (options) {
         return (defined(options.inputClass) && options.inputClass) || "";
     };
-    const getInputId = function (options, name) {
-        return (defined(options.inputId) && options.inputId) || name;
+    const getInputId = function (options) {
+        return (defined(options.inputId) && options.inputId) || null;
+    };
+    const getInputIdOrName = function (options, name) {
+        return (defined(options.inputId)
+            ? options.inputId
+            : name);
     };
     const getInputAttr = function (options) {
         return (defined(options.inputAttr) && options.inputAttr) || {};
@@ -55,7 +60,7 @@ module.exports.AppHTML = function () {
         let html = "";
         html += "<label style=\"width:0;\" class=\"mdl-switch mdl-js-switch mdl-js-ripple-effect " + options.labelClass + " \" for=\"" + name + "\">";
         html += "<input type=\"hidden\" name=\"" + name + "\" value=\"" + inputHiddenVal + "\"  />";
-        let input = "<input type=\"checkbox\" id=\"" + options.inputId
+        let input = "<input type=\"checkbox\" id=\"" + getInputIdOrName(options, name)
                 + "\" class=\"mdl-switch__input " + options.inputClass
                 + " \" name=\"" + name + "\" value=\"" + value + "\" " + options.checked + " ";
         $.each(options.inputAttr, function (index, value) {

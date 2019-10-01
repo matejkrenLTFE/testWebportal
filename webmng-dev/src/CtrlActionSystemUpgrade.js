@@ -91,8 +91,14 @@ CtrlActionSystemUpgrade.exec = function () {
                 AppMain.dialog("RUN_FIRMWARE_UPGRADE_WARNING", "warning");
 
                 $(".select-file").hide();
-                $("#file-name").html(file.name);
+                let eml = $("#file-name");
+                $(".file-name").html(file.name);
+                $(".mdl-tooltip").css("max-width", "1000px");
                 $(".file-selected").show();
+
+                setTimeout(function () {
+                    eml.css("max-width", eml.parent().width() + "px");
+                },200);
 
                 _this.controller.setRequestParam("uploadFilename", file.name);
             }

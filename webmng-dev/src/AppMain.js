@@ -171,7 +171,7 @@ global.AppMain = function (conf) {
     const _setConfig = function (_this, config) {
         $.each(config, function (index, value) {
             if (value !== undefined) {
-                _this[`${index}`] = value;
+                _this[index] = value;
             }
         });
     };
@@ -332,8 +332,8 @@ global.AppMain = function (conf) {
      */
     this.getConfigParams = function (paramName) {
         if (paramName) {
-            if (defined(config[`${paramName}`])) {
-                return config[`${paramName}`];
+            if (defined(config[paramName])) {
+                return config[paramName];
             }
             throw "ERROR: cannot return config param value '" + paramName + "' since it has not been set.";
         }
@@ -348,12 +348,12 @@ global.AppMain = function (conf) {
      * - "app"
      */
     this.getUrl = function (routeName) {
-        if (routeName === undefined || _routes[`${routeName}`] === undefined) {
+        if (routeName === undefined || _routes[routeName] === undefined) {
             throw "getUrl: undefined or invalid route --> " + routeName;
         }
-        return (_routes[`${routeName}`] === "/")
+        return (_routes[routeName] === "/")
             ? this.getProtocol() + window.location.hostname
-            : this.getProtocol() + window.location.hostname + _routes[`${routeName}`];
+            : this.getProtocol() + window.location.hostname + _routes[routeName];
     };
 
     // /**
@@ -392,8 +392,8 @@ global.AppMain = function (conf) {
      * @return {Object} initialized component.
      */
     this.getAppComponent = function (componentName) {
-        if (defined(this[`${componentName}`])) {
-            return this[`${componentName}`];
+        if (defined(this[componentName])) {
+            return this[componentName];
         }
         return null;
     };
@@ -416,8 +416,8 @@ global.AppMain = function (conf) {
      */
     this.localization = function (paramName, selectLocale) {
         const params = this.locale.localization(selectLocale);
-        return defined(params[`${paramName}`])
-            ? params[`${paramName}`]
+        return defined(params[paramName])
+            ? params[paramName]
             : params;
     };
 
@@ -451,7 +451,7 @@ global.AppMain = function (conf) {
      * Set custom global component.
      */
     this.setComponent = function (name, component) {
-        _components[`${name}`] = component;
+        _components[name] = component;
     };
 
     /**
@@ -459,8 +459,8 @@ global.AppMain = function (conf) {
      * @param {string} name Component name.
      */
     this.getComponent = function (name) {
-        return defined(_components[`${name}`])
-            ? _components[`${name}`]
+        return defined(_components[name])
+            ? _components[name]
             : null;
     };
 
@@ -485,8 +485,8 @@ global.AppMain = function (conf) {
      * @return {String}
      */
     this.getAppMessage = function (messageId) {
-        return defined(appMessages[`${messageId}`])
-            ? this.t(appMessages[`${messageId}`], "global")
+        return defined(appMessages[messageId])
+            ? this.t(appMessages[messageId], "global")
             : "";
     };
 

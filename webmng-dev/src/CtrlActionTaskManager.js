@@ -579,7 +579,7 @@ CtrlActionTaskManager.addJobFileUpload = function (jobType, node) {
             "<td>" + AppMain.t("FILE", "TASK_MANAGER") + " *<div id=\"fileUploadProgressSpinner\" class=\"mdl-spinner mdl-spinner--single-color mdl-js-spinner hidden\"></div></td>" +
             "<td style='text-align: left;'><div class=\"select-file\" style='padding-top: 5px;'><input id=\"sel-file\" type=\"file\" name=\"upload\" /></div>" +
             "<div style=\"display: none;\" class=\"file-selected\">" +
-            "<span id='file-name-span'></span>" +
+            "<div id='file-name-span'></div>" +
             "<i class='material-icons cursor-pointer' id='clear-icon' style='position:relative;top: 7px;'>clear</i>" +
             "</div>" +
             "</td></tr>" +
@@ -615,7 +615,7 @@ CtrlActionTaskManager.addJobFileUpload = function (jobType, node) {
                                 AppMain.t("IMAGE_IDENTIFIER_ERROR_TXT", "TASK_MANAGER"));
                         return false;
                     }
-                    CtrlActionTaskManager.addJobFileUploadProcessNext(jobObj);
+                    return CtrlActionTaskManager.addJobFileUploadProcessNext(jobObj);
                 }
             },
             cancel: {
@@ -639,7 +639,9 @@ CtrlActionTaskManager.addJobFileUpload = function (jobType, node) {
 
         if (node) { // from back
             $(".select-file").hide();
-            $("#file-name-span").html(node.fileName);
+            const fns = $("#file-name-span");
+            fns.html(node.fileName);
+            fns.attr("title", node.fileName);
             $(".file-selected").show();
             jobObj.fileName = node.fileName;
             jobObj.fileSize = node.fileSize;
@@ -654,7 +656,7 @@ CtrlActionTaskManager.addJobFileUpload = function (jobType, node) {
             jobObj.fileName = "";
             jobObj.fileSize = "";
             $(".select-file").show();
-            $("#file-name-span").html();
+            $("#file-name-span").html("");
             $(".file-selected").hide();
         });
         const inputElement = document.getElementById("sel-file");
@@ -691,7 +693,9 @@ CtrlActionTaskManager.addJobFileUpload = function (jobType, node) {
                     jobObj.fileName = file.name;
                     jobObj.fileSize = file.size;
                     $(".select-file").hide();
-                    $("#file-name-span").html(file.name);
+                    const fns1 = $("#file-name-span");
+                    fns1.html(file.name);
+                    fns1.attr("title", file.name);
                     $(".file-selected").show();
                 }
 
@@ -776,6 +780,8 @@ CtrlActionTaskManager.addJobSecond = function (jobType, node) {
             "<input class=\"mdl-textfield__input input-short\" style='width: 138px !important;' type=\"number\" maxlength='2' id=\"d-minutes\"> " +
             AppMain.t("MINUTES", "global") + "</div>" + "</td></tr>";
 
+    const isCreateToFileHidden = CtrlActionTaskManager.helper.isHiddenCreateToFileForSecondStep(node, jobType);
+
     let allHtml = this.helper.setAddJobSecondHeader(node, jobType);
     allHtml += AppMain.t("INSERT_JOB_PARAMS", "TASK_MANAGER") + "</br>" +
             "<table class=\"mdl-data-table mdl-js-data-table table-no-borders\" style=\"width: 100%\">";
@@ -812,6 +818,21 @@ CtrlActionTaskManager.addJobSecond = function (jobType, node) {
                         return false;
                     }
                     CtrlActionTaskManager.addJobSecondProcessNext(node, jobObj, jobType);
+                    return true;
+                }
+            },
+            createXML: {
+                text: AppMain.t("CREATE_TO_FILE", "global"),
+                isHidden: isCreateToFileHidden,
+                action: function () {
+                    let jobObj = CtrlActionTaskManager.helper.getAddJobSecondResourceObject(jobType, obj, CtrlActionTaskManager);
+                    if (!jobObj) {
+                        return false;
+                    }
+                    if (!CtrlActionTaskManager.helper.checkAddJobSecondManageAddRules(jobObj, jobType, CtrlActionTaskManager)) {
+                        return false;
+                    }
+                    CtrlActionTaskManager.addResourceXML(jobObj);
                     return true;
                 }
             },
@@ -1085,7 +1106,7 @@ CtrlActionTaskManager.addJobDevice = function (jobObj) {
                     return;
                 }
                 if (line !== "") {
-                    CtrlActionTaskManager.addTitle(line.split(",")[`${ind}`]
+                    CtrlActionTaskManager.addTitle(line.split(",")[ind]
                         .replace("\"", "").replace("\"", ""));
                 }
             });
@@ -1277,8 +1298,8 @@ CtrlActionTaskManager.getAddCosemHTML = function (jobType, jobService) {
  */
 CtrlActionTaskManager.getAddCosemTableHTML = function (jobService) {
     "use strict";
-    if (defined(this.helper.getAddCosemTableHTMLMap[`${jobService}`])) {
-        return this.helper.getAddCosemTableHTMLMap[`${jobService}`];
+    if (defined(this.helper.getAddCosemTableHTMLMap[jobService])) {
+        return this.helper.getAddCosemTableHTMLMap[jobService];
     }
     return "";
 };
@@ -1386,8 +1407,10 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
     allHtml1 += "</div>";
 
     let styleHid = "";
+    let hideCreateToFileButton = false;
     if (jobObj.jobType === "upgrade") {
         styleHid = "display: none;";
+        hideCreateToFileButton = true;
     }
 
     let allHtml = allHtml1 +
@@ -1442,6 +1465,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
             },
             createXML: {
                 text: AppMain.t("CREATE_TO_FILE", "global"),
+                isHidden: hideCreateToFileButton,
                 action: function () {
                     if (CtrlActionTaskManager.updateAttrs(jobObj)) {
                         if (jobObj.attrs.length === 0) {
@@ -1512,7 +1536,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
         jOd.on("change", function () {
             if (jOd.val() !== "0") {
                 const newValPos = parseInt(jOd.val(), 10) - 1;
-                CtrlActionTaskManager.selectCosemHelper(objectList.get[`${newValPos}`]);
+                CtrlActionTaskManager.selectCosemHelper(objectList.get[newValPos]);
             }
         });
         const jS = $("#job-service");
@@ -1575,7 +1599,7 @@ CtrlActionTaskManager.addJobFinal = function (jobObj) {
                 jOd2.on("change", function () {
                     if (jOd2.val() !== "0") {
                         const newValPos = parseInt(jOd2.val(), 10) - 1;
-                        CtrlActionTaskManager.selectCosemHelper(objectList.get[`${newValPos}`]);
+                        CtrlActionTaskManager.selectCosemHelper(objectList.get[newValPos]);
                     }
                 });
                 if (jobObj.jobService === "time-sync") {
@@ -1658,41 +1682,11 @@ CtrlActionTaskManager.updateAttrs = function (jobObj) {
 
     jobObj.attrs = [];
     let inputC = $("input[name='selectNode']:checked");
-    inputC.each(function (ignore, elm) {
-        const element = $(elm);
-        jobObj.attrs.push({
-            cClass: element.attr("data-node-class"),
-            cInstance: element.attr("data-node-instance"),
-            cAttr: element.attr("data-node-attr"),
-            cAccessFrom: element.attr("data-node-access-from"),
-            cAccessTo: element.attr("data-node-access-to"),
-            cRelAccessFrom: element.attr("data-node-rel-access-from"),
-            cRelAccessTo: element.attr("data-node-rel-access-to"),
-            cMaxDiff: element.attr("data-node-max-diff"),
-            cMinDiff: element.attr("data-node-min-diff"),
-            cVarType: element.attr("data-node-var-type"),
-            cVarValue: element.attr("data-node-var-value")
-        });
-    });
+    CtrlActionTaskManager.helper.updateJobObjectWithAttributes(inputC, jobObj);
     if (jobObj.attrs.length === 0) {
         if (CtrlActionTaskManager.addAttrPress()) {
             inputC = $("input[name='selectNode']:checked");
-            inputC.each(function (ignore, elm) {
-                const element = $(elm);
-                jobObj.attrs.push({
-                    cClass: element.attr("data-node-class"),
-                    cInstance: element.attr("data-node-instance"),
-                    cAttr: element.attr("data-node-attr"),
-                    cAccessFrom: element.attr("data-node-access-from"),
-                    cAccessTo: element.attr("data-node-access-to"),
-                    cRelAccessFrom: element.attr("data-node-rel-access-from"),
-                    cRelAccessTo: element.attr("data-node-rel-access-to"),
-                    cMaxDiff: element.attr("data-node-max-diff"),
-                    cMinDiff: element.attr("data-node-min-diff"),
-                    cVarType: element.attr("data-node-var-type"),
-                    cVarValue: element.attr("data-node-var-value")
-                });
-            });
+            CtrlActionTaskManager.helper.updateJobObjectWithAttributes(inputC, jobObj);
             return true;
         }
         return false;
@@ -1945,7 +1939,7 @@ CtrlActionTaskManager.arrangeNodeCosemStat = function (nodesCosemStat) {
     });
     if (nodesTitle.length > 0) {
         $.each(nodesTitle, function (ignore, title) {
-            CtrlActionTaskManager.nodesTitleObj[`${title}`] = title;
+            CtrlActionTaskManager.nodesTitleObj[title] = title;
         });
     }
     this.nodesTitle = nodesTitle;
@@ -1999,7 +1993,7 @@ CtrlActionTaskManager.importClick = function () {
             "<td>" + AppMain.t("FILE", "TASK_MANAGER") + " *<div id=\"fileUploadProgressSpinner\" class=\"mdl-spinner mdl-spinner--single-color mdl-js-spinner hidden\"></div></td>" +
             "<td style='text-align: left;'><div class=\"select-file\" style='padding-top: 5px;'><input id=\"sel-file-import\" type=\"file\" name=\"upload\" /></div>" +
             "<div style=\"display: none;\" class=\"file-selected\">" +
-            "<span id='file-name-span'></span>" +
+            "<div id='file-name-span'></div>" +
             "<i class='material-icons cursor-pointer' id='clear-icon' style='position:relative;top: 7px;'>clear</i>" +
             "</div>" +
             "</td></tr>" +
@@ -2021,6 +2015,8 @@ CtrlActionTaskManager.importClick = function () {
                     if (CtrlActionTaskManager.importXML && CtrlActionTaskManager.importXML !== "") {
                         return CtrlActionTaskManager.addResourceXMLRest(CtrlActionTaskManager.importXML);
                     }
+                    CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
+                            AppMain.t("ADD_JOB_UPLOAD_FILE_ERR_TXT", "TASK_MANAGER"));
                     return false;
                 }
             },
@@ -2039,7 +2035,7 @@ CtrlActionTaskManager.importClick = function () {
         $("#clear-icon").on("click", function () {
             CtrlActionTaskManager.importXML = "";
             $(".select-file").show();
-            $("#file-name-span").html();
+            $("#file-name-span").html("");
             $(".file-selected").hide();
         });
         const inputElement = document.getElementById("sel-file-import");
@@ -2051,7 +2047,9 @@ CtrlActionTaskManager.importClick = function () {
                 CtrlActionTaskManager.importXML = event.target.result;
                 inputElement.value = "";
                 $(".select-file").hide();
-                $("#file-name-span").html(file.name);
+                const fns = $("#file-name-span");
+                fns.html(file.name);
+                fns.attr("title", file.name);
                 $(".file-selected").show();
             };
             reader.readAsText(file);

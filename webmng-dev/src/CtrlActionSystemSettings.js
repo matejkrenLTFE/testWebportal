@@ -21,7 +21,7 @@ CtrlActionSystemSettings.getTimezoneObj = function () {
     }
     let timezoneObj = {};
     $.each(timezones, function (ignore, timezone) {
-        timezoneObj[`${timezone}`] = timezone;
+        timezoneObj[timezone] = timezone;
     });
     return timezoneObj;
 };

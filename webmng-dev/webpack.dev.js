@@ -27,6 +27,7 @@ const path = require("path");
 // const UglifyJSPlugin = require("uglifyjs-webpack-plugin");
 
 module.exports = {
+    cache: false,
     module: {
         rules: [{
             include: [path.resolve(__dirname, "src")],

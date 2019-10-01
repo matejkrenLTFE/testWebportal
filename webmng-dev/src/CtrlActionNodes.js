@@ -261,14 +261,14 @@ const defineDeviceSuccCommTimeTxt = function (node) {
 };
 const defineDeviceLastSuccCommTimeTxt = function (nodesCosemStat, nodeMac) {
     "use strict";
-    return (nodesCosemStat[`${nodeMac}`]["last-successful-communication"] && nodesCosemStat[`${nodeMac}`]["last-successful-communication"].toString() !== "0")
-        ? moment(nodesCosemStat[`${nodeMac}`]["last-successful-communication"].toString()).format(AppMain.localization("DATETIME_FORMAT"))
+    return (nodesCosemStat[nodeMac]["last-successful-communication"] && nodesCosemStat[nodeMac]["last-successful-communication"].toString() !== "0")
+        ? moment(nodesCosemStat[nodeMac]["last-successful-communication"].toString()).format(AppMain.localization("DATETIME_FORMAT"))
         : "---";
 };
 const defineDeviceLastUnSuccCommTimeTxt = function (nodesCosemStat, nodeMac) {
     "use strict";
-    return (nodesCosemStat[`${nodeMac}`]["last-unsuccessful-communication"] && nodesCosemStat[`${nodeMac}`]["last-unsuccessful-communication"].toString() !== "0")
-        ? moment(nodesCosemStat[`${nodeMac}`]["last-unsuccessful-communication"].toString()).format(AppMain.localization("DATETIME_FORMAT"))
+    return (nodesCosemStat[nodeMac]["last-unsuccessful-communication"] && nodesCosemStat[nodeMac]["last-unsuccessful-communication"].toString() !== "0")
+        ? moment(nodesCosemStat[nodeMac]["last-unsuccessful-communication"].toString()).format(AppMain.localization("DATETIME_FORMAT"))
         : "---";
 };
 const defineDeviceSecurityCounterTxt = function (node) {
@@ -287,7 +287,7 @@ const defineStatusChipHtml = function (node) {
     "use strict";
     return ((node["node-title"] !== undefined && node["node-title"] !== "---")
         ? "<span class='mdl-chip " + node["dc-state"] + "'><span class='mdl-chip__text dc-state'>" + CtrlActionNodes.getNodeStateString(node["dc-state"]) + "</span></span>"
-        : "<span class='mdl-chip METER-JOINED'><span class='mdl-chip__text dc-state'>" + CtrlActionNodes.getNodeStateString("METER-JOINED") + "</span></span>");
+        : "---");
 };
 const defineSuccessRateHtml = function (node) {
     "use strict";
@@ -499,18 +499,18 @@ CtrlActionNodes.getNodeInfoTitle = function (e) {
     }
 
     const nodeMac = $this.attr("data-node-mac");
-    if (this.nodesCosemStat[`${nodeMac}`]) {
+    if (this.nodesCosemStat[nodeMac]) {
         $this.attr("data-opened", 1);
         $this.attr("data-rid", randomId);
         let html = "<tr class='nodeListShowDetails id_" + randomId + "'>";
         html += "<td colspan='3'>" + AppMain.t("SUCCESSFUL_COMMUNICATIONS", "NODES") + "</td>";
-        html += "<td colspan='2'>" + this.nodesCosemStat[`${nodeMac}`]["successful-communications"] + "</td><td></td>";
+        html += "<td colspan='2'>" + this.nodesCosemStat[nodeMac]["successful-communications"] + "</td><td></td>";
         html += "<td colspan='2'>" + AppMain.t("LAST_SUCC_COMM_TIME", "NODES") + "</td>";
         html += "<td>" + defineDeviceLastSuccCommTimeTxt(this.nodesCosemStat, nodeMac) + "</td><td></td>";
         html += "</tr>";
         html += "<tr class='nodeListShowDetails id_" + randomId + "'>";
         html += "<td colspan='3'>" + AppMain.t("UNSUCCESSFUL_COMMUNICATIONS", "NODES") + "</td>";
-        html += "<td colspan='2'>" + this.nodesCosemStat[`${nodeMac}`]["unsuccessful-communications"] + "</td><td></td>";
+        html += "<td colspan='2'>" + this.nodesCosemStat[nodeMac]["unsuccessful-communications"] + "</td><td></td>";
         html += "<td colspan='2'>" + AppMain.t("LAST_UNSUCC_COMM_TIME", "NODES") + "</td>";
         html += "<td>" + defineDeviceLastUnSuccCommTimeTxt(this.nodesCosemStat, nodeMac) + "</td><td></td>";
         html += "</tr>";
@@ -723,8 +723,8 @@ CtrlActionNodes.getNodeStateString = function (stateName) {
         "METER-LOST": AppMain.t("METER_LOST", "NODES"),
         "METER-ACTIVE": AppMain.t("METER_ACTIVE", "NODES")
     };
-    return defined(nodeStates[`${stateName}`])
-        ? nodeStates[`${stateName}`]
+    return defined(nodeStates[stateName])
+        ? nodeStates[stateName]
         : "";
 };
 

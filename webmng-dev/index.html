@@ -2,92 +2,93 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1.0, minimum-scale=1.0" name="viewport">
     <title>AC550/AC750 Web UI</title>
-    <link rel="stylesheet" href="dist/bundle.css">
+    <link href="dist/bundle.css" rel="stylesheet">
     <style>#AppWindow {
         display: none;
     }</style>
 </head>
 <body id="AppWindow">
-<div class="layout mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
-    <div class="drawer mdl-layout__drawer mdl-color--white mdl-color-text--blue-grey-50">
-        <section id="MainMenu"></section>
-    </div>
 
-    <header class="header mdl-layout__header mdl-color--white mdl-color-text--grey-600 section mdl-layout__header--seamed">
-        <div class="mdl-layout__header-row">
-
-            <div class="header-logo">
-                <span class="logo-image"></span>
-            </div>
-
-            <div id="xhrLoad" class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active"></div>&nbsp;
-            <span class="mdl-layout-title title-long" id="dashboard">$viewTitle$</span>
-            <span class="mdl-layout-title title-short">$viewTitle$</span>
-
-            <div class="mdl-layout-spacer"></div>
-
-            <div id="SectionAlarmsEvents"></div>
-            <div id="UserMenu" class="header-user">
-                <div class="user headericon"></div>
-                <span id="SectionUsername">$username$</span>
-            </div>
-
-            <ul id="UserMenuOptions" class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
-                for="UserMenu">
-                <li data-bind-event="click" data-bind-action="userLogout" id="LogoutOption" class="mdl-menu__item">
-                    $logout$
-                </li>
-            </ul>
-
-            <div id="SectionLanguage"></div>
-
-            <div class="redline-container">
-                <div class="redline"></div>
-            </div>
+    <div class="layout mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
+        <div class="drawer mdl-layout__drawer mdl-color--white mdl-color-text--blue-grey-50 main-menu-drawer">
+            <section id="MainMenu"></section>
         </div>
-    </header>
 
-    <main class="mdl-layout__content mdl-color--grey-100 section">
-        <div id="dialogSection" class="dialog-section"></div>
+        <header class="header mdl-layout__header mdl-color--white mdl-color-text--grey-600 section mdl-layout__header--seamed">
+            <div class="mdl-layout__header-row">
 
-        <div class="mdl-grid content section main-canvas"></div>
-        <center id="SectionBuildV" style="color:#000; display:none;">Build: $buildVersion$</center>
-    </main>
+                <div class="header-logo">
+                    <span class="logo-image"></span>
+                </div>
 
-</div>
-<div id="snackbarWindow" class="mdl-js-snackbar mdl-snackbar">
-    <div class="mdl-snackbar__text"></div>
-    <button class="mdl-snackbar__action" type="button"></button>
-</div>
-<script src="dist/bundle.js"></script>
-<script>
+                <div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active" id="xhrLoad"></div>&nbsp;
+                <span class="mdl-layout-title title-long" id="dashboard">$viewTitle$</span>
+                <span class="mdl-layout-title title-short">$viewTitle$</span>
 
-    const updateFields = function () {
-        const selected = $("select[name='add-from-attached']").val().split(":");
-        if(selected.length === 8){
-            $("input[name='mac1']").val(selected[0].replace("\'", ""));
-            $("input[name='mac2']").val(selected[1]);
-            $("input[name='mac3']").val(selected[2]);
-            $("input[name='mac4']").val(selected[3]);
-            $("input[name='mac5']").val(selected[4]);
-            $("input[name='mac6']").val(selected[5]);
-            $("input[name='mac7']").val(selected[6]);
-            $("input[name='mac8']").val(selected[7].replace("\'", ""));
-        }else{
-            $("input[name='mac1']").val("");
-            $("input[name='mac2']").val("");
-            $("input[name='mac3']").val("");
-            $("input[name='mac4']").val("");
-            $("input[name='mac5']").val("");
-            $("input[name='mac6']").val("");
-            $("input[name='mac7']").val("");
-            $("input[name='mac8']").val("");
+                <div class="mdl-layout-spacer"></div>
+
+                <div id="SectionAlarmsEvents"></div>
+                <div class="header-user" id="UserMenu">
+                    <div class="user headericon"></div>
+                    <span id="SectionUsername">$username$</span>
+                </div>
+
+                <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="UserMenu"
+                    id="UserMenuOptions">
+                    <li class="mdl-menu__item" data-bind-action="userLogout" data-bind-event="click" id="LogoutOption">
+                        $logout$
+                    </li>
+                </ul>
+
+                <div id="SectionLanguage"></div>
+
+                <div class="redline-container">
+                    <div class="redline"></div>
+                </div>
+            </div>
+        </header>
+
+        <main class="mdl-layout__content mdl-color--grey-100 section">
+            <div class="dialog-section" id="dialogSection"></div>
+
+            <div class="mdl-grid content section main-canvas"></div>
+            <center id="SectionBuildV" style="color:#000; display:none;">Build: $buildVersion$</center>
+        </main>
+
+    </div>
+    <div class="mdl-js-snackbar mdl-snackbar" id="snackbarWindow">
+        <div class="mdl-snackbar__text"></div>
+        <button class="mdl-snackbar__action" type="button"></button>
+    </div>
+    <script src="dist/bundle.js"></script>
+    <script>
+
+        const updateFields = function () {
+            const selected = $("select[name='add-from-attached']").val().split(":");
+            if (selected.length === 8) {
+                $("input[name='mac1']").val(selected[0].replace("\'", ""));
+                $("input[name='mac2']").val(selected[1]);
+                $("input[name='mac3']").val(selected[2]);
+                $("input[name='mac4']").val(selected[3]);
+                $("input[name='mac5']").val(selected[4]);
+                $("input[name='mac6']").val(selected[5]);
+                $("input[name='mac7']").val(selected[6]);
+                $("input[name='mac8']").val(selected[7].replace("\'", ""));
+            } else {
+                $("input[name='mac1']").val("");
+                $("input[name='mac2']").val("");
+                $("input[name='mac3']").val("");
+                $("input[name='mac4']").val("");
+                $("input[name='mac5']").val("");
+                $("input[name='mac6']").val("");
+                $("input[name='mac7']").val("");
+                $("input[name='mac8']").val("");
+            }
         }
-    }
 
-</script>
+    </script>
 </body>
 </html>

@@ -316,6 +316,9 @@ const en_US = {
     },
     WAN_ETHERNET: {
         WAN2: "Ethernet",
+        WAN2_SETTINGS: "Ethernet settings",
+        WAN2_STATUS: "Ethernet status",
+        IPV4ADDRESS: "IPv4 address",
         CONN_TYPE: "Connection type",
         ETHERNET_MODE: "Ethernet mode",
         ETHERNET_SPEED: "Ethernet speed",

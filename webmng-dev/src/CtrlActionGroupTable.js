@@ -598,9 +598,9 @@ CtrlActionGroupTable.addGroup = function (group, prefix, devices) {
             }
             allTextLines.forEach(function (ignore, index) {
                 if (index >= startInd) {
-                    const line = allTextLines[`${index}`];
+                    const line = allTextLines[index];
                     if (line !== "") {
-                        CtrlActionGroupTable.addTitle(line.split(",")[`${ind}`]
+                        CtrlActionGroupTable.addTitle(line.split(",")[ind]
                             .replace("\"", "").replace("\"", ""));
                     }
                 }
@@ -772,7 +772,7 @@ CtrlActionGroupTable.arrangeNodeCosemStat = function () {
     });
     if (nodesTitle.length > 0) {
         $.each(nodesTitle, function (ignore, title) {
-            CtrlActionGroupTable.nodesTitleObj[`${title}`] = title;
+            CtrlActionGroupTable.nodesTitleObj[title] = title;
         });
     }
     this.nodesTitle = nodesTitle;
@@ -824,7 +824,7 @@ CtrlActionGroupTable.importClick = function () {
             "<td>" + AppMain.t("FILE", "GROUP_TABLE") + " *<div id=\"fileUploadProgressSpinner\" class=\"mdl-spinner mdl-spinner--single-color mdl-js-spinner hidden\"></div></td>" +
             "<td style='text-align: left;'><div class=\"select-file\" style='padding-top: 5px;'><input id=\"sel-file-import\" type=\"file\" name=\"upload\" /></div>" +
             "<div style=\"display: none;\" class=\"file-selected\">" +
-            "<span id='file-name-span'></span>" +
+            "<div id='file-name-span'></div>" +
             "<i class='material-icons cursor-pointer' id='clear-icon' style='position:relative;top: 7px;'>clear</i>" +
             "</div>" +
             "</td></tr>" +
@@ -846,6 +846,8 @@ CtrlActionGroupTable.importClick = function () {
                     if (CtrlActionGroupTable.importXML && CtrlActionGroupTable.importXML !== "") {
                         return CtrlActionGroupTable.addResourceXMLRest(CtrlActionGroupTable.importXML);
                     }
+                    CtrlActionGroupTable.importAlert(AppMain.t("ADD_JOB_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
+                            AppMain.t("ADD_JOB_UPLOAD_FILE_ERR_TXT", "TASK_MANAGER"));
                     return false;
                 }
             },
@@ -864,7 +866,7 @@ CtrlActionGroupTable.importClick = function () {
         $("#clear-icon").on("click", function () {
             CtrlActionGroupTable.importXML = "";
             $(".select-file").show();
-            $("#file-name-span").html();
+            $("#file-name-span").html("");
             $(".file-selected").hide();
         });
         const inputElement = document.getElementById("sel-file-import");
@@ -876,7 +878,9 @@ CtrlActionGroupTable.importClick = function () {
                 CtrlActionGroupTable.importXML = event.target.result;
                 inputElement.value = "";
                 $(".select-file").hide();
-                $("#file-name-span").html(file.name);
+                const fns = $("#file-name-span");
+                fns.html(file.name);
+                fns.attr("title", file.name);
                 $(".file-selected").show();
             };
             reader.readAsText(file);

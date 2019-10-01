@@ -1684,6 +1684,22 @@ g.default-node{
     right: 5px;
 }
 
+.mdl-tooltip.is-active{
+    z-index: 999999999;
+}
+
+#file-name-span {
+    display: inline-block;
+    max-width: 385px;
+    overflow: auto;
+}
+
+.mdl-layout__obfuscator.is-visible {
+    z-index: 8!important;
+}
+.main-menu-drawer.is-visible{
+    z-index: 9!important;
+}
 @media (max-width: 1024px) {
 
     .jconfirm-box{

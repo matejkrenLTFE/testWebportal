@@ -142,13 +142,13 @@ CtrlActionSystemUsersRole.selectRBACColumn = function (e) {
 };
 const getPermissionPom = function (rbacPermissions, category, valueRbac) {
     "use strict";
-    const fullControl = (rbacPermissions[`${category}`][`${valueRbac}`] === "*")
+    const fullControl = (rbacPermissions[category][valueRbac] === "*")
         ? "checked"
         : "";
-    const read = (rbacPermissions[`${category}`][`${valueRbac}`] === "r")
+    const read = (rbacPermissions[category][valueRbac] === "r")
         ? "checked"
         : "";
-    const disabledStr = (rbacPermissions[`${category}`][`${valueRbac}`] === "h")
+    const disabledStr = (rbacPermissions[category][valueRbac] === "h")
         ? "checked"
         : "";
     const obj = {
@@ -161,7 +161,7 @@ const getPermissionPom = function (rbacPermissions, category, valueRbac) {
 
 const getPermissions = function (rbacPermissions, category, valueRbac) {
     "use strict";
-    if (!defined(rbacPermissions[`${category}`][`${valueRbac}`])) {
+    if (!defined(rbacPermissions[category][valueRbac])) {
         const obj = {
             fullControl: "",
             read: "",
@@ -197,7 +197,7 @@ CtrlActionSystemUsersRole.htmlRoleTable = function (rolePermissions) {
 
         value.forEach(function (valueRbac) {
             let permission = {};
-            if (defined(rbacPermissions[`${category}`])) {
+            if (defined(rbacPermissions[category])) {
                 permission = getPermissions(rbacPermissions, category, valueRbac);
             } else {
                 permission = {fullControl: "checked", read: "", disabled: ""};

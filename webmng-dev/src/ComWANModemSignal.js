@@ -58,8 +58,8 @@ ComWANModemSignal.getSignalLevel = function (signal) {
     "use strict";
     let level = null;
     signal = parseInt(signal, 10);
-    if (defined(ComWANModemSignal.ranges[`${signal}`])) {
-        level = ComWANModemSignal.ranges[`${signal}`];
+    if (defined(ComWANModemSignal.ranges[signal])) {
+        level = ComWANModemSignal.ranges[signal];
     } else {
         $.each(ComWANModemSignal.ranges, function (index, item) {
             const range = index.split("-");
@@ -134,8 +134,8 @@ ComWANModemSignal.getBitStatus = function (statusCode) {
         "31": "Reserved31"
     };
     dmp(statusCode);
-    return defined(status[`${statusCode}`])
-        ? status[`${statusCode}`]
+    return defined(status[statusCode])
+        ? status[statusCode]
         : "Unknown";
 };
 
@@ -155,7 +155,6 @@ const getConnStatusErr = function (status, statusByteString) {
             }
         }
     }
-    return status;
 };
 
 const getConnStatusSetupMob = function (status, statusByteString, green) {
@@ -195,8 +194,7 @@ const getConnStatusSetup = function (status, statusByteString) {
         status.icon1Tooltip = AppMain.t("NETWORK2G", "global");
         // status.icon1Style= ""
     }
-    status = getConnStatusSetupMob(status, statusByteString, green);
-    return status;
+    getConnStatusSetupMob(status, statusByteString, green);
 };
 
 
@@ -229,9 +227,9 @@ ComWANModemSignal.getConnectionStatus = function (params) {
         icon2Style: "display:none;"
     };
     if (statusByteString[0] === "0" && statusByteString[16] === "0") { // Not registered
-        status = getConnStatusErr(status, statusByteString);
+        getConnStatusErr(status, statusByteString);
     } else { //registered
-        status = getConnStatusSetup(status, statusByteString);
+        getConnStatusSetup(status, statusByteString);
     }
     /*eslint-disable camelcase*/
     params.GSM_Status_txt = status.txt;

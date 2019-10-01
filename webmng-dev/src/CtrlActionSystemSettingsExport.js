@@ -200,8 +200,8 @@ CtrlActionSystemSettingsExport.exportParams = function () {
         formData = checkDCMGandCTRDM(formData);
         $.each(params.GetParametersResponse, function (cat, value) {
             if (defined(formData["export_" + cat])) {
-                exportCategories[exportCategories.length] = defined(expNameMap[`${cat}`])
-                    ? expNameMap[`${cat}`]
+                exportCategories[exportCategories.length] = defined(expNameMap[cat])
+                    ? expNameMap[cat]
                     : cat;
                 xml += "<" + cat + ">\n";
                 xml += Json2Xml.json2xml_str(value).replace(new RegExp("&#x2F;", "g"), "/");

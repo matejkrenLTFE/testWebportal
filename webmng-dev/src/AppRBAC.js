@@ -19,7 +19,7 @@ module.exports.AppRBAC = function () {
     const rbacHideElement = function (content, rbac, rbacSelector) {
         const rbacCategory = rbacSelector[0];
         const rbacParam = rbacSelector[1];
-        if (defined(rbac[`${rbacCategory}`]) && defined(rbac[`${rbacCategory}`][`${rbacParam}`]) && rbac[`${rbacCategory}`][`${rbacParam}`].toLowerCase() === "h") {
+        if (defined(rbac[rbacCategory]) && defined(rbac[rbacCategory][rbacParam]) && rbac[rbacCategory][rbacParam].toLowerCase() === "h") {
             const rbacSelectorReplace = "data-rbac=\"" + rbacCategory + "." + rbacParam + "\"";
             content = content.replace(new RegExp(rbacSelectorReplace, "gi"), rbacSelectorReplace + " style=\"display:none;\" "); // eslint-disable-line security/detect-non-literal-regexp
         }
@@ -27,13 +27,13 @@ module.exports.AppRBAC = function () {
     };
 
     const isDisable = function (rbac, rbacCategory, rbacParam) {
-        return (rbac[`${rbacCategory}`][`${rbacParam}`].toLowerCase() === "r" || rbac[`${rbacCategory}`][`${rbacParam}`].toLowerCase() === "h");
+        return (rbac[rbacCategory][rbacParam].toLowerCase() === "r" || rbac[rbacCategory][rbacParam].toLowerCase() === "h");
     };
 
     const rbacDisableElement = function (content, rbac, rbacSelector) {
         const rbacCategory = rbacSelector[0];
         const rbacParam = rbacSelector[1];
-        if (defined(rbac[`${rbacCategory}`]) && defined(rbac[`${rbacCategory}`][`${rbacParam}`]) && isDisable(rbac, rbacCategory, rbacParam)) {
+        if (defined(rbac[rbacCategory]) && defined(rbac[rbacCategory][rbacParam]) && isDisable(rbac, rbacCategory, rbacParam)) {
             const rbacSelectorReplace = "data-rbac-element=\"" + rbacCategory + "." + rbacParam + "\"";
             content = content.replace(new RegExp(rbacSelectorReplace, "gi"), rbacSelectorReplace + " disabled "); // eslint-disable-line security/detect-non-literal-regexp
         }
@@ -132,8 +132,8 @@ module.exports.AppRBAC = function () {
             "SystemFirewallManager": "system-firewall-manager",
             "SystemInformation": "system-information"
         };
-        return (defined(map[`${actionName}`]))
-            ? map[`${actionName}`]
+        return (defined(map[actionName]))
+            ? map[actionName]
             : actionName.toLowerCase();
     };
 

@@ -335,6 +335,13 @@ CtrlActionSystemUsers.saveAddUser = function (user) {
     }
     this.exec();
 };
+CtrlActionSystemUsers.updateAuthDigest = function (user) {
+    "use strict";
+    if (AppMain.user.getUserData("username") === user.username) {
+        localStorage.setItem("authDigest", btoa(user.username + ":" + user.password));
+    }
+};
+
 CtrlActionSystemUsers.saveChangeUser = function (user) {
     "use strict";
     let response = AppMain.ws().exec("SetUserData", {
@@ -343,14 +350,14 @@ CtrlActionSystemUsers.saveChangeUser = function (user) {
         username: user.username,
         password: user.password
     }).getResponse(false);
-
+    CtrlActionSystemUsers.updateAuthDigest(user);
     if (defined(response.SetUserDataResponse) && response.SetUserDataResponse.toString() === "OK") {
         AppMain.dialog("SUCC_USER_PASSWORD", "success");
         if (AppMain.user.getUserData("username") === user.username) {
             AppMain.dialog("USER_REAUTH", "warning");
             window.setTimeout(function () {
                 AppMain.user.logout();
-            }, 2000);
+            }, 1000);
         }
     } else {
         AppMain.dialog("ERR_USER_PASSWORD", "error");

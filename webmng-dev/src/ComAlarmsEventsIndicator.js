@@ -106,7 +106,7 @@ ComAlarmsEventsIndicator.renderEventListHTML = function (_this) {
 
         if (button.getAttribute("data-event-action") === "clear") {
             let eventObj = {};
-            eventObj[`${eventId}`] = 1;
+            eventObj[eventId] = 1;
             AppMain.ws().exec("EventAlarms", {"ClearAlarmFlags": eventObj}).getResponse(false);
             AppMain.dialog("EVENT_CLEARED", "success", [eventId]);
         } else {

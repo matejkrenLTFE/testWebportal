@@ -59,7 +59,7 @@ module.exports.AppLocale = function (loc) {
     this.loadTranslations = function () {
         if (Object.keys(translationStrings).length === 0 && translationStrings.constructor === Object) {
             languages.forEach(function (language) {  // protect dynamic require
-                translationStrings[`${language}`] = require("./locale/" + language); // eslint-disable-line security/detect-non-literal-require
+                translationStrings[language] = require("./locale/" + language); // eslint-disable-line security/detect-non-literal-require
             });
         }
     };
@@ -69,28 +69,28 @@ module.exports.AppLocale = function (loc) {
         // Reload translation strings
         this.loadTranslations();
         const emptyLang = {nameLang: ""};
-        return defined(translationStrings[`${_locale}`])
-            ? translationStrings[`${_locale}`]
+        return defined(translationStrings[_locale])
+            ? translationStrings[_locale]
             : emptyLang;
     };
 
     const getLangStr = function (string, langStrings) {
-        return defined(langStrings[`${string}`])
-            ? langStrings[`${string}`]
+        return defined(langStrings[string])
+            ? langStrings[string]
             : string;
     };
 
     const getGlobalStrTranslate = function (string, langStrings, context) {
-        if (defined(langStrings[`${context}`]) && defined(langStrings[`${context}`][`${string}`])) {
-            string = langStrings[`${context}`][`${string}`];
+        if (defined(langStrings[context]) && defined(langStrings[context][string])) {
+            string = langStrings[context][string];
         } else {
             string = getLangStr(string, langStrings);
         }
         return string;
     };
     const getContextStrTranslate = function (string, langStrings, context) {
-        return (defined(langStrings[`${context}`]) && defined(langStrings[`${context}`][`${string}`]))
-            ? langStrings[`${context}`][`${string}`]
+        return (defined(langStrings[context]) && defined(langStrings[context][string]))
+            ? langStrings[context][string]
             : string;
     };
     /**

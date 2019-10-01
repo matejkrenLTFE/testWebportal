@@ -381,8 +381,8 @@ CtrlActionMonitoringManager.drawGraph = function () {
 
 CtrlActionMonitoringManager.getCategoryColor = function (profileCategory) {
     "use strict";
-    return defined(this.categoryToColor[`${profileCategory}`])
-        ? this.categoryToColor[`${profileCategory}`]
+    return defined(this.categoryToColor[profileCategory])
+        ? this.categoryToColor[profileCategory]
         : "rgb(255, 172, 171)";
 };
 
@@ -396,14 +396,14 @@ CtrlActionMonitoringManager.updateProfileCategory = function (profileCategory) {
 };
 CtrlActionMonitoringManager.getChartType = function (profileType) {
     "use strict";
-    return this.typeObj[`${profileType}`] === "COUNTER"
+    return this.typeObj[profileType] === "COUNTER"
         ? "line"
         : "bar";
 };
 CtrlActionMonitoringManager.getUnits = function (profileType) {
     "use strict";
-    return defined(this.unitsObj[`${profileType}`])
-        ? " (" + this.unitsObj[`${profileType}`] + ")"
+    return defined(this.unitsObj[profileType])
+        ? " (" + this.unitsObj[profileType] + ")"
         : "";
 };
 
@@ -416,7 +416,7 @@ CtrlActionMonitoringManager.drawGraphSetUp = function () {
     const color = this.getCategoryColor(profileCategory);
     profileCategory = this.updateProfileCategory(profileCategory);
     const profileType = $("#profile-type").val();
-    const profileTypeTranslate = this.translateObj[`${profileType}`];
+    const profileTypeTranslate = this.translateObj[profileType];
 
     const counters = this.getParams();
     this.contersForExport = counters;
@@ -427,7 +427,7 @@ CtrlActionMonitoringManager.drawGraphSetUp = function () {
         this.chart.destroy();
     }
     this.firstTime = false;
-    const units = this.getUnits();
+    const units = this.getUnits(profileType);
     let chartData = {
         labels: this.chartLabels,
         datasets: [{
@@ -480,16 +480,16 @@ CtrlActionMonitoringManager.setCounters = function (counters, profileCategory, p
     this.bodyHTML = "";
     const self = this;
     counters.forEach(function (val, index) {
-        if (self.typeObj[`${profileType}`] === "COUNTER" && index === 0) {
+        if (self.typeObj[profileType] === "COUNTER" && index === 0) {
             return;
         }
         self.chartLabels.push(moment(val["time-stamp"]).format(AppMain.localization("DATETIME_FORMAT")));
         let value = 0;
         profileCategory = profileCategory.toLowerCase();
-        if (self.typeObj[`${profileType}`] === "COUNTER") {
-            value = Math.max(parseInt(val[`${profileCategory}`][`${profileType}`], 10) - parseInt(counters[index - 1][`${profileCategory}`][`${profileType}`], 10), 0);
+        if (self.typeObj[profileType] === "COUNTER") {
+            value = Math.max(parseInt(val[profileCategory][profileType], 10) - parseInt(counters[index - 1][profileCategory][profileType], 10), 0);
         } else {
-            value = parseInt(val[`${profileCategory}`][`${profileType}`], 10);
+            value = parseInt(val[profileCategory][profileType], 10);
         }
         self.chartDatasets[0].data.push(value);
         self.bodyHTML += "<tr><td style='text-align: left!important;'>" + moment(val["time-stamp"]).format(AppMain.localization("DATETIME_FORMAT")) + "</td>" +
@@ -573,7 +573,7 @@ CtrlActionMonitoringManager.export = function () {
         profileCategory = cntWan.toLowerCase();
     }
     const profileType = $("#profile-type").val();
-    const profileTypeTranslate = this.translateObj[`${profileType}`];
+    const profileTypeTranslate = this.translateObj[profileType];
 
     if (this.contersForExport.length === 0) {
         this.contersForExport = this.getParams();
@@ -585,7 +585,7 @@ CtrlActionMonitoringManager.export = function () {
     const self = this;
     this.chartLabels.forEach(function (value, index) {
         csv += "\"" + value + "\"" + ", ";
-        csv += self.chartDatasets[0].data[`${index}`] + "\r\n";
+        csv += self.chartDatasets[0].data[index] + "\r\n";
     });
 
     download("data:text/csv;charset=utf-8;base64," + btoa(csv), build.device + "_" + profileCategory.toUpperCase() +

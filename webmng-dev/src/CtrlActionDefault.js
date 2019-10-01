@@ -55,7 +55,7 @@ CtrlActionDefault.prepareCounters = function () {
             if (index === "uptime") {
                 cntValue = uptimeFormat(cntValue);
             }
-            counters[`${index}`] = cntValue;
+            counters[index] = cntValue;
         });
     }
     return counters;
@@ -181,8 +181,8 @@ CtrlActionDefault.batteryChargeLevelStr = function (level) {
         "BATTERY_LOW": AppMain.t("LOW", "DASHBOARD"),
         "BATTERY_FULL": AppMain.t("FULL", "DASHBOARD")
     };
-    return defined(levelStr[`${level}`])
-        ? levelStr[`${level}`]
+    return defined(levelStr[level])
+        ? levelStr[level]
         : "";
 };
 

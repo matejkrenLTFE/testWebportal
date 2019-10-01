@@ -719,7 +719,7 @@ module.exports.TaskManagerHelper = function () {
                 "<div class='mdl-card mdl-cell--1-col'></div>";
 
         if (jobType === "notification") {
-            this.addJobNotificationsStepsHtml(html, position);
+            return this.addJobNotificationsStepsHtml(html, position);
         }
         html += this.addJobStepsFirsStepHtml(position);
         html += this.addJobStepsSecondStepHtml(position);
@@ -1597,7 +1597,7 @@ module.exports.TaskManagerHelper = function () {
                     + AppMain.t("MIN_TIME_DIFF", "TASK_MANAGER") + ": " + attrObj.minDiff + "</td>";
         } else {
             if (attrObj.vType.length) {
-                devHtml += "<td colspan='2'>" + this.typeSelector[`${attrObj.varType}`] + "(" + attrObj.varValue + ")</td>";
+                devHtml += "<td colspan='2'>" + this.typeSelector[attrObj.varType] + "(" + attrObj.varValue + ")</td>";
             } else {
                 devHtml += "<td></td>";
             }
@@ -1607,10 +1607,35 @@ module.exports.TaskManagerHelper = function () {
     this.addAttrHtmlHasResource = function (attrObj) {
         let devHtml = "";
         if (this.hasResourceRelativeAccessFromTo(attrObj)) {
-            devHtml += "<td colspan='2'>" + this.relativeSelector[`${attrObj.relAccessFrom}`] + "</td>";
+            devHtml += "<td colspan='2'>" + this.relativeSelector[attrObj.relAccessFrom] + "</td>";
         } else {
             this.addAttrHtmlHasResourceForMinMaxDif(attrObj);
         }
         return devHtml;
+    };
+    this.updateJobObjectWithAttributes = function (inputC, jobObj) {
+        inputC.each(function (ignore, elm) {
+            const element = $(elm);
+            jobObj.attrs.push({
+                cClass: element.attr("data-node-class"),
+                cInstance: element.attr("data-node-instance"),
+                cAttr: element.attr("data-node-attr"),
+                cAccessFrom: element.attr("data-node-access-from"),
+                cAccessTo: element.attr("data-node-access-to"),
+                cRelAccessFrom: element.attr("data-node-rel-access-from"),
+                cRelAccessTo: element.attr("data-node-rel-access-to"),
+                cMaxDiff: element.attr("data-node-max-diff"),
+                cMinDiff: element.attr("data-node-min-diff"),
+                cVarType: element.attr("data-node-var-type"),
+                cVarValue: element.attr("data-node-var-value")
+            });
+        });
+    };
+
+    this.isHiddenCreateToFileForSecondStep = function (node, jobType) {
+        if (node && !node.back) {
+            return true;
+        }
+        return jobType !== "notification";
     };
 };

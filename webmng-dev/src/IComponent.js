@@ -27,7 +27,7 @@ module.exports.IComponent = function () {
 
     this.updateDataPom = function (name, value) {
         if (defined(name) && defined(value)) {
-            dataPom[`${name}`] = value;
+            dataPom[name] = value;
         }
     };
 
@@ -42,8 +42,8 @@ module.exports.IComponent = function () {
     this.data = function (name, value) {
         this.updateDataPom(name, value);
         if (defined(name)) {
-            return defined(dataPom[`${name}`])
-                ? dataPom[`${name}`]
+            return defined(dataPom[name])
+                ? dataPom[name]
                 : null;
         }
         return dataPom;
@@ -55,7 +55,7 @@ module.exports.IComponent = function () {
      */
     this.initData = function (data) {
         $.each(data, function (key, value) {
-            dataPom[`${key}`] = value;
+            dataPom[key] = value;
         });
     };
 };

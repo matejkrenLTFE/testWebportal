@@ -161,18 +161,18 @@ module.exports.AppView = function () {
         //dmp(viewContent);
         $.each(placeholderData, function (placeholder) {
             let replace = "";
-            if (typeof placeholderData[`${placeholder}`] === "object") {
-                $.each(placeholderData[`${placeholder}`], function (property) {
+            if (typeof placeholderData[placeholder] === "object") {
+                $.each(placeholderData[placeholder], function (property) {
                     replace = "$" + placeholder + "." + property + "$";
                     viewContent = viewContent.replace(replace, (_this.renderEmptyTemplate && replace.indexOf("$_") < 0)
                         ? _this.emptyValuePlaceholder
-                        : placeholderData[`${placeholder}`][`${property}`]);
+                        : placeholderData[placeholder][property]);
                 });
             } else {
                 replace = "$" + placeholder + "$";
                 viewContent = viewContent.replace(replace, (_this.renderEmptyTemplate && replace.indexOf("$_") < 0)
                     ? _this.emptyValuePlaceholder
-                    : placeholderData[`${placeholder}`]);
+                    : placeholderData[placeholder]);
 
             }
         });
@@ -236,11 +236,11 @@ module.exports.AppView = function () {
         }
     };
     const processBindDefaultCtrlMethod = function (_this, methodName, element) {
-        if (_this.controller[`${methodName}`] !== undefined) {
+        if (_this.controller[methodName] !== undefined) {
             $(element).on(element.getAttribute("data-bind-event"), function (e) {
                 e.stopImmediatePropagation();
                 e.preventDefault();
-                _this.controller[`${methodName}`]({event: e, target: element});
+                _this.controller[methodName]({event: e, target: element});
                 return false;
             });
         }
@@ -335,7 +335,7 @@ module.exports.AppView = function () {
         if (viewContent !== undefined) {
             viewContent = _processTemplate(this, viewContent, placeholderData);
             // Cache processed view template
-            this.cachePom[`${viewName}`] = viewContent;
+            this.cachePom[viewName] = viewContent;
         } else {
             throw "View template not found: " + viewTemplateName;
         }
@@ -400,7 +400,7 @@ module.exports.AppView = function () {
             ? processed
             : true;
         if (processed) {
-            return (this.cachePom[`${viewName}`] !== undefined);
+            return (this.cachePom[viewName] !== undefined);
         }
         return (this.cachePom["_" + viewName] !== undefined);
     };
