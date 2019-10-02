@@ -115,7 +115,7 @@ MaterialSelect.prototype.initMaxRows = function () {
     this.maxRows = parseInt(this.inputPom.getAttribute(
         this.ConstantPom.MAX_ROWS_ATTRIBUTE
     ), 10);
-    if (Number.isNaN(this.maxRows)) {
+    if (isNaN(this.maxRows)) {
         this.maxRows = this.ConstantPom.NO_MAX_ROWS;
     }
 };

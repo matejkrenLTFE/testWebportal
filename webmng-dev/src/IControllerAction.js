@@ -317,7 +317,7 @@ module.exports.IControllerAction = function () {
     const getNodeSuccessRate = function (nodesObj, node) {
         const succ = parseInt(nodesObj[node["mac-address"]]["successful-communications"], 10);
         const unsucc = parseInt(nodesObj[node["mac-address"]]["unsuccessful-communications"], 10);
-        return (!Number.isNaN(succ) && !Number.isNaN(unsucc) && succ + unsucc !== 0)
+        return (!isNaN(succ) && !isNaN(unsucc) && succ + unsucc !== 0)
             ? parseInt((succ / (succ + unsucc)) * 100, 10)
             : undefined;
     };

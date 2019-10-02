@@ -302,7 +302,7 @@ const defineSuccessRateHtml = function (node) {
 //     let successRate = (node["tx-ack-packets"] > 0)
 //         ? Math.ceil((parseInt(node["tx-ack-packets"], 10) / (parseInt(node["tx-ack-packets"], 10) + parseInt(node["tx-no-ack-packets"], 10))) * 100)
 //         : 0;
-//     if (Number.isNaN(successRate)) {
+//     if (isNaN(successRate)) {
 //         return 0;
 //     }
 //     return successRate;

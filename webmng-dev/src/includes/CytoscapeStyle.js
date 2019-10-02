@@ -52,7 +52,7 @@ const cyStyle = [
             "border-width": function (node) {
                 "use strict";
                 let busyness = parseInt(node.data("busyness"), 10);
-                if (Number.isNaN(busyness) || busyness === 0) {
+                if (isNaN(busyness) || busyness === 0) {
                     return 0;
                 }
                 return getBorderWidth(busyness);
@@ -117,7 +117,7 @@ const cyStyle = [
             "line-color": function (e) {
                 "use strict";
                 const linkCost = parseInt(e.data("linkCount"), 10);
-                if (Number.isNaN(linkCost) || linkCost <= 12) {
+                if (isNaN(linkCost) || linkCost <= 12) {
                     return "#009E00";
                 }
                 if (linkCost <= 254) {
@@ -128,7 +128,7 @@ const cyStyle = [
             "target-arrow-color": function (e) {
                 "use strict";
                 const linkCost = parseInt(e.data("linkCount"), 10);
-                if (Number.isNaN(linkCost) || linkCost <= 12) {
+                if (isNaN(linkCost) || linkCost <= 12) {
                     return "#009E00";
                 }
                 if (linkCost <= 254) {

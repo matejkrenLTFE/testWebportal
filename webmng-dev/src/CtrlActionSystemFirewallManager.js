@@ -216,7 +216,7 @@ CtrlActionSystemFirewallManager.removeFirewallRule = function (e) {
     let $this = $(e.target);
     let ruleId = $this.attr("data-node-ruleId");
     ruleId = parseInt(ruleId, 10);
-    if (!Number.isNaN(ruleId)) {
+    if (!isNaN(ruleId)) {
         const self = this;
         this.settings.rules.forEach(function (item, i) {
             if (item["id-number"] === ruleId) {

@@ -845,7 +845,7 @@ module.exports.TaskManagerHelper = function () {
     const getInsertedPriority = function () {
         const priority = $("input[name='priority']").val();
         return priority !== ""
-            ? (Number.isNaN(parseInt(priority, 10))
+            ? (isNaN(parseInt(priority, 10))
                 ? 255
                 : parseInt(priority, 10))
             : 255;
@@ -872,7 +872,7 @@ module.exports.TaskManagerHelper = function () {
         const dMinutes = parseInt($("#d-minutes").val(), 10);
         const durObj = moment.duration({
             seconds: 0,
-            minutes: (Number.isNaN(dMinutes) || dMinutes < 0)
+            minutes: (isNaN(dMinutes) || dMinutes < 0)
                 ? 0
                 : dMinutes,
             hours: 0,
@@ -1165,7 +1165,7 @@ module.exports.TaskManagerHelper = function () {
     };
 
     this.addAttrPressCheckDataIsOkInstaID1 = function (instaID1, CtrlActionTaskManager) {
-        if (Number.isNaN(instaID1) || instaID1 < 0 || instaID1 > 255) {
+        if (isNaN(instaID1) || instaID1 < 0 || instaID1 > 255) {
             CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
                     AppMain.t("ATTRIBUTE_ID_ERROR_TXT", "TASK_MANAGER"));
             return false;
@@ -1173,7 +1173,7 @@ module.exports.TaskManagerHelper = function () {
         return true;
     };
     this.addAttrPressCheckDataIsOkClassId = function (classID, CtrlActionTaskManager) {
-        if (Number.isNaN(classID) || classID < 0 || classID > 65536) {
+        if (isNaN(classID) || classID < 0 || classID > 65536) {
             CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
                     AppMain.t("CLASS_ID_ERROR_TXT", "TASK_MANAGER"));
             return false;
@@ -1181,7 +1181,7 @@ module.exports.TaskManagerHelper = function () {
         return true;
     };
     this.addAttrPressCheckDataIsOkAttrID = function (attrID, CtrlActionTaskManager) {
-        if (Number.isNaN(attrID) || attrID < 0 || attrID > 127) {
+        if (isNaN(attrID) || attrID < 0 || attrID > 127) {
             CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
                     AppMain.t("ATTRIBUTE_ID_ERROR_TXT", "TASK_MANAGER"));
             return false;
@@ -1216,12 +1216,12 @@ module.exports.TaskManagerHelper = function () {
         return true;
     };
     this.isTimeSynchroCheckValues = function (minDiffInt, maxDiffInt) {
-        return !Number.isNaN(minDiffInt) && !Number.isNaN(maxDiffInt) && minDiffInt > maxDiffInt;
+        return !isNaN(minDiffInt) && !isNaN(maxDiffInt) && minDiffInt > maxDiffInt;
     };
     this.addAttrPressCheckAccessMinDiffMaxDiff = function (minDiff, maxDiff, CtrlActionTaskManager) {
         if (minDiff !== "" || maxDiff !== "") {
-            const minDiffInt = Number.parseInt(minDiff, 10);
-            const maxDiffInt = Number.parseInt(maxDiff, 10);
+            const minDiffInt = parseInt(minDiff, 10);
+            const maxDiffInt = parseInt(maxDiff, 10);
             if (this.isTimeSynchroCheckValues(minDiffInt, maxDiffInt)) {
                 CtrlActionTaskManager.importAlert(AppMain.t("ADD_JOB_COSEM_PARAMETER_ERROR_TITLE_TXT", "TASK_MANAGER"),
                         AppMain.t("MAXMINDIF_ERROR_TXT", "TASK_MANAGER"));
@@ -1276,7 +1276,7 @@ module.exports.TaskManagerHelper = function () {
         return "";
     };
     this.isTimeSynchro = function (maxDiffInt, minDiffInt) {
-        return !Number.isNaN(maxDiffInt) || !Number.isNaN(minDiffInt);
+        return !isNaN(maxDiffInt) || !isNaN(minDiffInt);
     };
     this.addAttrPressGetMaxMindif = function (addObj) {
         const maxDiffInt = parseInt($("#max-time-diff").val(), 10);
@@ -1284,10 +1284,10 @@ module.exports.TaskManagerHelper = function () {
         const minDiffInt = parseInt($("#min-time-diff").val(), 10);
         addObj.minDiff = "";
         if (this.isTimeSynchro(maxDiffInt, minDiffInt)) { //is time sync
-            if (!Number.isNaN(maxDiffInt)) {
+            if (!isNaN(maxDiffInt)) {
                 addObj.maxDiff = maxDiffInt + "";
             }
-            if (!Number.isNaN(minDiffInt)) {
+            if (!isNaN(minDiffInt)) {
                 addObj.minDiff = minDiffInt + "";
             }
         }

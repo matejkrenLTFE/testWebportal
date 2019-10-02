@@ -131,7 +131,7 @@ CtrlActionSystemUpgrade.upgrade = function () {
                         }).getResponse(false);
                         const respCode = parseInt(resp.UpgradeResponse.toString(), 10);
 
-                        if (Number.isNaN(respCode) || respCode >= 0) {
+                        if (isNaN(respCode) || respCode >= 0) {
                             $(".warning .close").click();
                             AppMain.dialog("UPGRADE_STARTED", "success");
                             CtrlActionSystemUpgrade.controller.userLogout();

@@ -108,7 +108,7 @@ CtrlActionSystemCertManager.getValidity = function () {
 
     let validity = $("input[name='cert-validity']").val();
     validity = parseInt(validity, 10);
-    if (Number.isNaN(validity)) {
+    if (isNaN(validity)) {
         validity = 0;
     }
     return validity;
